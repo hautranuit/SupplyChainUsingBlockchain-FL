@@ -9,9 +9,7 @@ import { IERC721 as IERC721Interface } from "@openzeppelin/contracts/token/ERC72
 
 contract SupplyChainNFT is Marketplace, BatchProcessing, DisputeResolution, NodeManagement {
     event PaymentSuspended(uint256 tokenId);
-    event ReputationPenalized(address indexed node, uint256 newReputation);
-    constructor(address initialOwner) NFTCore(initialOwner) {
-        // NFTCore(initialOwner) sets the owner.
+    event ReputationPenalized(address indexed node, uint256 newReputation);    constructor(address initialOwner) NFTCore(initialOwner) Ownable(initialOwner) { // Added Ownable(initialOwner)Ownable(initialOwner) { // Call Ownable directly        // NFTCore(initialOwner) sets the owner.
     }
 
     // --- Sale Functions (overriding Marketplace) ---

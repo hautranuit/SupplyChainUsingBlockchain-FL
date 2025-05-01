@@ -122,7 +122,7 @@ describe("SupplyChainNFT - Batch Processing Metrics", function () {
         await storeInitialReputations([sn1, pn1, pn2, pn3, pn4, pn5]);
 
         // Mint Products using mintNFT (owned by SN1)
-        const mintParams1 = { recipient: sn1.address, uniqueProductID: "PROD001", batchNumber: "B001", manufacturingDate: "D1", expirationDate: "E1", productType: "T1", manufacturerID: owner.address, quickAccessURL: "Q1", nftReference: "R1" };
+        const mintParams1 = { recipient: sn1.address, uniqueProductID: "PROD001", batchNumber: "B001", manufacturingDate: "D1", expirationDate: "E1", productType: "T1", manufacturerID: "abc", quickAccessURL: "Q1", nftReference: "R1" };
         const mintTx1 = await supplyChainNFT.connect(owner).mintNFT(mintParams1);
         const receipt1 = await mintTx1.wait();
 
@@ -155,7 +155,7 @@ describe("SupplyChainNFT - Batch Processing Metrics", function () {
         console.log(`Minted tokenId1: ${tokenId1}`);
 
         // --- Làm tương tự cho lần mint thứ hai ---
-        const mintParams2 = { recipient: sn1.address, uniqueProductID: "PROD002", batchNumber: "B002", manufacturingDate: "D2", expirationDate: "E2", productType: "T2", manufacturerID: owner.address, quickAccessURL: "Q2", nftReference: "R2" };
+        const mintParams2 = { recipient: sn1.address, uniqueProductID: "PROD002", batchNumber: "B002", manufacturingDate: "D2", expirationDate: "E2", productType: "T2", manufacturerID: "abc", quickAccessURL: "Q2", nftReference: "R2" };
         const mintTx2 = await supplyChainNFT.connect(owner).mintNFT(mintParams2);
         const receipt2 = await mintTx2.wait();
 
