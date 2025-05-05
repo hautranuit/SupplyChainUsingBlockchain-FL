@@ -1,13 +1,14 @@
 // backendListener.js - Skeleton for Blockchain Event Listeners
 
-const { ethers } = require("ethers");
-const NFTCoreABI = require("./artifacts/contracts/NFTCore.sol/NFTCore.json").abi; // Assuming ABI is here after compilation
-require('dotenv').config(); // For environment variables like private keys, RPC URL, IPFS keys
-
+import { ethers } from "ethers";
+import NFTCoreArtifact from "../SupplyChain_dapp/artifacts/contracts/NFTCore.sol/NFTCore.json" assert { type: "json" };
+import dotenv from "dotenv";
+dotenv.config();
+const NFTCoreABI = NFTCoreArtifact.abi;
 // --- Configuration (Replace with your actual values) ---
-const RPC_URL = process.env.AMOY_RPC_URL || "YOUR_AMOY_RPC_URL"; // Or your network's RPC URL
-const NFT_CORE_ADDRESS = process.env.NFT_CORE_ADDRESS || "YOUR_DEPLOYED_NFT_CORE_ADDRESS";
-const BACKEND_PRIVATE_KEY = process.env.BACKEND_PRIVATE_KEY; // Private key for the account with UPDATER_ROLE and Owner permissions
+const RPC_URL = process.env.POLYGON_AMOY_RPC || "YOUR_AMOY_RPC_URL"; // Or your network's RPC URL
+const NFT_CORE_ADDRESS = process.env.CONTRACT_ADDRESS || "YOUR_DEPLOYED_NFT_CORE_ADDRESS";
+const BACKEND_PRIVATE_KEY = process.env.PRIVATE_KEY; // Private key for the account with UPDATER_ROLE and Owner permissions
 const IPFS_CLIENT = null; // Initialize your IPFS client here (e.g., using ipfs-http-client or web3.storage client)
 
 // --- Helper Functions (Placeholders - Implement with your IPFS logic) ---

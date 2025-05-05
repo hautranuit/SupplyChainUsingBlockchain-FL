@@ -1,8 +1,0 @@
-Unique Product ID: 
-Batch Number: 
-Manufacturing Date: 
-Expiration Date: 
-Product Type: 
-Manufacturer ID: 
-Quick Access URL: 
-NFT Reference:

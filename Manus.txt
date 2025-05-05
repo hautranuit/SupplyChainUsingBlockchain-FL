@@ -1,0 +1,22 @@
+I am working on my graduation thesis project with the topic: ChainFLIP: A Unified Framework Integrating Blockchain, Federated Learning, and IPFS for Secure Supply Chain Management. This project is based on two papers: "Role_of_Blockchain_Technology_in_Supplychain_Management.pdf" and "Blockchain-based_Supply_Chain_Solution_Using_IPFS_.pdf", with some additional improvements.
+
+We will not discuss Federated Learning in the current context, as that part is being handled by my teammate. All my unfinished work is included in this zip file (the PDF files in the my_main_paper folder are academic papers I wrote based on this ongoing project). Please read through all the files carefully and help me complete the system based on the following requirements:
+
+Complete the Blockchain-based Supply Chain Management System according to the approach by Narayanan et al. in the paper "Role_of_Blockchain_Technology_in_Supplychain_Management.pdf", especially if you find that the logic or code in any file is incomplete or not optimal. Optimize the process to consume fewer gas units where possible.
+
+IPFS should be used to store the metadata of NFTs after a product is minted, and also to store the product's historical records (such as manufacturing, listing for sale, transportation across locations A, B, C, delivery to the end consumer, etc.). The backend should automatically store the returned CID on the blockchain. Moreover, the blockchain (Amoy Polygon) will store other important data such as transactions, disputes, node settings, etc.
+
+The Dynamic & Encrypted QR Code will be attached to the product, and only authorized parties will be able to scan it. For example:
+
+A transporter can scan it to update transportation history (uploaded to IPFS).
+
+A consumer can scan it to view the product's metadata (through the IPFS CID link), etc.
+
+However, this workflow is currently incomplete, so I need your help to finish it.
+
+Please provide me with several script files so that I can record a demo video showcasing the final system.
+(Note: The .env file for IPFS requires the smart contract address after deployment, so after deploying the smart contracts, please pause to let me insert the address into the .env file before continuing with the remaining script execution.)
+
+(Note: My ability to explain in written language is limited. You are an intelligent and powerful AI, and I trust that you will fully understand the ideas and context of this project and help me complete it.)
+
+After you finish, provide me with all the files you have repaired along with what steps I need to take to have a complete and great system folder. Then guide me to run each script file to have a demo that clearly shows all the functions of the system.
