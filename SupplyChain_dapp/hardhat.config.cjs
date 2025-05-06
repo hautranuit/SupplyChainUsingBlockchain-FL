@@ -1,6 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+//console.log("Environment variables:");
+//console.log("POLYGON_AMOY_RPC:", process.env.POLYGON_AMOY_RPC ? "defined" : "undefined");
+//console.log("PRIVATE_KEYS:", process.env.PRIVATE_KEYS ? "defined" : "undefined");
+
 /** @type import(\'hardhat/config\').HardhatUserConfig */
 module.exports = {
     solidity: {
