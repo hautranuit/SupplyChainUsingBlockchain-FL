@@ -1,3 +1,0 @@
-TRANSPORT_STARTED;From=Warehouse A;To=City E;FirstTransporter=0xc6a050a538a9e857b4dcb4a33436280c202f6941;Distance=850;NumTransporters=5
-
-[Timestamp: 16:42:42, 29/04/2025]

@@ -5,20 +5,15 @@ import "./NFTCore.sol";
 
 abstract contract Marketplace is NFTCore {
     mapping(uint256 => uint256) public listingPrice;
-    // Removed: mapping(uint256 => uint256) public transportCost; // No longer calculating a fixed cost
 
-    // Added: Mapping to store transporter involvement details for a given transport
-    // tokenId => transporterIndex => transporterAddress (or some data)
-    mapping(uint256 => mapping(uint256 => address)) public transportLegs;
-    // Added: Mapping to store distance segments (example, could be more complex)
-    mapping(uint256 => uint256[]) public distanceSegments;
+    // Removed: mapping(uint256 => mapping(uint256 => address)) public transportLegs;
+    // Removed: mapping(uint256 => uint256[]) public distanceSegments;
 
-
+    event ProductListedForSale(uint256 indexed tokenId, address indexed seller, uint256 price);
     event PurchaseInitiated(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price);
-    event PaymentReleaseTriggered(uint256 indexed tokenId, address indexed buyer);
-    // Removed: event TransportCostCalculated(uint256 indexed tokenId, uint256 cost);
-
-    // Removed: Internal function _calculateTransportCost
+    // event PaymentReleaseTriggered(uint256 indexed tokenId, address indexed buyer); // Already in NFTCore or can be inferred
+    event TransportStarted(uint256 indexed tokenId, address indexed owner, address[] transporters, string startLocation, string endLocation, uint256 distance);
+    event TransportCompleted(uint256 indexed tokenId, address indexed completer);
 
     function sellProduct(uint256 tokenId, uint256 price) public virtual {
         require(ownerOf(tokenId) == msg.sender, "Marketplace: You do not own this NFT");
@@ -26,15 +21,13 @@ abstract contract Marketplace is NFTCore {
 
         listingPrice[tokenId] = price;
 
-        string memory history = string(abi.encodePacked(
-            "LISTED_FOR_SALE;Price=",
-            uintToString(price)
-        ));
-
-        emit ProductHistoryUpdated(tokenId, history);
+        // Emit event for backend to handle IPFS logging
+        emit ProductListedForSale(tokenId, msg.sender, price);
+        // The old emit ProductHistoryUpdated(tokenId, history_string) is removed.
+        // Backend will listen to ProductListedForSale, create IPFS log, and call updateProductHistory with new CID.
     }
 
-    function initiatePurchase(uint256 tokenId, string memory CIDHash) public  {
+    function initiatePurchase(uint256 tokenId, string memory CIDHash) public {
         uint256 price = listingPrice[tokenId];
         require(price > 0, "Marketplace: Product not listed for sale");
 
@@ -51,14 +44,14 @@ abstract contract Marketplace is NFTCore {
         purchase.price = price;
         purchase.status = PurchaseStatus.AwaitingCollateral;
 
-        listingPrice[tokenId] = 0;
+        listingPrice[tokenId] = 0; // Mark as no longer listed at this price
 
         emit PurchaseInitiated(tokenId, msg.sender, currentOwner, price);
     }
 
     function startTransport(
         uint256 tokenId,
-        address[] memory transporters, // Changed to array of transporter addresses
+        address[] memory transporters,
         string memory startLocation,
         string memory endLocation,
         uint256 distance
@@ -67,51 +60,31 @@ abstract contract Marketplace is NFTCore {
         uint256 numTransporters = transporters.length;
         require(numTransporters > 0, "Marketplace: Must specify at least one transporter");
 
-        // --- Gas Consumption Logic --- 
-        // Store each transporter involved - increases storage writes based on numTransporters
-        for (uint i = 0; i < numTransporters; i++) {
-            transportLegs[tokenId][i] = transporters[i];
-        }
+        // Removed on-chain storage of transportLegs and distanceSegments for gas optimization.
+        // This data will be part of the event and logged to IPFS by the backend.
+        // for (uint i = 0; i < numTransporters; i++) {
+        //     transportLegs[tokenId][i] = transporters[i];
+        // }
+        // delete distanceSegments[tokenId]; 
+        // for (uint i = 0; i < numSegments; i++) {
+        //     distanceSegments[tokenId].push(i); 
+        // }
 
-        // Example: Store distance segments - increases storage based on distance (simplified)
-        // This is a basic example; a more realistic implementation might involve more complex logic
-        uint numSegments = distance / 100; // Example: one segment per 100 miles
-        if (distance % 100 != 0) numSegments++;
-        if (numSegments == 0 && distance > 0) numSegments = 1; // At least one segment if distance > 0
-        
-        delete distanceSegments[tokenId]; // Clear previous segments if any
-        for (uint i = 0; i < numSegments; i++) {
-            distanceSegments[tokenId].push(i); // Store placeholder data for each segment
-        }
-        // --- End Gas Consumption Logic ---
-
-        // Log history (simplified transporter logging)
-        string memory history = string(abi.encodePacked(
-            "TRANSPORT_STARTED",
-            ";From=", startLocation,
-            ";To=", endLocation,
-            ";FirstTransporter=", _addressToString(transporters[0]), // Log first transporter for simplicity
-            ";Distance=", uintToString(distance),
-            ";NumTransporters=", uintToString(numTransporters)
-            // Removed CalculatedCost logging
-        ));
-
-        emit ProductHistoryUpdated(tokenId, history);
+        // Emit event for backend to handle IPFS logging
+        emit TransportStarted(tokenId, msg.sender, transporters, startLocation, endLocation, distance);
+        // The old emit ProductHistoryUpdated(tokenId, history_string) is removed.
+        // Backend will listen to TransportStarted, create IPFS log, and call updateProductHistory with new CID.
     }
 
     function completeTransport(uint256 tokenId) public {
+        // Require that the caller is one of the involved parties, e.g., the current owner or perhaps the last transporter.
+        // For simplicity, keeping it as ownerOf for now, but this could be refined based on exact workflow.
         require(ownerOf(tokenId) == msg.sender, "Marketplace: Only NFT holder can complete transport");
 
-        // Optional: Clear transport data upon completion to manage storage
-        // delete transportLegs[tokenId];
-        // delete distanceSegments[tokenId];
-
-        string memory history = string(abi.encodePacked(
-            "TRANSPORT_COMPLETED",
-            ";CompletedBy=",
-            _addressToString(msg.sender)
-        ));
-
-        emit ProductHistoryUpdated(tokenId, history);
+        // Emit event for backend to handle IPFS logging
+        emit TransportCompleted(tokenId, msg.sender);
+        // The old emit ProductHistoryUpdated(tokenId, history_string) is removed.
+        // Backend will listen to TransportCompleted, create IPFS log, and call updateProductHistory with new CID.
     }
 }
+

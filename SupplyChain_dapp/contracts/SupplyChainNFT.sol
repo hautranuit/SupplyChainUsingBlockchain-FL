@@ -8,138 +8,123 @@ import "./NodeManagement.sol";
 import { IERC721 as IERC721Interface } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract SupplyChainNFT is Marketplace, BatchProcessing, DisputeResolution, NodeManagement {
+
     event PaymentSuspended(uint256 tokenId);
-    event ReputationPenalized(address indexed node, uint256 newReputation);    constructor(address initialOwner) NFTCore(initialOwner) Ownable(initialOwner) { // Added Ownable(initialOwner)Ownable(initialOwner) { // Call Ownable directly        // NFTCore(initialOwner) sets the owner.
+    // ReputationPenalized event is already in NodeManagement
+    event DirectSaleAndTransferCompleted(uint256 indexed tokenId, address indexed seller, address indexed buyer, uint256 price, string oldCIDForVerification);
+
+    constructor(address initialAdmin)
+        NFTCore(initialAdmin) 
+        BatchProcessing(initialAdmin) 
+    {
+        // initialAdmin is owner for Ownable (from BatchProcessing) and has DEFAULT_ADMIN_ROLE (from NFTCore)
     }
 
     // --- Sale Functions (overriding Marketplace) ---
     function sellProduct(uint256 tokenId, uint256 price) public override {
-        require(ownerOf(tokenId) == msg.sender, "You do not own this NFT");
-        require(price > 0, "Price must be > 0");
-        listingPrice[tokenId] = price;
-        string memory productionHistory = string(abi.encodePacked("Products are ListedForSale "));
-        emit ProductHistoryUpdated(tokenId, productionHistory);
+        super.sellProduct(tokenId, price);
     }
     
-    function releasePaymentWithCollateral(
-        uint256 tokenId,
-        string memory CIDHash,
-        address seller,
-        address transporter,
-        uint256 amount,
-        bool meetsIncentiveCriteria
-    ) public {
-        string memory verificationStatus = verifyProductAuthenticity(tokenId, CIDHash, seller);
-        require(keccak256(bytes(verificationStatus)) == keccak256(bytes("Product is Authentic")), verificationStatus);
-
-        payable(seller).transfer(amount);
-        if (meetsIncentiveCriteria) {
-            uint256 incentive = amount / 10;
-            payable(transporter).transfer(incentive);  
-        }
-
-        emit PaymentReleased(seller, amount);
-    }
-  
+    // --- Direct Sale ---
     function sellAndTransferProduct(
         uint256 tokenId,
         uint256 price,
         address buyer,
-        string memory CIDHash
+        string memory currentProductCID
     ) public {
-        // Verify authenticity before processing sale
+        require(ownerOf(tokenId) == msg.sender, "SupplyChainNFT: Caller is not the owner");
+        require(buyer != address(0), "SupplyChainNFT: Buyer cannot be zero address");
+
         string memory result = verifyProductAuthenticity(
             tokenId,
-            CIDHash,
-            ownerOf(tokenId)
+            currentProductCID,
+            msg.sender 
         );
         require(keccak256(bytes(result)) == keccak256(bytes("Product is Authentic")), result);
     
-        // Transfer NFT ownership
-        _transfer(msg.sender, buyer, tokenId);
-        emit SaleSuccessful(tokenId, buyer, price);
-        string memory productionHistory = string(abi.encodePacked("Products are saled successful on "));
-        emit ProductHistoryUpdated(tokenId, productionHistory);
+        _transferNFTInternal(msg.sender, buyer, tokenId);
+        
+        emit DirectSaleAndTransferCompleted(tokenId, msg.sender, buyer, price, currentProductCID);
     }
 
-    // --- Reputation Management ---
-    // Internal function for contract logic
-    function updateReputation(address node, uint256 score) internal override (BatchProcessing, NodeManagement) {
-        nodeReputation[node] += score;
-        emit ReputationUpdated(node, nodeReputation[node]);
+    // --- Reputation Management Overrides ---
+    function updateReputation(address node, uint256 score) internal override(BatchProcessing, NodeManagement) {
+        NodeManagement.updateReputation(node, score);
     }
 
-    // Public wrapper function for owner to manually update reputation
+    function penalizeNode(address node, uint256 penalty) internal override(BatchProcessing, NodeManagement) {
+        NodeManagement.penalizeNode(node, penalty);
+    }
+    
+    // --- Admin functions for reputation (using Ownable from BatchProcessing) ---
     function adminUpdateReputation(address node, uint256 score) public onlyOwner {
-        updateReputation(node, score); // Calls the internal function
+        updateReputation(node, score); 
     }
 
-    // Internal function for contract logic
-    function penalizeNode(address node, uint256 penalty) internal override (BatchProcessing, NodeManagement) {
-        if (nodeReputation[node] > penalty) {
-            nodeReputation[node] -= penalty;
-        } else {
-            nodeReputation[node] = 0;
-        }
-        emit ReputationPenalized(node, nodeReputation[node]);
-    }
-
-    // Public wrapper function for owner to manually penalize node
     function adminPenalizeNode(address node, uint256 penalty) public onlyOwner {
-        penalizeNode(node, penalty); // Calls the internal function
+        penalizeNode(node, penalty);
     }
 
-    // --- Node Management Overrides ---
-    function _getAllPrimaryNodes() internal view override returns (address[] memory) {
-        uint256 totalPN = getTotalPrimaryNodes();
-        address[] memory pns = new address[](totalPN);
+    // --- Node Management Overrides & Implementations ---
+    // Concrete implementation for _getAllPrimaryNodes required by BatchProcessing
+    function _getAllPrimaryNodes() internal view override(BatchProcessing) returns (address[] memory) {
+        uint256 primaryNodeCount = 0;
+        for (uint256 i = 0; i < allNodes.length; i++) {
+            if (isPrimaryNode(allNodes[i])) { // isPrimaryNode is from NodeManagement
+                primaryNodeCount++;
+            }
+        }
+        address[] memory primaryNodesList = new address[](primaryNodeCount);
         uint256 idx = 0;
         for (uint256 i = 0; i < allNodes.length; i++) {
-            if (_verifiedNodes[allNodes[i]] && nodeTypes[allNodes[i]] == NodeType.Primary) {
-                pns[idx] = allNodes[i];
+            if (isPrimaryNode(allNodes[i])) {
+                primaryNodesList[idx] = allNodes[i];
                 idx++;
             }
         }
-        return pns;
+        return primaryNodesList;
     }
 
     function getTotalPrimaryNodes() public view override(NodeManagement) returns (uint256) {
-        uint256 count = 0;
-        for (uint256 i = 0; i < allNodes.length; i++) {
-            if (_verifiedNodes[allNodes[i]] && nodeTypes[allNodes[i]] == NodeType.Primary) {
-                count++;
-            }
-        }
-        return count;
+        // NodeManagement has an implementation, but we can also use the logic from _getAllPrimaryNodes if preferred
+        // For consistency with the new _getAllPrimaryNodes, let's use its length.
+        // Or, stick to NodeManagement's version if it's more optimized or has specific logic.
+        // Sticking to NodeManagement's version as it was likely intended.
+        return NodeManagement.getTotalPrimaryNodes(); 
     }
 
-    function isPrimaryNode(address node) internal view override (BatchProcessing, NodeManagement) returns (bool) {
-        return _verifiedNodes[node] && nodeTypes[node] == NodeType.Primary;
+    function isPrimaryNode(address node) internal view override(BatchProcessing, NodeManagement) returns (bool) {
+        return NodeManagement.isPrimaryNode(node);
     }
 
-    function isSecondaryNode(address node) internal view override (BatchProcessing, NodeManagement) returns (bool) {
-        return _verifiedNodes[node] && nodeTypes[node] == NodeType.Secondary;
+    function isSecondaryNode(address node) internal view override(BatchProcessing, NodeManagement) returns (bool) {
+        return NodeManagement.isSecondaryNode(node);
     }
 
-    function getNodeReputation(address node) internal view override returns (uint256) {
-        return nodeReputation[node];
+    function getNodeReputation(address node) internal view override(BatchProcessing) returns (uint256) {
+        return NodeManagement.nodeReputation[node]; // Accessing public state variable from NodeManagement
     }
 
     // --- DisputeResolution Overrides ---
-    function getProductHistory(uint256 tokenId) public view override returns (string memory) {
-        return cidMapping[tokenId];
+    function getProductHistory(uint256 tokenId) public view override(DisputeResolution) returns (string memory) {
+        // cidMapping is in NFTCore.sol, which Marketplace inherits. SupplyChainNFT inherits Marketplace.
+        // So, cidMapping should be directly accessible.
+        return cidMapping[tokenId]; 
     }
 
-    // --- Override ownerOf to resolve conflicts from multiple base classes ---
+    // --- ERC721 Overrides ---
     function ownerOf(uint256 tokenId) public view override(ERC721, BatchProcessing, IERC721Interface) returns (address) {
         return ERC721.ownerOf(tokenId);
     }
 
-    function _batchTransfer(address from, address to, uint256 tokenId) internal override {
-    ERC721._transfer(from, to, tokenId);
+    // --- BatchProcessing Overrides ---
+    function _batchTransfer(address from, address to, uint256 tokenId) internal override(BatchProcessing) {
+        _transferNFTInternal(from, to, tokenId); // _transferNFTInternal is from NFTCore
     }
 
-    function isVerified(address candidate) public view override (DisputeResolution, NodeManagement) returns (bool) {
-    return _verifiedNodes[candidate];
+    // --- General Overrides ---
+    function isVerified(address candidate) public view override(DisputeResolution, NodeManagement) returns (bool) {
+        return NodeManagement.isVerified(candidate);
     }
 }
+

@@ -1,1 +1,0 @@
-{"RFIDData":{"uniqueProductID":"12345","batchNumber":"batch001","manufacturingDate":"2023-01-01","expirationDate":"2025-01-01","productType":"Gadget","manufacturerID":"manu123","quickAccessURL":"https://example.com/product123","nftReference":"nft123456"},"HologramData":{"hologramID":"holo123","hologramHash":"hash123","issuanceDate":"2023-02-01","extraAuthInfo":"Verified"}}

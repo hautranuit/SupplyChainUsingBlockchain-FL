@@ -10,12 +10,12 @@ import { Blob, File } from '@web-std/file'; // For creating files in memory
 dotenv.config();
 
 // --- Configuration (Ensure these are set in your .env file) ---
-const RPC_URL = process.env.AMOY_RPC_URL || "YOUR_AMOY_RPC_URL";
-const NFT_CORE_ADDRESS = process.env.NFT_CORE_ADDRESS || "YOUR_DEPLOYED_NFT_CORE_ADDRESS";
-const UPDATER_PRIVATE_KEY = process.env.BACKEND_PRIVATE_KEY; // Key for account with UPDATER_ROLE
-const W3UP_KEY = process.env.KEY; // Web3.Storage KEY
-const W3UP_PROOF = process.env.PROOF; // Web3.Storage PROOF
-const NFTCoreABI = require("./artifacts/contracts/NFTCore.sol/NFTCore.json").abi; // Assuming ABI path
+const RPC_URL = process.ifps_qr.env.AMOY_RPC_URL || "YOUR_AMOY_RPC_URL";
+const NFT_CORE_ADDRESS = process.ifps_qr.env.NFT_CORE_ADDRESS || "YOUR_DEPLOYED_NFT_CORE_ADDRESS";
+const UPDATER_PRIVATE_KEY = process.ifps_qr.env.BACKEND_PRIVATE_KEY; // Key for account with UPDATER_ROLE
+const W3UP_KEY = process.ifps_qr.env.KEY; // Web3.Storage KEY
+const W3UP_PROOF = process.ifps_qr.env.PROOF; // Web3.Storage PROOF
+const NFTCoreABI = require("../SupplyChain_dapp/artifacts/contracts/NFTCore.sol/NFTCore.json").abi; // Assuming ABI path
 
 // --- Helper Functions ---
 
