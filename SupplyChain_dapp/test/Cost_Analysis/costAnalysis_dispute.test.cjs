@@ -14,7 +14,7 @@ describe("Supply Chain Cost Analysis (Dispute Resolution Only)", function () {
     };
 
     // const ARBITRATOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ARBITRATOR_ROLE")); // Not used directly
-    const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Arbitrator: 3 }; // Matches contract enum
+    const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4 }; // Matches contract enum
     // const ContractNodeType = { Primary: 0, Secondary: 1 }; // Not used in this test
 
     // Setup runs once before all tests in this script

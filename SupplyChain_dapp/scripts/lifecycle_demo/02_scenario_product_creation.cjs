@@ -21,6 +21,33 @@ function getEnvVariable(variableName) {
     process.exit(1);
 }
 
+const qrDir = path.join(__dirname, "../../../w3storage-upload-script/qr_codes");
+
+function cleanupOldQRCodes(tokenId) {
+    if (!fs.existsSync(qrDir)) {
+        fs.mkdirSync(qrDir, { recursive: true });
+        return;
+    }
+    
+    const files = fs.readdirSync(qrDir);
+    let cleanedCount = 0;
+    
+    files.forEach(file => {
+        if (file.startsWith(`token_${tokenId}_`) && file.endsWith('.png')) {
+            try {
+                fs.unlinkSync(path.join(qrDir, file));
+                cleanedCount++;
+            } catch (error) {
+                console.warn(`⚠️ Failed to delete old QR code ${file}: ${error.message}`);
+            }
+        }
+    });
+    
+    if (cleanedCount > 0) {
+        console.log(`🧹 Cleaned up ${cleanedCount} old QR code(s) for token ${tokenId}`);
+    }
+}
+
 async function main() {
     console.log("--- Starting 02: Product Creation (Minting NFTs) ---");
 
@@ -109,6 +136,12 @@ async function main() {
             const storeCidTx = await supplyChainNFT.connect(deployer).storeInitialCID(tokenId, initialPlaceholderCID);
             const storeCidReceipt = await storeCidTx.wait(1);
             console.log(`      Initial CID stored. Gas Used: ${storeCidReceipt.gasUsed.toString()}`);
+
+            // Validate initial CID format
+            if (!initialPlaceholderCID.startsWith('ipfs://')) {
+                console.error(`Invalid initial CID format: ${initialPlaceholderCID}`);
+                process.exit(1);
+            }
 
         } else {
             console.error(`    ERROR: ProductMinted event not found or tokenId missing for NFT ${i + 1}. Gas Used: ${receipt.gasUsed.toString()}`);

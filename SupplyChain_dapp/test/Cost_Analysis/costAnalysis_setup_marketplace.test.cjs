@@ -73,7 +73,7 @@ describe("Supply Chain Cost Analysis (Setup & Marketplace Only)", function () {
 
         // 3. Register Nodes
         console.log("Registering Nodes...");
-        const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3 }; // Removed Arbitrator as not used here
+        const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4 }; // Updated to match contract enum
         const ContractNodeType = { Primary: 0, Secondary: 1 };
         let regGasTotal = BigInt(0);
 

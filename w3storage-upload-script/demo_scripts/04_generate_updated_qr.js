@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import { cleanupOldQRCodes } from './utils.js';
 
 // Determine the correct path to .env file and artifact based on script execution location
 const __filename_script = fileURLToPath(import.meta.url);
@@ -105,6 +106,8 @@ async function main() {
         console.log("\n✅ Updated QR Code generated successfully.");
         console.log(`   QR Image Path: ${qrFilePath}`);
         console.log(`   Encrypted Payload for next step (consumer view): ${finalPayload}`);
+
+        cleanupOldQRCodes(tokenId);
 
     } catch (error) {
         console.error("❌ Error generating updated QR code:", error.message);

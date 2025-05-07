@@ -118,7 +118,7 @@ describe("Supply Chain Cost Analysis (Batch Processing & IPFS History - Gas Unit
         await supplyChainNFT.connect(owner).grantRole(MINTER_ROLE, owner.address); // owner for minting
         console.log(`Granted UPDATER_ROLE to ${sn1.address}, MINTER_ROLE to ${owner.address}`);
 
-        const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3 };
+        const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4 };
         const ContractNodeType = { Primary: 0, Secondary: 1 };
 
         console.log("Registering nodes...");

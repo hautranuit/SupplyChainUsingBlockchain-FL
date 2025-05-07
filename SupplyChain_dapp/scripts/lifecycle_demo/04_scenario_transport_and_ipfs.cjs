@@ -2,6 +2,32 @@ const { ethers } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 
+const qrDir = path.join(__dirname, "../../../w3storage-upload-script/qr_codes");
+
+function cleanupOldQRCodes(tokenId) {
+    if (!fs.existsSync(qrDir)) {
+        fs.mkdirSync(qrDir, { recursive: true });
+        return;
+    }
+    
+    const files = fs.readdirSync(qrDir);
+    let cleanedCount = 0;
+    
+    files.forEach(file => {
+        if (file.startsWith(`token_${tokenId}_`) && file.endsWith('.png')) {
+            try {
+                fs.unlinkSync(path.join(qrDir, file));
+                cleanedCount++;
+            } catch (error) {
+                console.warn(`⚠️ Failed to delete old QR code ${file}: ${error.message}`);
+            }
+        }
+    });
+    
+    if (cleanedCount > 0) {
+        console.log(`🧹 Cleaned up ${cleanedCount} old QR code(s) for token ${tokenId}`);
+    }
+}
 // Helper function to read demo_context.json
 function getDemoContext() {
     const demoContextPath = path.join(__dirname, "demo_context.json");
@@ -22,6 +48,27 @@ function simulateIPFSUpload(data) {
     const cid = "ipfs://Qm" + randomString;
     console.log(`    Simulated IPFS CID: ${cid}`);
     return cid;
+}
+
+async function downloadFromIPFSGatewayWithRetry(cid, maxRetries = 3) {
+    let retries = 0;
+    while (retries < maxRetries) {
+        try {
+            // Simulate IPFS download
+            console.log(`    Downloading from IPFS gateway (attempt ${retries + 1}/${maxRetries})...`);
+            // Add actual IPFS download logic here
+            return true;
+        } catch (error) {
+            retries++;
+            if (retries === maxRetries) {
+                console.error(`    Failed to download from IPFS after ${maxRetries} attempts:`, error);
+                throw error;
+            }
+            const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+            console.log(`    Retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
 }
 
 async function main() {
@@ -75,6 +122,14 @@ async function main() {
     const endLocation1 = "Retailer Hub Z";
     const distance1 = 1200; // km
 
+    // Validate transporter addresses
+    for (const transporter of transportLegs1) {
+        if (!ethers.isAddress(transporter)) {
+            console.error(`Invalid transporter address: ${transporter}`);
+            process.exit(1);
+        }
+    }
+
     console.log(`  Starting transport for Token ID ${tokenId1} with ${transportLegs1.length} transporters...`);
     let tx = await supplyChainNFT.connect(ownerOfToken1Signer).startTransport(tokenId1, transportLegs1, startLocation1, endLocation1, distance1);
     let receipt = await tx.wait(1);
@@ -87,6 +142,15 @@ async function main() {
     receipt = await tx.wait(1);
     console.log(`      Product history CID updated for transport start. Gas Used: ${receipt.gasUsed.toString()}`);
     product1Info.currentTransportCID = transportLogCID1;
+
+    // Validate timestamp is after last entry
+    const lastTimestamp = product1Info.lastUpdateTimestamp || 0;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    if (currentTimestamp <= lastTimestamp) {
+        console.error(`Invalid timestamp: ${currentTimestamp} must be greater than last update ${lastTimestamp}`);
+        process.exit(1);
+    }
+    product1Info.lastUpdateTimestamp = currentTimestamp;
 
     // Simulate some time passing / legs completing - contract doesn't have explicit leg completion
     console.log(`  Simulating transport progress...`);

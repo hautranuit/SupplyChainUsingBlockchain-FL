@@ -104,6 +104,10 @@ async function main() {
     }
     const [tokenId, encryptedQrPayload, newLocation, transporterWalletAddress] = args;
 
+    if (!ethers.isAddress(transporterWalletAddress)) {
+        throw new Error("Invalid transporter wallet address format");
+    }
+
     const RPC_URL = process.env.POLYGON_AMOY_RPC || process.env.AMOY_RPC_URL;
     const PRIVATE_KEY = process.env.PRIVATE_KEY || process.env.BACKEND_PRIVATE_KEY; // This key needs UPDATER_ROLE
     const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS; // This should be the deployed SupplyChainNFT address
@@ -134,6 +138,15 @@ async function main() {
 
         // 2. Download current history from IPFS
         const currentHistoryData = await downloadFromIPFS(currentIpfsHistoryCID);
+
+        // Validate timestamp
+        const timestamp = Math.floor(Date.now() / 1000);
+        if (currentHistoryData.historyLog && currentHistoryData.historyLog.length > 0) {
+            const lastEntry = currentHistoryData.historyLog[currentHistoryData.historyLog.length - 1];
+            if (timestamp <= lastEntry.timestamp) {
+                throw new Error("New timestamp must be greater than the last history entry");
+            }
+        }
 
         // 3. Append new transport event
         console.log("\nAppending new transport event to history...");

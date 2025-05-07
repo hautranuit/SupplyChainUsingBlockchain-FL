@@ -94,6 +94,19 @@ async function downloadFromIPFSGateway(cid) {
     }
 }
 
+async function downloadFromIPFSGatewayWithRetry(cid, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await downloadFromIPFSGateway(cid);
+        } catch (error) {
+            if (i === maxRetries - 1) throw error;
+            console.log(`Retry ${i + 1}/${maxRetries} after error: ${error.message}`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+    }
+}
+
+
 async function main() {
     const args = process.argv.slice(2);
     if (args.length < 1) {
@@ -135,7 +148,7 @@ async function main() {
 
         // 2. Download history from IPFS (using public gateway by default)
         console.log("\nFetching product history and data from IPFS...");
-        const productData = await downloadFromIPFSGateway(ipfsHistoryCID);
+        const productData = await downloadFromIPFSGatewayWithRetry(ipfsHistoryCID);
 
         if (productData) {
             console.log("\n✅ Product Data and History Retrieved Successfully:");

@@ -78,10 +78,14 @@ This script mints several distinct product NFTs, each with unique metadata, by t
 
 *   **Script Path (example):** `scripts/lifecycle_demo/02_scenario_product_creation.js`
 *   **Command:** `npx hardhat run scripts/lifecycle_demo/02_scenario_product_creation.js --network localhost`
-
-**What to Observe:**
+*   **Prerequisites:**
+    - Ensure the `qr_codes` directory exists in `w3storage-upload-script/`
+    - The `ifps_qr.env` file should be properly configured with valid keys
+*   **What to Observe:**
 *   Console output indicating it's using the contract address from the previous step (read from `demo_context.json`).
 *   Logs for each NFT being minted, including its unique product ID, recipient (Manufacturer), and the resulting Token ID.
+*   Validation of initial CID format (must start with 'ipfs://').
+*   Automatic cleanup of any existing QR codes for the minted tokens.
 *   Gas used for each minting transaction.
 *   A `demo_context.json` file will be created/updated in the script's directory, storing the contract address, minted token IDs, and product details for use by subsequent scripts.
 *   The backend listener might log `ProductMinted` events.
@@ -111,13 +115,20 @@ This script simulates the transport process for purchased products. It shows tra
 
 *   **Script Path (example):** `scripts/lifecycle_demo/04_scenario_transport_and_ipfs.js`
 *   **Command:** `npx hardhat run scripts/lifecycle_demo/04_scenario_transport_and_ipfs.js --network localhost`
-
-**What to Observe:**
+*   **Prerequisites:**
+    - Ensure the `qr_codes` directory exists in `w3storage-upload-script/`
+    - The `ifps_qr.env` file should be properly configured with valid keys
+    - The `demo_context.json` file should be present from previous scripts
+*   **What to Observe:**
+*   Validation of transporter wallet addresses before transport initiation.
+*   Timestamp validation to ensure chronological order of history entries.
 *   Logs for starting transport for different products (Token ID, transporters, locations).
 *   Simulated IPFS CIDs being generated for transport logs.
+*   Retry mechanism for IPFS gateway requests (simulated in the demo).
 *   On-chain `ProductHistoryCIDUpdated` events being logged by the script (and picked up by the backend listener).
 *   Logs for transport completion.
-*   The `demo_context.json` file will be updated with transport CIDs and status.
+*   Automatic cleanup of old QR codes before generating new ones.
+*   The `demo_context.json` file will be updated with transport CIDs, status, and last update timestamps.
 *   The backend listener should log `TransportStarted`, `TransportCompleted`, and `ProductHistoryCIDUpdated` events.
 *   The script will mention conceptual QR code generation points, referencing the original `w3storage-upload-script` utilities.
 
@@ -170,12 +181,53 @@ To run the demo again from scratch:
 
 ## 4. Tips for Recording a Demo
 
-*   **Screen Setup**: Arrange your screen to show multiple terminal windows: one for running the Hardhat scripts, one for the Hardhat node output (if run separately), and one for the `backendListener.js` output.
+*   **Screen Setup**: Arrange your screen to show multiple terminal windows:
+    - One for running the Hardhat scripts
+    - One for the Hardhat node output (if run separately)
+    - One for the `backendListener.js` output
+    - One for monitoring the `qr_codes` directory (optional)
 *   **Clear Explanations**: Verbally explain what each script is doing and what the expected outcomes are before running it.
-*   **Highlight Key Outputs**: Point out important console logs, such as deployed contract addresses, Token IDs, Batch IDs, Dispute IDs, IPFS CIDs (simulated), and event logs from the backend listener.
-*   **Show `demo_context.json`**: Briefly show how `demo_context.json` is created and updated by the scripts to pass state information.
+*   **Highlight Key Outputs**: Point out important console logs, such as:
+    - Deployed contract addresses
+    - Token IDs
+    - Batch IDs
+    - Dispute IDs
+    - IPFS CIDs (simulated)
+    - Validation messages for transporter addresses and timestamps
+    - QR code cleanup notifications
+    - IPFS gateway retry attempts
+    - Event logs from the backend listener
+*   **Show `demo_context.json`**: Briefly show how `demo_context.json` is created and updated by the scripts to pass state information, including new fields like `lastUpdateTimestamp`.
 *   **Pace Yourself**: Run scripts one by one, allowing time for the audience (lecturer) to absorb the information and observe the outputs.
 *   **Network Choice**: Using the local Hardhat network (`--network localhost`) is generally faster and more reliable for demos. If using a testnet like Amoy, ensure your accounts are funded and be prepared for longer transaction times.
+*   **Validation Points**: Highlight the new validation features:
+    - Transporter address validation
+    - Timestamp chronological validation
+    - Initial CID format validation
+    - QR code cleanup process
+    - IPFS gateway retry mechanism
+
+## 5. Troubleshooting Common Issues
+
+*   **QR Code Cleanup Issues**:
+    - If you see warnings about failed QR code cleanup, check the permissions of the `qr_codes` directory
+    - Ensure the directory exists and is writable
+    - The script will create the directory if it doesn't exist, but will warn if it can't
+
+*   **IPFS Gateway Issues**:
+    - If you see multiple retry attempts, check your network connection
+    - The script will automatically retry up to 3 times with exponential backoff
+    - If all retries fail, the script will exit with an error
+
+*   **Timestamp Validation Issues**:
+    - If you see timestamp validation errors, ensure your system clock is accurate
+    - The script requires timestamps to be in chronological order
+    - Each new update must have a timestamp greater than the previous one
+
+*   **Transporter Address Issues**:
+    - If you see transporter address validation errors, check the address format
+    - Addresses must be valid Ethereum addresses
+    - The script will validate addresses before initiating transport
 
 This comprehensive flow should provide a clear demonstration of your project's on-chain and off-chain capabilities (excluding Federated Learning).
 

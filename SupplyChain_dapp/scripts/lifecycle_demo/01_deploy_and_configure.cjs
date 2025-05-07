@@ -78,8 +78,6 @@ async function main() {
 
     // Update .env file
     const envFilePath = path.join(__dirname, "../../../w3storage-upload-script/ifps_qr.env"); 
-    // Adjust path as necessary. Assuming this script is run from lifecycle_demo_scripts, 
-    // and ifps_qr.env is in w3storage-upload-script/ifps_qr.env/
     console.log(`\n--- Updating .env file at ${envFilePath} ---`);
     try {
         let envContent = "";
@@ -91,12 +89,12 @@ async function main() {
         const newLines = lines.map(line => {
             if (line.startsWith("CONTRACT_ADDRESS=")) {
                 found = true;
-                return `CONTRACT_ADDRESS=${contractAddress}`;
+                return `CONTRACT_ADDRESS=${contractAddress.toLowerCase()}`;
             }
             return line;
         });
         if (!found) {
-            newLines.push(`CONTRACT_ADDRESS=${contractAddress}`);
+            newLines.push(`CONTRACT_ADDRESS=${contractAddress.toLowerCase()}`);
         }
         // Filter out empty lines that might result from multiple newlines at the end
         fs.writeFileSync(envFilePath, newLines.filter(line => line.trim() !== "" || newLines.indexOf(line) === newLines.length -1 && line === "").join("\n"));

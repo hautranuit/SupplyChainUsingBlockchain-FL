@@ -7,7 +7,7 @@ abstract contract NodeManagement {
     mapping(address => uint256) public nodeReputation;
     mapping(address => uint256) public lastActionTimestamp;
 
-    enum Role { Manufacturer, Transpoter, Customer, Arbitrator }
+    enum Role { Manufacturer, Transporter, Customer, Retailer, Arbitrator }
     mapping(address => Role) public roles;
 
     enum NodeType { Primary, Secondary }
