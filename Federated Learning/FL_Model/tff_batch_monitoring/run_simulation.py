@@ -4,7 +4,7 @@ import nest_asyncio
 import numpy as np
 from data_preparation_phase2 import make_federated_data_phase2, ELEMENT_SPEC_PHASE2, NUM_PHASE2_FEATURES
 from federated_training import build_weighted_fed_avg
-from model_definition import tff_model_fn
+from model_definition import tff_model_fn, create_keras_model # Import create_keras_model
 
 # Apply nest_asyncio to allow TFF to run in environments like Jupyter or scripts easily.
 nest_asyncio.apply()
@@ -45,17 +45,25 @@ def main():
         result = iterative_process.next(server_state, federated_train_datasets)
         server_state = result.state
         train_metrics = result.metrics
+        # print(f"DEBUG: Full train_metrics: {train_metrics}") # Keep this commented out for now
         
+        # Access nested metrics correctly
+        client_train_metrics = train_metrics.get("client_work", {}).get("train", {})
+        loss = client_train_metrics.get("loss", float("nan"))
+        accuracy = client_train_metrics.get("accuracy", float("nan"))
+
         print(f"Round {round_num + 1:2d}: "
-              f"loss={train_metrics['loss']:.4f}, "
-              f"accuracy={train_metrics['accuracy']:.4f}")
+              f"loss={loss:.4f}, "
+              f"accuracy={accuracy:.4f}")
     
     print("Federated training completed.")
     
     # Extract the final model weights
     print("Extracting final global model weights...")
-    keras_model = tff_model_fn()
-    keras_model.load_weights(server_state.model_weights)
+    # Create a new Keras model instance for evaluation
+    keras_model_for_evaluation = create_keras_model()
+    # Assign the trained weights from TFF server_state to the Keras model
+    server_state.global_model_weights.assign_weights_to(keras_model_for_evaluation)
     print("Final global model weights assigned to a new Keras model instance.")
     
     # Simulate evaluation
@@ -64,12 +72,33 @@ def main():
     test_datasets = make_federated_data_phase2(num_fl_clients=1)
     test_dataset = preprocess_client_dataset(test_datasets[0])
     
+    # Compile the Keras model before evaluation
+    keras_model_for_evaluation.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(),
+        metrics=[
+            tf.keras.metrics.BinaryAccuracy(name="accuracy"),
+            tf.keras.metrics.AUC(name="auc"),
+            tf.keras.metrics.Precision(name="precision"),
+            tf.keras.metrics.Recall(name="recall")
+        ]
+    )
+    
     # Evaluate the model
-    evaluation_metrics = keras_model.evaluate(test_dataset)
+    evaluation_metrics = keras_model_for_evaluation.evaluate(test_dataset)
+    # Keras evaluate returns a list of scalars if multiple metrics are used
+    # The order matches the order in compile metrics + loss
+    eval_loss = evaluation_metrics[0]
+    eval_accuracy = evaluation_metrics[1]
+    eval_auc = evaluation_metrics[2]
+    eval_precision = evaluation_metrics[3]
+    eval_recall = evaluation_metrics[4]
+
     print(f"Global model evaluation on simulated test data - "
-          f"Loss: {evaluation_metrics['loss']:.4f}, "
-          f"Accuracy: {evaluation_metrics['accuracy']:.4f}, "
-          f"AUC: {evaluation_metrics['auc']:.4f}")
+          f"Loss: {eval_loss:.4f}, "
+          f"Accuracy: {eval_accuracy:.4f}, "
+          f"AUC: {eval_auc:.4f}, "
+          f"Precision: {eval_precision:.4f}, "
+          f"Recall: {eval_recall:.4f}")
     
     print("\nSimulation finished.")
 

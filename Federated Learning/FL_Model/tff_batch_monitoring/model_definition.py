@@ -1,11 +1,18 @@
 import tensorflow as tf
 import tensorflow_federated as tff
-from data_preparation_phase2 import NUM_PHASE2_FEATURES, ELEMENT_SPEC_PHASE2
+from data_preparation_phase2 import NUM_PHASE2_FEATURES # ELEMENT_SPEC_PHASE2 is not needed here directly
+
+# Define the batched input spec for TFF's from_keras_model
+# This describes the shape of one batch of data (features, labels)
+BATCHED_INPUT_SPEC = (
+    tf.TensorSpec(shape=(None, NUM_PHASE2_FEATURES), dtype=tf.float32),
+    tf.TensorSpec(shape=(None, 1), dtype=tf.int32)
+)
 
 def create_keras_model():
     """Creates a Keras model for binary classification of anomalous/collusive behavior."""
     model = tf.keras.models.Sequential([
-        # Input layer with explicit shape for Phase 2 features
+        # Input layer with explicit shape for Phase 2 features (shape of one sample)
         tf.keras.layers.Input(shape=(NUM_PHASE2_FEATURES,)),
         
         # First hidden layer with increased capacity
@@ -44,7 +51,7 @@ def tff_model_fn():
     
     return tff.learning.models.from_keras_model(
         keras_model_instance,
-        input_spec=ELEMENT_SPEC_PHASE2,  # Using Phase 2 element spec
+        input_spec=BATCHED_INPUT_SPEC,  # Use the defined batched input spec
         loss=tf.keras.losses.BinaryCrossentropy(),
         metrics=[
             tf.keras.metrics.BinaryAccuracy(name="accuracy"),
@@ -60,10 +67,21 @@ if __name__ == '__main__':
     keras_m = create_keras_model()
     keras_m.summary()
     
+    # Try with a sample 2D input (batch of N)
+    sample_input_2d_batchN = tf.random.normal([5, NUM_PHASE2_FEATURES])
+    print(f"\nShape of 2D (batch N) sample input: {sample_input_2d_batchN.shape}")
+    try:
+        output_2d_batchN = keras_m(sample_input_2d_batchN)
+        print(f"Output shape with 2D (batch N) input: {output_2d_batchN.shape}")
+    except Exception as e:
+        print(f"Error with 2D (batch N) input: {e}")
+
     print("\nTesting TFF model function...")
-    tff_m_fn = tff_model_fn()
-    print("TFF model function created successfully.")
-    
-    # Example: Create a concrete TFF model (not usually done directly like this for training)
-    # state_manager = tff.learning.models.ModelWeights.get_model_weights(tff_m_fn())
-    # print(f"Model weights structure: {state_manager}")
+    # The tff_model_fn itself doesn't take arguments for its direct call here for testing purposes.
+    # It's used by TFF processes which will handle data according to the input_spec.
+    try:
+        tff_m_instance = tff_model_fn()
+        print(f"TFF model function created successfully. Input spec: {tff_m_instance.input_spec}")
+    except Exception as e:
+        print(f"Error creating TFF model instance: {e}")
+
