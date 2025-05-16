@@ -1,0 +1,80 @@
+[2025-05-16T21:54:30.320758] === Starting Integration Validation ===
+[2025-05-16T21:54:30.320758] All required FL scripts exist
+[2025-05-16T21:54:30.320758] Context file check: Context file not found
+[2025-05-16T21:54:30.320758] Master script check: Master orchestration script found
+[2025-05-16T21:54:30.320758] Results directory check: Results directory exists at E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\results
+[2025-05-16T21:54:30.320758] Validating data flow between scripts...
+[2025-05-16T21:54:30.320758] Creating a test context file for validation...
+[2025-05-16T21:54:30.320758] Test context created at E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\test_context.json
+[2025-05-16T21:54:30.320758] Testing individual FL scripts...
+[2025-05-16T21:54:30.320758] Validating script: run_sybil_detection.py
+[2025-05-16T21:54:30.320758]   - make_federated_data function: Found
+[2025-05-16T21:54:30.320758]   - log_message function: Found
+[2025-05-16T21:54:30.320758]   - Context reading logic: Found
+[2025-05-16T21:54:30.320758]   - Results saving logic: Found
+[2025-05-16T21:54:30.320758]   Error validating run_sybil_detection.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:30.320758] Validating script: run_batch_monitoring.py
+[2025-05-16T21:54:30.320758]   - make_federated_data function: Found
+[2025-05-16T21:54:30.320758]   - log_message function: Found
+[2025-05-16T21:54:30.320758]   - Context reading logic: Found
+[2025-05-16T21:54:30.320758]   - Results saving logic: Found
+[2025-05-16T21:54:30.320758]   Error validating run_batch_monitoring.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:30.320758] Validating script: run_node_behavior_timeseries.py
+[2025-05-16T21:54:30.320758]   - make_federated_data function: Found
+[2025-05-16T21:54:30.320758]   - log_message function: Found
+[2025-05-16T21:54:30.320758]   - Context reading logic: Found
+[2025-05-16T21:54:30.320758]   - Results saving logic: Found
+[2025-05-16T21:54:30.320758]   Error validating run_node_behavior_timeseries.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:30.320758] Validating script: run_arbitrator_bias.py
+[2025-05-16T21:54:30.320758]   - make_federated_data function: Found
+[2025-05-16T21:54:30.320758]   - log_message function: Found
+[2025-05-16T21:54:30.320758]   - Context reading logic: Found
+[2025-05-16T21:54:30.320758]   - Results saving logic: Found
+[2025-05-16T21:54:30.320758]   Error validating run_arbitrator_bias.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:30.320758] Validating script: run_dispute_risk.py
+[2025-05-16T21:54:30.320758]   - make_federated_data function: Found
+[2025-05-16T21:54:30.320758]   - log_message function: Found
+[2025-05-16T21:54:30.320758]   - Context reading logic: Found
+[2025-05-16T21:54:30.320758]   - Results saving logic: Found
+[2025-05-16T21:54:30.320758]   Error validating run_dispute_risk.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:30.336357] Validation results saved to E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\results\integration_validation_results.json
+[2025-05-16T21:54:39.370847] === Starting Integration Validation ===
+[2025-05-16T21:54:39.370847] All required FL scripts exist
+[2025-05-16T21:54:39.370847] Context file check: Context file not found
+[2025-05-16T21:54:39.370847] Master script check: Master orchestration script found
+[2025-05-16T21:54:39.370847] Results directory check: Results directory exists at E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\results
+[2025-05-16T21:54:39.385356] Validating data flow between scripts...
+[2025-05-16T21:54:39.385356] Creating a test context file for validation...
+[2025-05-16T21:54:39.385356] Test context created at E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\test_context.json
+[2025-05-16T21:54:39.385356] Testing individual FL scripts...
+[2025-05-16T21:54:39.385356] Validating script: run_sybil_detection.py
+[2025-05-16T21:54:39.385356]   - make_federated_data function: Found
+[2025-05-16T21:54:39.385356]   - log_message function: Found
+[2025-05-16T21:54:39.385356]   - Context reading logic: Found
+[2025-05-16T21:54:39.385356]   - Results saving logic: Found
+[2025-05-16T21:54:39.385356]   Error validating run_sybil_detection.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:39.385356] Validating script: run_batch_monitoring.py
+[2025-05-16T21:54:39.385356]   - make_federated_data function: Found
+[2025-05-16T21:54:39.385356]   - log_message function: Found
+[2025-05-16T21:54:39.385356]   - Context reading logic: Found
+[2025-05-16T21:54:39.385356]   - Results saving logic: Found
+[2025-05-16T21:54:39.385356]   Error validating run_batch_monitoring.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:39.385356] Validating script: run_node_behavior_timeseries.py
+[2025-05-16T21:54:39.385356]   - make_federated_data function: Found
+[2025-05-16T21:54:39.385356]   - log_message function: Found
+[2025-05-16T21:54:39.385356]   - Context reading logic: Found
+[2025-05-16T21:54:39.385356]   - Results saving logic: Found
+[2025-05-16T21:54:39.385356]   Error validating run_node_behavior_timeseries.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:39.385356] Validating script: run_arbitrator_bias.py
+[2025-05-16T21:54:39.385356]   - make_federated_data function: Found
+[2025-05-16T21:54:39.385356]   - log_message function: Found
+[2025-05-16T21:54:39.385356]   - Context reading logic: Found
+[2025-05-16T21:54:39.385356]   - Results saving logic: Found
+[2025-05-16T21:54:39.385356]   Error validating run_arbitrator_bias.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:39.385356] Validating script: run_dispute_risk.py
+[2025-05-16T21:54:39.385356]   - make_federated_data function: Found
+[2025-05-16T21:54:39.385356]   - log_message function: Found
+[2025-05-16T21:54:39.385356]   - Context reading logic: Found
+[2025-05-16T21:54:39.385356]   - Results saving logic: Found
+[2025-05-16T21:54:39.385356]   Error validating run_dispute_risk.py: 'charmap' codec can't encode character '\u2713' in position 31: character maps to <undefined>
+[2025-05-16T21:54:39.385356] Validation results saved to E:\NAM3\DO_AN_CHUYEN_NGANH\fl_integration\results\integration_validation_results.json
