@@ -31,50 +31,85 @@ async function main() {
     const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4 };
     const ContractNodeType = { Primary: 0, Secondary: 1 };
 
-    console.log("\n--- Granting Contract-Level Roles ---");
+    // Define gas options to override defaults if needed, especially for testnets like Amoy
+    const gasOptions = {
+        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'), // Adjust as needed
+        maxFeePerGas: ethers.parseUnits('100', 'gwei')       // Adjust as needed
+        // For local testing, you might not need these or can use lower values.
+    };
+    console.log("\\n--- Granting Contract-Level Roles ---");
     const MINTER_ROLE = await supplyChainNFT.MINTER_ROLE();
     const UPDATER_ROLE = await supplyChainNFT.UPDATER_ROLE();
 
     console.log(`Granting MINTER_ROLE to deployer (${deployer.address})...`);
-    await (await supplyChainNFT.connect(deployer).grantRole(MINTER_ROLE, deployer.address)).wait();
+    await (await supplyChainNFT.connect(deployer).grantRole(MINTER_ROLE, deployer.address, gasOptions)).wait();
     console.log(`Granting UPDATER_ROLE to deployer (${deployer.address})...`);
-    await (await supplyChainNFT.connect(deployer).grantRole(UPDATER_ROLE, deployer.address)).wait();
+    await (await supplyChainNFT.connect(deployer).grantRole(UPDATER_ROLE, deployer.address, gasOptions)).wait();
 
-    console.log("\n--- Configuring Demo Participants ---");
+    console.log("\\n--- Configuring Demo Participants ---");
 
     async function configureParticipant(account, name, role, nodeType, initialReputation, isVerified = true) {
         console.log(`Configuring ${name} (${account.address})...`);
         if (isVerified) {
-            await (await supplyChainNFT.connect(deployer).setVerifiedNode(account.address, true)).wait();
+            await (await supplyChainNFT.connect(deployer).setVerifiedNode(account.address, true, gasOptions)).wait();
             console.log(`  - Set as Verified Node`);
         }
         if (role !== null) {
-            await (await supplyChainNFT.connect(deployer).setRole(account.address, role)).wait();
+            await (await supplyChainNFT.connect(deployer).setRole(account.address, role, gasOptions)).wait();
             console.log(`  - Set Role to: ${Object.keys(ContractRole).find(key => ContractRole[key] === role)} (${role})`);
         }
         if (nodeType !== null) {
-            await (await supplyChainNFT.connect(deployer).setNodeType(account.address, nodeType)).wait();
+            await (await supplyChainNFT.connect(deployer).setNodeType(account.address, nodeType, gasOptions)).wait();
             console.log(`  - Set Node Type to: ${Object.keys(ContractNodeType).find(key => ContractNodeType[key] === nodeType)} (${nodeType})`);
         }
         if (initialReputation > 0) {
-            await (await supplyChainNFT.connect(deployer).adminUpdateReputation(account.address, initialReputation)).wait();
+            await (await supplyChainNFT.connect(deployer).adminUpdateReputation(account.address, initialReputation, gasOptions)).wait();
             console.log(`  - Set Initial Reputation to: ${initialReputation}`);
         }
     }
 
-    await configureParticipant(manufacturerAcc, "Manufacturer", ContractRole.Manufacturer, null, 100);
-    await configureParticipant(transporter1Acc, "Transporter 1 (Primary)", ContractRole.Transporter, ContractNodeType.Primary, 100);
-    await configureParticipant(transporter2Acc, "Transporter 2 (Primary)", ContractRole.Transporter, ContractNodeType.Primary, 100);
-    await configureParticipant(transporter3Acc, "Transporter 3 (Secondary/Proposer)", ContractRole.Transporter, ContractNodeType.Secondary, 100);
-    await configureParticipant(retailerAcc, "Retailer", ContractRole.Retailer, null, 100);
-    await configureParticipant(buyerAcc, "Buyer/Customer", ContractRole.Customer, null, 100);
-    await configureParticipant(arbitratorAcc, "Arbitrator", ContractRole.Arbitrator, null, 100);
+    await configureParticipant(manufacturerAcc, "Manufacturer", ContractRole.Manufacturer, ContractNodeType.Primary, 100);
+    await configureParticipant(transporter1Acc, "Transporter 1 (Secondary)", ContractRole.Transporter, ContractNodeType.Secondary, 100);
+    await configureParticipant(transporter2Acc, "Transporter 2 (Secondary)", ContractRole.Transporter, ContractNodeType.Secondary, 100);
+    await configureParticipant(transporter3Acc, "Transporter 3 (Secondary)", ContractRole.Transporter, ContractNodeType.Secondary, 100);
+    await configureParticipant(retailerAcc, "Retailer (Primary)", ContractRole.Retailer, ContractNodeType.Primary, 100);
+    await configureParticipant(buyerAcc, "Buyer/Customer (Secondary)", ContractRole.Customer, ContractNodeType.Secondary, 100);
+    await configureParticipant(arbitratorAcc, "Arbitrator (Primary)", ContractRole.Arbitrator, ContractNodeType.Primary, 100);
 
-    console.log("\n--- Configuration Summary --- ");
+    console.log("\\n--- Configuration Summary --- ");
     console.log("Contract Address:", contractAddress);
     console.log("Deployer/Admin:", deployer.address);
     console.log("Manufacturer:", manufacturerAcc.address);
     // ... (log other participants)
+
+    // Save deployment info to demo_context.json
+    const deploymentInfo = {
+        contractAddress: contractAddress,
+        deployerAddress: deployer.address,
+        manufacturerAddress: manufacturerAcc.address,
+        transporter1Address: transporter1Acc.address,
+        transporter2Address: transporter2Acc.address,
+        transporter3Address: transporter3Acc.address,
+        retailerAddress: retailerAcc.address,
+        buyer1Address: buyerAcc.address,
+        arbitratorAddress: arbitratorAcc.address
+    };
+
+    // Save to the lifecycle_demo directory only
+    const contextPath = path.join(__dirname, "demo_context.json");
+
+    try {
+        // Create directory if it doesn't exist (though __dirname should exist)
+        const dir = path.dirname(contextPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        
+        fs.writeFileSync(contextPath, JSON.stringify(deploymentInfo, null, 2));
+        console.log("\\nDeployment info saved to:", contextPath);
+    } catch (error) {
+        console.error(`Warning: Could not save to ${contextPath}:`, error.message);
+    }
 
     // Update .env file
     const envFilePath = path.join(__dirname, "../../../w3storage-upload-script/ifps_qr.env"); 

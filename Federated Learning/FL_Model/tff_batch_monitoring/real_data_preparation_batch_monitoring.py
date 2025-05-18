@@ -48,9 +48,9 @@ def fetch_and_cache_batch_events(bc_connector):
             contract_name="SupplyChainNFT", event_name="BatchCommitted", from_block=0
         )
         EVENT_CACHE["processed"] = True
-        print(f"Fetched {len(EVENT_CACHE["BatchProposed"])} BatchProposed events.")
-        print(f"Fetched {len(EVENT_CACHE["BatchValidated"])} BatchValidated events.")
-        print(f"Fetched {len(EVENT_CACHE["BatchCommitted"])} BatchCommitted events.")
+        print(f"Fetched {len(EVENT_CACHE['BatchProposed'])} BatchProposed events.")
+        print(f"Fetched {len(EVENT_CACHE['BatchValidated'])} BatchValidated events.")
+        print(f"Fetched {len(EVENT_CACHE['BatchCommitted'])} BatchCommitted events.")
     except Exception as e:
         print(f"Error fetching batch events: {e}")
         EVENT_CACHE["processed"] = False

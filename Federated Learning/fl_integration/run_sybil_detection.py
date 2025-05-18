@@ -4,24 +4,39 @@ import sys
 import json
 import time
 from datetime import datetime
+from dotenv import load_dotenv
 
-# Add FL Model directory to path
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Federated Learning/FL_Model"))
+# Add FL Model directory to path - adjusted for new directory structure
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "FL_Model"))
 from tff_sybil_detection.real_data_preparation_sybil import make_federated_data_sybil_real
+
+def load_env_variables():
+    # Try to load from w3storage-upload-script/ifps_qr.env
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                           "w3storage-upload-script", "ifps_qr.env")
+    
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        print(f"Loaded environment variables from {env_path}")
+    else:
+        print(f"Warning: Environment file not found at {env_path}. Using default/placeholder values.")
 
 def log_message(message):
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] {message}")
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fl_integration_run.log")
-    with open(log_file_path, "a") as log_file:
+    with open(log_file_path, "a", encoding='utf-8') as log_file:
         log_file.write(f"[{timestamp}] {message}\n")
 
 def main():
     log_message("=== Starting Sybil Detection FL Model ===")
     
-    # Read demo_context.json to get node addresses
+    # Load environment variables
+    load_env_variables()
+    
+    # Read demo_context.json to get node addresses - adjusted for new directory structure
     try:
-        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
                                    "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
         log_message(f"Looking for context file at: {context_path}")
         
@@ -29,14 +44,14 @@ def main():
             log_message(f"Context file not found at {context_path}")
             # Try alternative path
             context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                       "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
+                                       "demo_context.json")
             log_message(f"Trying alternative path: {context_path}")
             
             if not os.path.exists(context_path):
                 log_message("Context file not found at alternative path either")
                 return False
         
-        with open(context_path, "r") as f:
+        with open(context_path, "r", encoding='utf-8') as f:
             context = json.load(f)
             log_message(f"Successfully loaded context with keys: {list(context.keys())}")
     except Exception as e:
@@ -101,7 +116,10 @@ def main():
         
         # Make federated datasets
         log_message("Preparing federated data...")
-        federated_data = make_federated_data_sybil_real(node_addresses, num_fl_clients=num_clients)
+        federated_data = make_federated_data_sybil_real(
+            node_addresses, 
+            num_fl_clients=num_clients
+        )
         
         # Here you would normally run the actual FL training
         # For demo purposes, we'll just log the data preparation success
@@ -113,14 +131,16 @@ def main():
             "model": "Sybil Detection",
             "num_clients": num_clients,
             "node_addresses": node_addresses,
-            "datasets_prepared": len(federated_data)
+            "datasets_prepared": len(federated_data),
+            "contract_address": os.getenv("CONTRACT_ADDRESS"),
+            "rpc_url": os.getenv("POLYGON_AMOY_RPC")
         }
         
         results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
         os.makedirs(results_dir, exist_ok=True)
         
         results_path = os.path.join(results_dir, "sybil_detection_results.json")
-        with open(results_path, "w") as f:
+        with open(results_path, "w", encoding='utf-8') as f:
             json.dump(results, f, indent=2)
         
         log_message(f"Sybil Detection results saved to {results_path}")

@@ -4,9 +4,13 @@ import tensorflow as tf
 import numpy as np
 import time
 import sys
+import os
+from dotenv import load_dotenv
 
 # Adjust path to import connectors
-sys.path.append("/home/ubuntu/fl_integration_workspace/Project/Federated Learning/FL_Model/")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+fl_model_dir = os.path.dirname(current_dir)
+sys.path.append(fl_model_dir)
 
 from connectors.blockchain_connector import BlockchainConnector
 
@@ -20,10 +24,10 @@ ELEMENT_SPEC_SYBIL = (
 RPC_URL_OVERRIDE = "https://rpc-amoy.polygon.technology/"
 
 # Heuristic thresholds for Sybil labeling (can be tuned)
-SYBIL_MAX_AGE_SECONDS = 86400 * 7  # e.g., less than 7 days old
-SYBIL_MAX_REPUTATION = 10
-SYBIL_MAX_TX_COUNT = 5
-SYBIL_MAX_COUNTERPARTIES = 2
+SYBIL_MAX_AGE_SECONDS = 86400 * 7  # 7 ngày
+SYBIL_MAX_REPUTATION = 30  # Giảm ngưỡng reputation
+SYBIL_MAX_TX_COUNT = 5  # Tăng ngưỡng số giao dịch
+SYBIL_MAX_COUNTERPARTIES = 2  # Tăng ngưỡng số đối tác
 
 def get_node_registration_timestamp(bc_connector, node_address):
     try:
@@ -63,7 +67,12 @@ def get_node_transaction_count_and_counterparties(bc_connector, node_address):
             for role in roles:
                 # Fetch events where the node is in this role
                 filters = {role: checksum_node_address}
-                events = bc_connector.get_events("SupplyChainNFT", event_name, filters, from_block=0)
+                events = bc_connector.get_events(
+                    contract_name="SupplyChainNFT",
+                    event_name=event_name,
+                    argument_filters=filters,
+                    from_block=0
+                )
                 transaction_count += len(events)
                 # Identify counterparties
                 for event_data in events:
@@ -79,10 +88,9 @@ def get_node_transaction_count_and_counterparties(bc_connector, node_address):
         print(f"Error in get_node_transaction_count_and_counterparties for {node_address}: {e}")
         return 0, 0
 
-def generate_features_and_label_for_sybil(bc_connector, node_address):
+def generate_features_and_label_for_sybil(bc_connector, node_address, fl_model=None):
     features = np.zeros(NUM_SYBIL_FEATURES, dtype=np.float32)
     current_timestamp = int(time.time())
-    sybil_score = 0
 
     reg_timestamp = get_node_registration_timestamp(bc_connector, node_address)
     age_seconds = 0
@@ -91,7 +99,6 @@ def generate_features_and_label_for_sybil(bc_connector, node_address):
         features[0] = age_seconds
     else:
         features[0] = 0.0
-        sybil_score += 2 # No valid registration or very new (timestamp 0)
 
     reputation = bc_connector.get_node_reputation(node_address)
     features[1] = float(reputation if reputation is not None else 0)
@@ -103,29 +110,52 @@ def generate_features_and_label_for_sybil(bc_connector, node_address):
     is_verified_status = bc_connector.is_node_verified(node_address)
     features[4] = 1.0 if is_verified_status else 0.0
 
-    # Heuristic Labeling for Sybil
+    # Sử dụng mô hình FL nếu có
+    if fl_model is not None:
+        try:
+            # Dự đoán xác suất là Sybil
+            sybil_probability = fl_model.predict(features)
+            # Nếu xác suất > 0.5 thì là Sybil
+            label_val = 1 if sybil_probability > 0.5 else 0
+            print(f"  Node {node_address} - FL Model Prediction: {sybil_probability:.4f}, Label: {'SYBIL' if label_val == 1 else 'NORMAL'}")
+        except Exception as e:
+            print(f"Error using FL model for {node_address}: {e}")
+            # Fallback về heuristic rules nếu có lỗi
+            label_val = apply_heuristic_rules(features, is_verified_status, reputation)
+    else:
+        # Sử dụng heuristic rules nếu không có mô hình FL
+        label_val = apply_heuristic_rules(features, is_verified_status, reputation)
+    
+    label = np.array([label_val], dtype=np.int32)
+    return features, label
+
+def apply_heuristic_rules(features, is_verified_status, reputation):
+    """Apply heuristic rules to determine if a node is Sybil"""
+    sybil_score = 0
+    
+    # Heuristic rules với trọng số
     if not is_verified_status:
-        sybil_score += 3 # Strong indicator
-    if age_seconds < SYBIL_MAX_AGE_SECONDS and age_seconds > 0: # only if age is validly calculated
+        sybil_score += 2  # Tăng trọng số cho việc chưa verify
+    
+    if features[0] < SYBIL_MAX_AGE_SECONDS and features[0] > 0:
         sybil_score += 1
-    elif age_seconds == 0 and is_verified_status: # Verified but age couldn't be determined (e.g. no NodeVerified event, but isVerified is true)
-        sybil_score += 1 # Slightly suspicious
+    elif features[0] == 0 and is_verified_status:
+        sybil_score += 0
 
     if (reputation if reputation is not None else 0) < SYBIL_MAX_REPUTATION:
+        sybil_score += 1.5  # Tăng trọng số cho reputation thấp
+    
+    if features[2] < SYBIL_MAX_TX_COUNT:
         sybil_score += 1
-    if tx_count < SYBIL_MAX_TX_COUNT:
-        sybil_score += 1
-    if distinct_counterparties < SYBIL_MAX_COUNTERPARTIES:
+    
+    if features[3] < SYBIL_MAX_COUNTERPARTIES:
         sybil_score += 1
 
-    # Determine label based on score
-    # This threshold can be adjusted. For example, a score of 3 or more might indicate Sybil.
-    label_val = 1 if sybil_score >= 4 else 0
-    label = np.array([label_val], dtype=np.int32)
-    
-    if label_val == 1:
-        print(f"  Node {node_address} labeled as SYBIL (score: {sybil_score}). Age: {age_seconds:.0f}s, Rep: {features[1]}, TX: {features[2]}, CP: {features[3]}, Verified: {features[4]}")
-    return features, label
+    # Điều chỉnh ngưỡng để phù hợp hơn
+    if is_verified_status and (reputation if reputation is not None else 0) > SYBIL_MAX_REPUTATION:
+        return 0  # Node đã verify và có reputation cao
+    else:
+        return 1 if sybil_score >= 4 else 0  # Tăng ngưỡng để giảm false positive
 
 def load_real_data_for_fl_client(client_id: str, target_node_addresses: list[str], bc_connector):
     print(f"FL Client {client_id}: Loading real data for nodes: {target_node_addresses}")
@@ -150,8 +180,24 @@ def load_real_data_for_fl_client(client_id: str, target_node_addresses: list[str
     dataset = tf.data.Dataset.from_tensor_slices((features_array, labels_array))
     return dataset.batch(1)
 
-def make_federated_data_sybil_real(all_target_node_addresses: list[str], num_fl_clients: int):
-    bc_connector = BlockchainConnector(rpc_url_override=RPC_URL_OVERRIDE)
+def make_federated_data_sybil_real(node_addresses, num_fl_clients=3):
+    # Load environment variables
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+                           "w3storage-upload-script", "ifps_qr.env")
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+        print(f"Loaded environment variables from {env_path}")
+    else:
+        print(f"Warning: Environment file not found at {env_path}. Using default/placeholder values.")
+
+    contract_address = os.getenv("CONTRACT_ADDRESS")
+    rpc_url = os.getenv("POLYGON_AMOY_RPC")
+
+    if not contract_address or not rpc_url:
+        print("Warning: Contract address or RPC URL not found in environment variables")
+        return []
+
+    bc_connector = BlockchainConnector(rpc_url_override=rpc_url)
     
     if "SupplyChainNFT" not in bc_connector.contracts:
         print("Error: SupplyChainNFT contract not loaded...")
@@ -161,7 +207,7 @@ def make_federated_data_sybil_real(all_target_node_addresses: list[str], num_fl_
         )).batch(1)
         return [empty_ds for _ in range(num_fl_clients)]
 
-    if not all_target_node_addresses:
+    if not node_addresses:
         print("Warning: No target node addresses provided...")
         empty_ds = tf.data.Dataset.from_tensor_slices((
             np.empty((0, NUM_SYBIL_FEATURES), dtype=np.float32),
@@ -169,8 +215,8 @@ def make_federated_data_sybil_real(all_target_node_addresses: list[str], num_fl_
         )).batch(1)
         return [empty_ds for _ in range(num_fl_clients)]
 
-    nodes_per_client = len(all_target_node_addresses) // num_fl_clients
-    extra_nodes = len(all_target_node_addresses) % num_fl_clients
+    nodes_per_client = len(node_addresses) // num_fl_clients
+    extra_nodes = len(node_addresses) % num_fl_clients
     client_datasets = []
     current_node_idx = 0
 
@@ -178,9 +224,9 @@ def make_federated_data_sybil_real(all_target_node_addresses: list[str], num_fl_
         client_id = f"real_data_client_{i}"
         num_nodes_for_this_client = nodes_per_client + (1 if i < extra_nodes else 0)
         client_node_list = []
-        if num_nodes_for_this_client > 0 and current_node_idx < len(all_target_node_addresses):
-            end_idx = min(current_node_idx + num_nodes_for_this_client, len(all_target_node_addresses))
-            client_node_list = all_target_node_addresses[current_node_idx : end_idx]
+        if num_nodes_for_this_client > 0 and current_node_idx < len(node_addresses):
+            end_idx = min(current_node_idx + num_nodes_for_this_client, len(node_addresses))
+            client_node_list = node_addresses[current_node_idx : end_idx]
             current_node_idx = end_idx
         
         if not client_node_list: 
@@ -196,18 +242,18 @@ def make_federated_data_sybil_real(all_target_node_addresses: list[str], num_fl_
 
 if __name__ == '__main__':
     print("Testing Real Data Preparation for Sybil Detection with Heuristic Labeling...")
+    
+    # Sử dụng địa chỉ ví thật từ blockchain
     example_node_addresses = [
-        # Add actual node addresses from your Amoy testnet deployment for a real test
-        # "0xYourNodeAddress1", "0xAnotherNodeAddress2"
+        "0x5C6fF29A0f75E9d0dffC4374f600224EDc114449",  # Contract address
+        "0x1234567890123456789012345678901234567890",  # Placeholder 1
+        "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",  # Placeholder 2
+        "0xfedcba9876543210fedcba9876543210fedcba98"   # Placeholder 3
     ]
-    if not example_node_addresses:
-        print("Warning: example_node_addresses is empty. Using placeholder for structural test.")
-        example_node_addresses.append("0x0000000000000000000000000000000000000001")
-        example_node_addresses.append("0x0000000000000000000000000000000000000002")
 
     print(f"Using example node addresses: {example_node_addresses}")
 
-    num_clients_test = 1 # Test with 1 client to see all example nodes
+    num_clients_test = 2  # Test with 2 clients
     federated_train_data_test = make_federated_data_sybil_real(example_node_addresses, num_fl_clients=num_clients_test)
     
     print(f"\nCreated {len(federated_train_data_test)} client datasets.")

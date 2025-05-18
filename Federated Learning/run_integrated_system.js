@@ -1,13 +1,14 @@
 // Master orchestration script for integrating lifecycle_demo with FL models
+// Updated for new directory structure with FL integration inside Federated Learning directory
 const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration
-const PROJECT_ROOT = path.resolve(__dirname);
+// Configuration - adjusted for new directory structure
+const PROJECT_ROOT = path.resolve(__dirname, '..');  // One level up from Federated Learning directory
 const LIFECYCLE_DEMO_DIR = path.join(PROJECT_ROOT, 'SupplyChain_dapp/scripts/lifecycle_demo');
-const FL_INTEGRATION_DIR = path.join(PROJECT_ROOT, 'fl_integration');
-const LOG_FILE = path.join(PROJECT_ROOT, 'integrated_system_run.log');
+const FL_INTEGRATION_DIR = path.join(__dirname, 'fl_integration');  // Inside Federated Learning directory
+const LOG_FILE = path.join(__dirname, 'integrated_system_run.log');
 
 // Create FL integration directory if it doesn't exist
 if (!fs.existsSync(FL_INTEGRATION_DIR)) {
@@ -20,13 +21,13 @@ function logMessage(message) {
   const timestamp = new Date().toISOString();
   const logEntry = `[${timestamp}] ${message}\n`;
   console.log(message);
-  fs.appendFileSync(LOG_FILE, logEntry);
+  fs.appendFileSync(LOG_FILE, logEntry, { encoding: 'utf8' });
 }
 
 function runLifecycleScript(scriptName) {
   logMessage(`Running lifecycle script: ${scriptName}`);
   try {
-    execSync(`node ${path.join(LIFECYCLE_DEMO_DIR, scriptName)}`, { 
+    execSync(`npx hardhat run ${scriptName} --network amoy`, { 
       stdio: 'inherit',
       cwd: LIFECYCLE_DEMO_DIR
     });
@@ -41,9 +42,11 @@ function runLifecycleScript(scriptName) {
 function runFLModel(modelScript, modelName) {
   logMessage(`Running FL model: ${modelName}`);
   try {
-    execSync(`python3 ${path.join(FL_INTEGRATION_DIR, modelScript)}`, { 
+    // Convert Windows path to WSL path if needed
+    const scriptPath = path.join(FL_INTEGRATION_DIR, modelScript).replace(/\\/g, '/');
+    execSync(`python "${scriptPath}"`, { 
       stdio: 'inherit',
-      cwd: PROJECT_ROOT
+      cwd: __dirname  // Run from Federated Learning directory
     });
     logMessage(`Successfully completed FL model: ${modelName}`);
     return true;
@@ -189,7 +192,7 @@ async function main() {
     try {
       execSync(`node ${path.join(FL_INTEGRATION_DIR, 'generate_integration_report.js')}`, { 
         stdio: 'inherit',
-        cwd: PROJECT_ROOT
+        cwd: __dirname
       });
       logMessage("Final report generated successfully.");
     } catch (error) {
@@ -218,8 +221,9 @@ async function main() {
     };
     
     fs.writeFileSync(
-      path.join(PROJECT_ROOT, 'integration_summary.json'), 
-      JSON.stringify(summary, null, 2)
+      path.join(__dirname, 'integration_summary.json'), 
+      JSON.stringify(summary, null, 2),
+      { encoding: 'utf8' }
     );
     logMessage("Simple summary created at integration_summary.json");
   }

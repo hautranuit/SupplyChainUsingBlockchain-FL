@@ -5,31 +5,38 @@ import json
 import time
 from datetime import datetime
 
-# Add FL Model directory to path
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Federated Learning/FL_Model"))
+# Add FL Model directory to path - adjusted for new directory structure
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "FL_Model"))
 from tff_batch_monitoring.real_data_preparation_batch_monitoring import make_federated_data_batch_monitoring_real
 
 def log_message(message):
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] {message}")
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fl_integration_run.log")
-    with open(log_file_path, "a") as log_file:
+    with open(log_file_path, "a", encoding='utf-8') as log_file:
         log_file.write(f"[{timestamp}] {message}\n")
 
 def main():
     log_message("=== Starting Batch Monitoring FL Model ===")
     
-    # Read demo_context.json to get batch data
+    # Read demo_context.json to get batch data - adjusted for new directory structure
     try:
-        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
                                    "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
         log_message(f"Looking for context file at: {context_path}")
         
         if not os.path.exists(context_path):
             log_message(f"Context file not found at {context_path}")
-            return False
+            # Try alternative path
+            context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                       "demo_context.json")
+            log_message(f"Trying alternative path: {context_path}")
+            
+            if not os.path.exists(context_path):
+                log_message("Context file not found at alternative path either")
+                return False
         
-        with open(context_path, "r") as f:
+        with open(context_path, "r", encoding='utf-8') as f:
             context = json.load(f)
             log_message(f"Successfully loaded context with keys: {list(context.keys())}")
     except Exception as e:
@@ -94,7 +101,7 @@ def main():
         
         # Make federated datasets
         log_message("Preparing federated data...")
-        federated_data = make_federated_data_batch_monitoring_real(batch_data, node_addresses, num_fl_clients=num_clients)
+        federated_data = make_federated_data_batch_monitoring_real(node_addresses, num_clients)
         
         # Here you would normally run the actual FL training
         # For demo purposes, we'll just log the data preparation success
@@ -114,7 +121,7 @@ def main():
         os.makedirs(results_dir, exist_ok=True)
         
         results_path = os.path.join(results_dir, "batch_monitoring_results.json")
-        with open(results_path, "w") as f:
+        with open(results_path, "w", encoding='utf-8') as f:
             json.dump(results, f, indent=2)
         
         log_message(f"Batch Monitoring results saved to {results_path}")

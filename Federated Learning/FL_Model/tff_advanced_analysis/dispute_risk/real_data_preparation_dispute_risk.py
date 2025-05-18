@@ -227,6 +227,9 @@ def make_federated_data_p3_dispute_real(num_fl_clients: int):
     
     return client_datasets
 
+# Add alias for backward compatibility
+make_federated_data_dispute_risk_real = make_federated_data_p3_dispute_real
+
 if __name__ == '__main__':
     print("Testing Real Data Preparation for Dispute Risk with Heuristic Labeling...")
     num_clients_test = 1 

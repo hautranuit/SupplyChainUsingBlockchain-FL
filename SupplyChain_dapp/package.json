@@ -15,7 +15,8 @@
     "hardhat": "^2.23.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.3.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@web3-storage/w3up-client": "^17.2.0",
     "dotenv": "^16.5.0",
     "ethers": "^6.13.7"
   }

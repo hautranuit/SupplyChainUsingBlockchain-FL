@@ -6,10 +6,16 @@ import json
 import os
 from web3 import Web3
 from dotenv import dotenv_values
+from pathlib import Path
+from web3.middleware import geth_poa_middleware
 
 # --- Configuration --- 
+# Get the current directory and project root
+CURRENT_DIR = Path(__file__).parent
+PROJECT_ROOT = CURRENT_DIR.parent.parent.parent  # Go up one more level to reach the root
+
 # Load environment variables from ifps_qr.env for RPC URL and Contract Address
-ENV_FILE_PATH = "/home/ubuntu/fl_integration_workspace/Project/w3storage-upload-script/ifps_qr.env"
+ENV_FILE_PATH = PROJECT_ROOT / "w3storage-upload-script" / "ifps_qr.env"
 
 config = {}
 if os.path.exists(ENV_FILE_PATH):
@@ -28,10 +34,9 @@ CONTRACT_ADDRESSES = {
     # "Marketplace": "YOUR_MARKETPLACE_ADDRESS", 
 }
 
-# Contract ABIs: SupplyChainNFT ABI path is now specific
-# Other ABIs can be added similarly if needed
+# Contract ABIs: SupplyChainNFT ABI path is now relative to project root
 CONTRACT_ABI_PATHS = {
-    "SupplyChainNFT": "/home/ubuntu/Project_files/Project/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json",
+    "SupplyChainNFT": PROJECT_ROOT / "SupplyChain_dapp" / "artifacts" / "contracts" / "SupplyChainNFT.sol" / "SupplyChainNFT.json",
     # "Marketplace": "/path/to/Marketplace.json",
 }
 CONTRACT_ABIS_CACHE = {} # Cache for loaded ABIs
@@ -69,6 +74,10 @@ class BlockchainConnector:
     def __init__(self, rpc_url_override=None):
         selected_rpc_url = rpc_url_override if rpc_url_override else RPC_URL
         self.w3 = Web3(Web3.HTTPProvider(selected_rpc_url))
+        
+        # Thêm middleware cho POA chain
+        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        
         if not self.w3.is_connected():
             raise ConnectionError(f"Failed to connect to blockchain RPC at {selected_rpc_url}")
         print(f"Successfully connected to blockchain RPC at {selected_rpc_url}")
@@ -154,9 +163,12 @@ class BlockchainConnector:
     def get_events(self, contract_name, event_name, from_block=0, to_block='latest', argument_filters=None):
         try:
             contract = self.get_contract(contract_name)
-            event_filter = contract.events[event_name].create_filter(
-                from_block=from_block,
-                to_block=to_block,
+            event = contract.events[event_name]
+            
+            # Tạo bộ lọc sự kiện với các tham số phù hợp
+            event_filter = event.create_filter(
+                fromBlock=from_block,
+                toBlock=to_block,
                 argument_filters=argument_filters
             )
             return event_filter.get_all_entries()

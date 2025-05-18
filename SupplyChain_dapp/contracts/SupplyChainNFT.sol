@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.28;
 
 import "./Marketplace.sol";
 import "./BatchProcessing.sol";
@@ -48,21 +48,21 @@ contract SupplyChainNFT is Marketplace, BatchProcessing, DisputeResolution, Node
     }
 
     // --- Reputation Management Overrides ---
-    function updateReputation(address node, uint256 score) internal override(BatchProcessing, NodeManagement) {
-        NodeManagement.updateReputation(node, score);
+    function updateReputation(address node, int256 scoreChange, string memory reason) internal override(BatchProcessing, NodeManagement) {
+        NodeManagement.updateReputation(node, scoreChange, reason);
     }
 
-    function penalizeNode(address node, uint256 penalty) internal override(BatchProcessing, NodeManagement) {
-        NodeManagement.penalizeNode(node, penalty);
+    function penalizeNode(address node, uint256 penalty, string memory reason) internal override(BatchProcessing, NodeManagement) {
+        NodeManagement.penalizeNode(node, penalty, reason);
     }
     
     // --- Admin functions for reputation (using Ownable from BatchProcessing) ---
     function adminUpdateReputation(address node, uint256 score) public onlyOwner {
-        updateReputation(node, score); 
+        updateReputation(node, int256(score), "Admin Reputation Update");
     }
 
     function adminPenalizeNode(address node, uint256 penalty) public onlyOwner {
-        penalizeNode(node, penalty);
+        penalizeNode(node, penalty, "Admin Penalty");
     }
 
     // --- Node Management Overrides & Implementations ---

@@ -9,7 +9,7 @@ def log_message(message):
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] {message}")
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fl_integration_run.log")
-    with open(log_file_path, "a") as log_file:
+    with open(log_file_path, "a", encoding='utf-8') as log_file:
         log_file.write(f"[{timestamp}] {message}\n")
 
 def check_script_existence():
@@ -33,14 +33,20 @@ def check_script_existence():
 
 def check_context_file():
     """Check if demo_context.json exists and is valid"""
-    context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+    # First try the standard path (relative to project root)
+    context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
                                "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
     
     if not os.path.exists(context_path):
-        return False, "Context file not found"
+        # Try alternative path (in Federated Learning directory)
+        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                   "demo_context.json")
+        
+        if not os.path.exists(context_path):
+            return False, "Context file not found"
     
     try:
-        with open(context_path, "r") as f:
+        with open(context_path, "r", encoding='utf-8') as f:
             context = json.load(f)
         return True, f"Context file valid with {len(context.keys())} keys"
     except Exception as e:
@@ -124,7 +130,7 @@ def main():
         }
         
         test_context_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_context.json")
-        with open(test_context_path, "w") as f:
+        with open(test_context_path, "w", encoding='utf-8') as f:
             json.dump(test_context, f, indent=2)
         
         log_message(f"Test context created at {test_context_path}")
@@ -142,7 +148,7 @@ def main():
             
             # Check imports and basic structure
             try:
-                with open(script_path, "r") as f:
+                with open(script_path, "r", encoding='utf-8') as f:
                     script_content = f.read()
                 
                 # Check for essential components
@@ -166,9 +172,9 @@ def main():
                 log_message(f"  - Results saving logic: {'Found' if has_results_saving else 'Missing'}")
                 
                 if script_results[script_name]["validation_passed"]:
-                    log_message(f"  ✓ Script {script_name} passed validation")
+                    log_message(f"  [PASS] Script {script_name} passed validation")
                 else:
-                    log_message(f"  ✗ Script {script_name} failed validation")
+                    log_message(f"  [FAIL] Script {script_name} failed validation")
             
             except Exception as e:
                 log_message(f"  Error validating {script_name}: {e}")
@@ -205,16 +211,16 @@ def main():
     }
     
     validation_results_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "integration_validation_results.json")
-    with open(validation_results_path, "w") as f:
+    with open(validation_results_path, "w", encoding='utf-8') as f:
         json.dump(validation_results, f, indent=2)
     
     log_message(f"Validation results saved to {validation_results_path}")
     
     # Overall assessment
     if validation_results["overall_status"] == "PASS":
-        log_message("✓ Integration validation PASSED. All components are properly configured for workflow execution.")
+        log_message("[PASS] Integration validation PASSED. All components are properly configured for workflow execution.")
     else:
-        log_message("✗ Integration validation FAILED. Please address the issues mentioned above.")
+        log_message("[FAIL] Integration validation FAILED. Please address the issues mentioned above.")
     
     log_message("=== Integration Validation Complete ===")
     return validation_results["overall_status"] == "PASS"

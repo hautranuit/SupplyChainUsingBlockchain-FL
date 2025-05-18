@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.28;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -44,8 +44,8 @@ abstract contract BatchProcessing is Ownable {
     // --- Abstract Functions ---
     function _batchTransfer(address from, address to, uint256 tokenId) internal virtual;
     function ownerOf(uint256 tokenId) public view virtual returns (address);
-    function updateReputation(address node, uint256 score) internal virtual;
-    function penalizeNode(address node, uint256 penalty) internal virtual;
+    function updateReputation(address node, int256 scoreChange, string memory reason) internal virtual;
+    function penalizeNode(address node, uint256 penalty, string memory reason) internal virtual;
     function _getAllPrimaryNodes() internal view virtual returns (address[] memory);
     function getNodeReputation(address node) internal view virtual returns (uint256);
     function isPrimaryNode(address node) internal view virtual returns (bool);
@@ -165,14 +165,14 @@ abstract contract BatchProcessing is Ownable {
                     _batchTransfer(txData.from, txData.to, txData.tokenId);
                 }
             }
-            updateReputation(b.proposer, 5);
+            updateReputation(b.proposer, 5, "Successful batch proposal");
             _rewardValidators(batchId, true);
             emit BatchCommitted(batchId, true);
         } else {
             uint256 denialPercent = (batchDenials[batchId] * 100) / b.numSelectedValidators;
             if (denialPercent > (100 - superMajorityFraction)) {
                  b.flagged = true;
-                 penalizeNode(b.proposer, 2);
+                 penalizeNode(b.proposer, 2, "Batch flagged for review");
                  _rewardValidators(batchId, false);
                  emit BatchCommitted(batchId, false);
             }
@@ -188,9 +188,9 @@ abstract contract BatchProcessing is Ownable {
             bool votedApprove = (vote == 1);
             bool correctVote = (votedApprove == batchPassed);
             if (correctVote) {
-                updateReputation(validator, 2);
+                updateReputation(validator, 2, "Correct validation vote");
             } else {
-                penalizeNode(validator, 1);
+                penalizeNode(validator, 1, "Incorrect validation vote");
             }
         }
     }

@@ -57,23 +57,29 @@ async function main() {
         process.exit(1);
     }
 
+    // Verify that we have the required fields
+    if (!product1Info.currentOwnerAddress || !product1Info.tokenId || 
+        !product2Info.currentOwnerAddress || !product2Info.tokenId) {
+        console.error("Missing required fields in product details. Required: currentOwnerAddress and tokenId");
+        console.error("Product 1 details:", product1Info);
+        console.error("Product 2 details:", product2Info);
+        process.exit(1);
+    }
+
     const transactionsForBatch1 = [];
     // Example: Transfer Product 1 from current owner (buyer1) to a new internal wallet (e.g., retailerAcc for demo)
-    if (product1Info.currentOwnerAddress) {
         transactionsForBatch1.push({
             from: product1Info.currentOwnerAddress,
             to: signers[5].address, // retailerAcc, let's say this is the final destination wallet
             tokenId: ethers.BigNumber.from(product1Info.tokenId) // Ensure tokenId is BigNumber
         });
-    }
+
     // Example: Transfer Product 2 from current owner (buyer2/retailer) to another internal wallet (e.g., deployer for demo)
-    if (product2Info.currentOwnerAddress) {
         transactionsForBatch1.push({
             from: product2Info.currentOwnerAddress,
             to: deployer.address, // deployer's address
             tokenId: ethers.BigNumber.from(product2Info.tokenId) // Ensure tokenId is BigNumber
         });
-    }
 
     if (transactionsForBatch1.length === 0) {
         console.log("No transactions to batch process. Exiting.");
@@ -103,7 +109,7 @@ async function main() {
     const selectedValidators = proposeEvent.args.selectedValidators;
     console.log(`  Batch ID: ${batchId.toString()}, Selected Validators (${selectedValidators.length}): ${selectedValidators.join(", ")}`);
 
-    console.log("  Validators voting (aiming for supermajority approval)...`);
+    console.log("  Validators voting (aiming for supermajority approval)...");
     let approvals = 0;
     const superMajorityFraction = await supplyChainNFT.superMajorityFraction();
     const numSelectedValidators = selectedValidators.length;

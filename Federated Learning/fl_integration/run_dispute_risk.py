@@ -5,31 +5,38 @@ import json
 import time
 from datetime import datetime
 
-# Add FL Model directory to path
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Federated Learning/FL_Model"))
+# Add FL Model directory to path - adjusted for new directory structure
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "FL_Model"))
 from tff_advanced_analysis.dispute_risk.real_data_preparation_dispute_risk import make_federated_data_dispute_risk_real
 
 def log_message(message):
     timestamp = datetime.now().isoformat()
     print(f"[{timestamp}] {message}")
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fl_integration_run.log")
-    with open(log_file_path, "a") as log_file:
+    with open(log_file_path, "a", encoding='utf-8') as log_file:
         log_file.write(f"[{timestamp}] {message}\n")
 
 def main():
     log_message("=== Starting Dispute Risk FL Model ===")
     
-    # Read demo_context.json to get transaction and product data
+    # Read demo_context.json to get transaction and product data - adjusted for new directory structure
     try:
-        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
                                    "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
         log_message(f"Looking for context file at: {context_path}")
         
         if not os.path.exists(context_path):
             log_message(f"Context file not found at {context_path}")
-            return False
+            # Try alternative path
+            context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                       "demo_context.json")
+            log_message(f"Trying alternative path: {context_path}")
+            
+            if not os.path.exists(context_path):
+                log_message("Context file not found at alternative path either")
+                return False
         
-        with open(context_path, "r") as f:
+        with open(context_path, "r", encoding='utf-8') as f:
             context = json.load(f)
             log_message(f"Successfully loaded context with keys: {list(context.keys())}")
     except Exception as e:
@@ -149,7 +156,7 @@ def main():
         os.makedirs(results_dir, exist_ok=True)
         
         results_path = os.path.join(results_dir, "dispute_risk_results.json")
-        with open(results_path, "w") as f:
+        with open(results_path, "w", encoding='utf-8') as f:
             json.dump(results, f, indent=2)
         
         log_message(f"Dispute Risk results saved to {results_path}")

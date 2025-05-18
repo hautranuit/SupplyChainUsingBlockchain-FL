@@ -61,6 +61,28 @@ async function initWeb3Storage() {
     return client;
 }
 
+async function uploadRawFileToIPFS(filePath, mimeType) {
+    if (!ipfsClient) throw new Error("IPFS client not initialized");
+    // filePath is expected to be relative to __dirname_listener (location of backendListener.js)
+    const absoluteFilePath = path.resolve(__dirname_listener, filePath);
+    console.log(`[IPFS] Attempting to upload raw file from path: ${absoluteFilePath}`);
+    try {
+        if (!fs.existsSync(absoluteFilePath)) {
+            console.error(`[IPFS] File not found at path: ${absoluteFilePath}`);
+            return null; 
+        }
+        const fileBuffer = fs.readFileSync(absoluteFilePath);
+        const blob = new Blob([fileBuffer], { type: mimeType });
+        const file = new File([blob], path.basename(filePath));
+        const cid = await ipfsClient.uploadFile(file);
+        console.log(`[IPFS] Raw file ${path.basename(filePath)} uploaded successfully. CID: ${cid.toString()}`);
+        return cid.toString();
+    } catch (error) {
+        console.error(`[IPFS] Error uploading raw file ${filePath} (resolved to ${absoluteFilePath}):`, error);
+        return null; 
+    }
+}
+
 async function uploadToIPFS(data, filename = "product_data.json") {
     if (!ipfsClient) throw new Error("IPFS client not initialized");
     console.log(`[IPFS] Uploading data (${filename}):`, JSON.stringify(data, null, 2));
@@ -123,55 +145,99 @@ async function main() {
 
     console.log(`👂 Listening for events on SupplyChainNFT contract at ${CONTRACT_ADDRESS} on network ${RPC_URL}...`);
 
+    // --- Promise Queue for storeInitialCID operations ---
+    let storeInitialCIDQueue = Promise.resolve();
+
+    // --- Promise Queue for updateProductHistoryCID operations ---
+    let updateHistoryCIDQueue = Promise.resolve(); // Initialize the new queue
+
     // Listener for ProductMinted (from NFTCore.sol, inherited by SupplyChainNFT)
     supplyChainContract.on("ProductMinted", async (tokenId, owner, uniqueProductID, batchNumber, manufacturingDate, event) => {
-        console.log(`
---- 🎉 ProductMinted Event Received ---`);
+        console.log(`\\n--- 🎉 ProductMinted Event Received ---`);
         console.log(`   Token ID: ${tokenId.toString()}`);
         console.log(`   Owner: ${owner}`);
         console.log(`   Unique Product ID: ${uniqueProductID}`);
 
-        try {
-            console.log(`   Fetching full RFID data for token ${tokenId}...`);
-            // rfidDataMapping is in NFTCore, accessible via supplyChainContract
-            const rfidData = await supplyChainContract.rfidDataMapping(tokenId.toString());
-            
-            const initialIpfsData = {
-                rfid: {
-                    uniqueProductID: rfidData.uniqueProductID,
-                    batchNumber: rfidData.batchNumber,
-                    manufacturingDate: rfidData.manufacturingDate,
-                    expirationDate: rfidData.expirationDate,
-                    productType: rfidData.productType,
-                    manufacturerID: rfidData.manufacturerID,
-                    quickAccessURL: rfidData.quickAccessURL,
-                    nftReference: rfidData.nftReference
-                },
-                images: [], 
-                videos: [], 
-                historyLog: [
-                    {
-                        timestamp: Math.floor(Date.now() / 1000),
-                        event: "Product Minted & Registered",
-                        actor: owner,
-                        details: `Initial product registration. Unique ID: ${rfidData.uniqueProductID}, Batch: ${rfidData.batchNumber}.`
-                    }
-                ]
-            };
+        // Add to the queue
+        storeInitialCIDQueue = storeInitialCIDQueue.then(async () => {
+            try {
+                console.log(`   Processing ProductMinted for token ${tokenId} (from queue)...`);
+                console.log(`   Fetching full RFID data for token ${tokenId}...`);
+                // rfidDataMapping is in NFTCore, accessible via supplyChainContract
+                const rfidData = await supplyChainContract.rfidDataMapping(tokenId.toString());
 
-            console.log("   Uploading initial metadata and history to IPFS...");
-            const initialCid = await uploadToIPFS(initialIpfsData, `token_${tokenId}_initial_metadata.json`);
+                let imageCid = null;
+                let videoCid = null;
 
-            console.log(`   Calling storeInitialCID(${tokenId}, ${initialCid}) on contract...`);
-            // storeInitialCID is in NFTCore, accessible via supplyChainContract
-            const tx = await supplyChainContract.storeInitialCID(tokenId.toString(), initialCid);
-            console.log(`   Transaction sent: ${tx.hash}`);
-            const receipt = await tx.wait();
-            console.log(`   ✅ Transaction confirmed. Initial CID stored for token ${tokenId}. Gas used: ${receipt.gasUsed.toString()}`);
+                // Define file paths relative to backendListener.js
+                // These are assumed to be in w3storage-upload-script/images/ and w3storage-upload-script/videos/
+                const imagePath = './images/product1.png'; // Corrected filename
+                const videoPath = './videos/product1.mp4';
 
-        } catch (error) {
-            console.error(`   ❌ Error processing ProductMinted for token ${tokenId}:`, error);
-        }
+                console.log(`   Attempting to upload sample image: ${imagePath}`);
+                imageCid = await uploadRawFileToIPFS(imagePath, 'image/png');
+                if (imageCid) {
+                    console.log(`   Sample image ${path.basename(imagePath)} uploaded. CID: ${imageCid}`);
+                } else {
+                    console.warn(`   ⚠️ Sample image ${path.basename(imagePath)} could not be uploaded or was not found.`);
+                }
+
+                console.log(`   Attempting to upload sample video: ${videoPath}`);
+                videoCid = await uploadRawFileToIPFS(videoPath, 'video/mp4');
+                if (videoCid) {
+                    console.log(`   Sample video ${path.basename(videoPath)} uploaded. CID: ${videoCid}`);
+                } else {
+                    console.warn(`   ⚠️ Sample video ${path.basename(videoPath)} could not be uploaded or was not found.`);
+                }
+                
+                const initialIpfsData = {
+                    rfid: {
+                        uniqueProductID: rfidData.uniqueProductID,
+                        batchNumber: rfidData.batchNumber,
+                        manufacturingDate: rfidData.manufacturingDate,
+                        expirationDate: rfidData.expirationDate,
+                        productType: rfidData.productType,
+                        manufacturerID: rfidData.manufacturerID,
+                        quickAccessURL: rfidData.quickAccessURL,
+                        nftReference: rfidData.nftReference
+                    },
+                    images: imageCid ? [{ name: path.basename(imagePath), cid: imageCid, uploadedAt: formatDateTime(new Date()) }] : [], // Applied formatDateTime
+                    videos: videoCid ? [{ name: path.basename(videoPath), cid: videoCid, uploadedAt: formatDateTime(new Date()) }] : [], // Applied formatDateTime
+                    historyLog: [
+                        {
+                            timestamp: formatDateTime(new Date()), // Use new formatter
+                            event: "Product Minted & Registered",
+                            actor: owner,
+                            details: `Initial product registration. Unique ID: ${rfidData.uniqueProductID}, Batch: ${rfidData.batchNumber}.`
+                        }
+                    ]
+                };
+
+                console.log("   Uploading initial metadata (with media CIDs if available) and history to IPFS...");
+                const initialCid = await uploadToIPFS(initialIpfsData, `token_${tokenId}_initial_metadata.json`);
+
+                console.log(`   Calling storeInitialCID(${tokenId}, ${initialCid}) on contract...`);
+                
+                const gasOptions = {
+                    maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), // Example, adjust as needed
+                    maxFeePerGas: ethers.parseUnits('80', 'gwei')          // Example, adjust as needed
+                };
+
+                // storeInitialCID is in NFTCore, accessible via supplyChainContract
+                const tx = await supplyChainContract.storeInitialCID(tokenId.toString(), initialCid, gasOptions);
+                console.log(`   Transaction sent for storeInitialCID (Token ${tokenId}): ${tx.hash}`);
+                const receipt = await tx.wait();
+                console.log(`   ✅ Transaction confirmed. Initial CID stored for token ${tokenId}. Gas used: ${receipt.gasUsed.toString()}`);
+
+            } catch (error) {
+                console.error(`   ❌ Error processing ProductMinted for token ${tokenId} (from queue):`, error);
+            }
+        }).catch(queueError => {
+            // Catch errors in the queue promise itself to prevent unhandled rejections on the chain
+            console.error(`   ❌ Error in storeInitialCIDQueue for token ${tokenId}:`, queueError);
+            // Optionally, decide if the queue should continue or halt on such an error
+            // For now, we'll let it continue with the next item.
+        });
         console.log(`--- End ProductMinted Event ---`);
     });
 
@@ -180,66 +246,118 @@ async function main() {
         // From Marketplace.sol (inherited by SupplyChainNFT)
         { eventName: "ProductListedForSale", actorField: "seller", detailsFn: (args) => `Product listed for sale by ${args.seller} at price ${ethers.formatEther(args.price)} ETH.` },
         { eventName: "PurchaseInitiated", actorField: "buyer", detailsFn: (args) => `Purchase initiated by ${args.buyer} from ${args.seller} for ${ethers.formatEther(args.price)} ETH.` },
-        { eventName: "CollateralDepositedForPurchase", actorField: "buyer", detailsFn: (args) => `Collateral (payment) of ${ethers.formatEther(args.amount)} ETH deposited by ${args.buyer}. NFT transferred to buyer.` },
+        { eventName: "CollateralDepositedForPurchase", actorField: "buyer", detailsFn: (args) => `Collateral of ${ethers.formatEther(args.amount)} ETH deposited by ${args.buyer} for token ${args.tokenId}.` }, // ADDED THIS EVENT
         { eventName: "PaymentAndTransferCompleted", actorField: "buyer", detailsFn: (args) => `Payment of ${ethers.formatEther(args.price)} ETH released to seller ${args.seller} by buyer ${args.buyer}. Purchase complete.` },
         { eventName: "ReceiptConfirmed", actorField: "confirmer", detailsFn: (args) => `Product receipt confirmed by ${args.confirmer}.` },
         // From NFTCore.sol (inherited by SupplyChainNFT)
-        { eventName: "TransportStarted", actorField: "owner", detailsFn: (args) => `Transport started by ${args.owner}. From: ${args.startLocation}, To: ${args.endLocation}, Distance: ${args.distance}km, Transporters: ${args.transporters.join(", ")}.` },
-        { eventName: "TransportCompleted", actorField: "completer", detailsFn: (args) => `Transport completed by ${args.completer}.` },
+        { eventName: "TransportStarted", actorField: "owner", detailsFn: (args) => `Transport started by ${args.owner} for token ${args.tokenId}. Transporters: ${args.transporters.join(', ')}. From: ${args.startLocation}, To: ${args.endLocation}, Distance: ${args.distance}.` },
+        { eventName: "TransportCompleted", actorField: "completer", detailsFn: (args) => `Transport leg completed by ${args.completer}.` },
+        // Standard ERC721 Transfer event (from ERC721.sol, inherited via NFTCore.sol)
+        { eventName: "Transfer", actorField: "to", detailsFn: (args) => `NFT transferred from ${args.from} to ${args.to}.` },
         // From SupplyChainNFT.sol itself
         { eventName: "DirectSaleAndTransferCompleted", actorField: "seller", detailsFn: (args) => `Direct sale and transfer from ${args.seller} to ${args.buyer} for ${ethers.formatEther(args.price)} ETH. Verified against CID: ${args.oldCIDForVerification}.` },
         // From DisputeResolution.sol (inherited by SupplyChainNFT)
         { eventName: "DisputeInitiated", actorField: "initiator", detailsFn: (args) => `Dispute initiated by ${args.initiator} regarding product owned by ${args.currentOwner}.` }
-        // Add other relevant events if needed, ensuring they are in SupplyChainNFT's ABI
+        // Add other relevant events if needed, ensuring they are in SupplyChainNFT\'s ABI
     ];
+
+    // REMOVE: const transactionQueue = {}; // Key: tokenId, Value: Promise for the last transaction
 
     eventsToUpdateHistory.forEach(({ eventName, actorField, detailsFn }) => {
         supplyChainContract.on(eventName, async (...args) => {
-            const eventData = args[args.length - 1]; 
-            const tokenId = args[0].toString(); 
-            const actor = args[eventData.fragment.inputs.findIndex(input => input.name === actorField)];
-            const details = detailsFn(eventData.args);
+            const eventData = args[args.length - 1];
+            let tokenId;
+            let actor;
+            let details;
 
-            console.log(`
---- 🔄 ${eventName} Event Received ---`);
+            // Log raw event arguments for debugging
+            // console.log(`[DEBUG] Raw event args for ${eventName}:`, args);
+
+            if (eventName === "Transfer") {
+                tokenId = args[2].toString();
+                const fromAddress = args[0];
+                actor = args[1]; // 'to' address
+                details = detailsFn({ from: fromAddress, to: args[1], tokenId: args[2] });
+                if (fromAddress === ethers.ZeroAddress) {
+                    console.log(`   ℹ️ Transfer event for token ${tokenId} is from ZeroAddress (minting). Skipping IPFS history update as ProductMinted handles initial CID.`);
+                    console.log(`--- End ${eventName} Event ---`);
+                    return;
+                }
+            } else if (eventName === "CollateralDepositedForPurchase") {
+                tokenId = args[0].toString(); // tokenId is the first argument
+                actor = args[1]; // buyer is the second argument
+                details = detailsFn({ tokenId: args[0], buyer: args[1], amount: args[2] });
+            }
+            else {
+                tokenId = args[0].toString(); // Assuming tokenId is generally the first argument
+                const actorIndex = eventData.fragment.inputs.findIndex(input => input.name === actorField);
+                actor = actorIndex === -1 ? 'unknown_actor' : args[actorIndex];
+                details = detailsFn(eventData.args);
+            }
+
+            console.log(`\\n--- 🔄 ${eventName} Event Received ---`);
             console.log(`   Token ID: ${tokenId}`);
             console.log(`   Actor (${actorField}): ${actor}`);
             console.log(`   Details: ${details}`);
+            console.log(`   Transaction Hash: ${eventData.log.transactionHash}`);
 
-            try {
-                // cidMapping is in NFTCore, accessible via supplyChainContract
-                const currentCid = await supplyChainContract.cidMapping(tokenId);
-                if (!currentCid || currentCid.trim() === "") { // Added trim() for safety
-                    console.warn(`   ⚠️ No initial CID found for token ${tokenId}. Cannot update history. This might happen if ProductMinted processing failed or is pending.`);
-                    return;
+            // Add to the updateHistoryCIDQueue
+            updateHistoryCIDQueue = updateHistoryCIDQueue.then(async () => {
+                try {
+                    console.log(`   Processing ${eventName} for token ${tokenId} (from updateHistoryCIDQueue)...`);
+                    const currentCid = await supplyChainContract.cidMapping(tokenId);
+                    if (!currentCid || currentCid.trim() === "") {
+                        console.warn(`   ⚠️ No initial CID found for token ${tokenId} during ${eventName}. Cannot update history. This might be normal if ProductMinted hasn't completed yet or if it's an old token without prior CID.`);
+                        return; // Exit this specific queued task
+                    }
+
+                    console.log(`   Current CID for token ${tokenId}: ${currentCid}`);
+                    const currentHistoryData = await downloadFromIPFS(currentCid);
+                    const newHistoryLogEntry = {
+                        timestamp: formatDateTime(new Date()),
+                        event: eventName,
+                        actor: actor,
+                        details: details,
+                        transactionHash: eventData.log.transactionHash
+                    };
+
+                    const updatedHistoryData = {
+                        ...currentHistoryData,
+                        historyLog: [...(currentHistoryData.historyLog || []), newHistoryLogEntry]
+                    };
+
+                    const newCid = await uploadToIPFS(updatedHistoryData, `token_${tokenId}_history_${eventName}_${Date.now()}.json`);
+
+                    console.log(`   Calling updateProductHistoryCID(${tokenId}, ${newCid}) on contract for event ${eventName}...`);
+
+                    const gasOptionsUpdate = {
+                        maxPriorityFeePerGas: ethers.parseUnits('60', 'gwei'), // Increased
+                        maxFeePerGas: ethers.parseUnits('120', 'gwei')         // Increased
+                    };
+
+                    let tx;
+                    try {
+                        tx = await supplyChainContract.updateProductHistoryCID(tokenId, newCid, gasOptionsUpdate);
+                        console.log(`   Transaction sent for ${eventName} (Token ${tokenId}): ${tx.hash}`);
+                        const receipt = await tx.wait(1); // Wait for 1 confirmation
+                        console.log(`   ✅ Transaction confirmed for ${eventName} (Token ${tokenId}). History CID updated. Gas used: ${receipt.gasUsed.toString()}`);
+                    } catch (txError) {
+                        console.error(`   ❌❌ Transaction Error during updateProductHistoryCID for ${eventName} (Token ${tokenId}, New CID ${newCid}):`, txError.message);
+                        if (txError.code) console.error(`       Error Code: ${txError.code}`);
+                        if (txError.reason) console.error(`       Reason: ${txError.reason}`);
+                        if (txError.transactionHash) console.error(`       Transaction Hash (if available): ${txError.transactionHash}`);
+                        // Optionally, re-throw or handle specific errors like nonce issues if needed
+                    }
+
+                } catch (error) {
+                    console.error(`   ❌ Error processing ${eventName} for token ${tokenId} (from updateHistoryCIDQueue - Outer Try-Catch):`, error.message);
+                    if (error.stack) console.error(error.stack);
                 }
+            }).catch(queueError => {
+                // Catch errors in the queue promise itself
+                console.error(`   ❌ Error in updateHistoryCIDQueue for ${eventName}, token ${tokenId}:`, queueError);
+            });
 
-                const currentHistoryData = await downloadFromIPFS(currentCid);
-                const newHistoryLogEntry = {
-                    timestamp: Math.floor(Date.now() / 1000),
-                    event: eventName,
-                    actor: actor,
-                    details: details,
-                    transactionHash: eventData.log.transactionHash 
-                };
-
-                const updatedHistoryData = {
-                    ...currentHistoryData, 
-                    historyLog: [...(currentHistoryData.historyLog || []), newHistoryLogEntry]
-                };
-
-                const newCid = await uploadToIPFS(updatedHistoryData, `token_${tokenId}_history_${Date.now()}.json`);
-                
-                console.log(`   Calling updateProductHistoryCID(${tokenId}, ${newCid}) on contract...`);
-                // updateProductHistoryCID is in NFTCore, accessible via supplyChainContract
-                const tx = await supplyChainContract.updateProductHistoryCID(tokenId, newCid);
-                console.log(`   Transaction sent: ${tx.hash}`);
-                const receipt = await tx.wait();
-                console.log(`   ✅ Transaction confirmed. History CID updated for token ${tokenId}. Gas used: ${receipt.gasUsed.toString()}`);
-
-            } catch (error) {
-                console.error(`   ❌ Error processing ${eventName} for token ${tokenId}:`, error);
-            }
             console.log(`--- End ${eventName} Event ---`);
         });
     });
@@ -262,4 +380,15 @@ main().catch((error) => {
     console.error("🚨 Unhandled error in main listener:", error);
     process.exit(1);
 });
+
+// Helper function to format Date object to "DD/MM/YYYY, HH:MM:SS"
+function formatDateTime(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+}
 

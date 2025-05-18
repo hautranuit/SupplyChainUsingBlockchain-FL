@@ -1,0 +1,66 @@
+{
+  "contractAddress": "0xd9fb6aa150e33a85d1c03dd2812c7f6dd33e6e41",
+  "manufacturerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+  "deployerAddress": "0x032041b4b356fEE1496805DD4749f181bC736FFA",
+  "tokenIds": [
+    "28",
+    "29",
+    "30"
+  ],
+  "productDetails": [
+    {
+      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "uniqueProductID": "DEMO_PROD_001",
+      "batchNumber": "B_ALPHA_001",
+      "manufacturingDate": "2025-05-10",
+      "expirationDate": "2027-05-10",
+      "productType": "Electronics - HighEnd Laptop",
+      "manufacturerID": "MANU_ACME_CORP",
+      "quickAccessURL": "http://example.com/products/laptop001_qa",
+      "nftReference": "http://example.com/products/DEMO_PROD_001",
+      "tokenId": "28",
+      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "price": "100000000000000000",
+      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "productStatus": "CollateralDeposited",
+      "pendingBuyerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+      "collateralAmount": "100000000000000000"
+    },
+    {
+      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "uniqueProductID": "DEMO_PROD_002",
+      "batchNumber": "B_BETA_002",
+      "manufacturingDate": "2025-06-15",
+      "expirationDate": "2026-06-15",
+      "productType": "Pharmaceuticals - Vaccine Batch",
+      "manufacturerID": "MANU_HEALTHCARE_INC",
+      "quickAccessURL": "http://example.com/products/vaccine002_qa",
+      "nftReference": "http://example.com/products/DEMO_PROD_002",
+      "tokenId": "29",
+      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "price": "200000000000000000",
+      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "productStatus": "CollateralDeposited",
+      "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+      "collateralAmount": "200000000000000000"
+    },
+    {
+      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "uniqueProductID": "DEMO_PROD_003",
+      "batchNumber": "B_GAMMA_003",
+      "manufacturingDate": "2025-07-20",
+      "expirationDate": "2025-12-20",
+      "productType": "Luxury Goods - Designer Handbag",
+      "manufacturerID": "MANU_FASHION_LUXE",
+      "quickAccessURL": "http://example.com/products/handbag003_qa",
+      "nftReference": "http://example.com/products/DEMO_PROD_003",
+      "tokenId": "30",
+      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "price": "300000000000000000",
+      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "productStatus": "CollateralDeposited",
+      "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+      "collateralAmount": "300000000000000000"
+    }
+  ]
+}

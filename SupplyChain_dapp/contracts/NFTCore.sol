@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.26;
+pragma solidity 0.8.28;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -27,8 +27,12 @@ contract NFTCore is ERC721URIStorage, AccessControl {
     enum PurchaseStatus {
         Idle,             
         Listed,           
-        AwaitingCollateral, 
+        AwaitingCollateral,
+        CollateralDeposited,
+        InTransit,
+        TransportCompleted,
         AwaitingRelease,  
+        ReceiptConfirmed,
         Complete,         
         Disputed          
     }
@@ -43,23 +47,24 @@ contract NFTCore is ERC721URIStorage, AccessControl {
     mapping(uint256 => RFIDData) public rfidDataMapping; // Retained for potential on-chain quick checks
     mapping(uint256 => PurchaseInfo) public purchaseInfos;
 
-    // --- Roles ---
+    // --- Roles --- // (Roles are defined in NodeManagement.sol)
     bytes32 public constant UPDATER_ROLE = keccak256("UPDATER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE"); // Added for minting
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    // --- Event Declarations ---
-    event ProductMinted(uint256 indexed tokenId, address indexed owner, string uniqueProductID, string batchNumber, string manufacturingDate);
-    event ProductTransferred(uint256 indexed tokenId, address indexed from, address indexed to);
-    event PaymentReleased(uint256 indexed tokenId, address indexed seller, uint256 amount);
-    event TransporterIncentivePaid(uint256 indexed tokenId, address indexed transporter, uint256 amount);
-    event DisputeInitiated(uint256 indexed tokenId, address indexed initiator, address currentOwner);
-    event CIDStored(uint256 indexed tokenId, string cid); // General CID storage event
-    event InitialCIDStored(uint256 indexed tokenId, string initialCID, address indexed actor); // Specific for initial CID after minting
-    event CIDToHistoryStored(uint256 indexed tokenId, string newCid); // For IPFS history updates
-    event CollateralDepositedForPurchase(uint256 indexed tokenId, address indexed buyer, uint256 amount);
-    event PurchaseCompleted(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price);
-    event ReceiptConfirmed(uint256 indexed tokenId, address indexed confirmer);
-    event PaymentAndTransferCompleted(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price); // New event for releasePurchasePayment
+    // --- Event Declarations --- (Added timestamp and actor where appropriate)
+    event ProductMinted(uint256 indexed tokenId, address indexed owner, string uniqueProductID, string batchNumber, string manufacturingDate, uint256 timestamp);
+    event ProductTransferred(uint256 indexed tokenId, address indexed from, address indexed to, uint256 timestamp);
+    event PaymentReleased(uint256 indexed tokenId, address indexed seller, uint256 amount, uint256 timestamp);
+    event TransporterIncentivePaid(uint256 indexed tokenId, address indexed transporter, uint256 amount, uint256 timestamp);
+    event DisputeInitiated(uint256 indexed tokenId, address indexed initiator, address currentOwner, uint256 timestamp); // From NFTCore, DisputeResolution has DisputeOpened
+    event CIDStored(uint256 indexed tokenId, string cid, address indexed actor, uint256 timestamp); // General CID storage event
+    event InitialCIDStored(uint256 indexed tokenId, string initialCID, address indexed actor, uint256 timestamp); // Specific for initial CID after minting
+    event CIDToHistoryStored(uint256 indexed tokenId, string newCid, address indexed actor, uint256 timestamp); // For IPFS history updates
+    event CollateralDepositedForPurchase(uint256 indexed tokenId, address indexed buyer, uint256 amount, uint256 timestamp);
+    event PurchaseCompleted(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price, uint256 timestamp);
+    event ReceiptConfirmed(uint256 indexed tokenId, address indexed confirmer, uint256 timestamp);
+    event PaymentAndTransferCompleted(uint256 indexed tokenId, address indexed buyer, address indexed seller, uint256 price, uint256 timestamp);
+    event PurchaseStatusUpdated(uint256 indexed tokenId, PurchaseStatus oldStatus, PurchaseStatus newStatus, address indexed actor, uint256 timestamp);
 
 
     constructor(address initialAdmin)
@@ -99,18 +104,35 @@ contract NFTCore is ERC721URIStorage, AccessControl {
             nftReference: params.nftReference
         });
 
-        emit ProductMinted(tokenId, params.recipient, params.uniqueProductID, params.batchNumber, params.manufacturingDate);
-        // Backend listens for ProductMinted, uploads initial metadata (including all RFIDData) to IPFS, 
-        // then calls storeInitialCID with the resulting CID.
+        emit ProductMinted(tokenId, params.recipient, params.uniqueProductID, params.batchNumber, params.manufacturingDate, block.timestamp);
+        // Update lastActionTimestamp for minter and owner
+        // This requires NFTCore to inherit or have access to NodeManagement's lastActionTimestamp
+        // For now, assuming this will be handled in SupplyChainNFT or by off-chain logic listening to events
         return tokenId;
     }
 
+    // Helper function to check if a token exists
+    function _exists(uint256 tokenId) internal view returns (bool) {
+        return _ownerOf(tokenId) != address(0);
+    }
+
     // Renamed for clarity: this is for the *initial* metadata CID after minting
-    function storeInitialCID(uint256 tokenId, string memory cid) public onlyRole(UPDATER_ROLE) { 
-        require(bytes(cidMapping[tokenId]).length == 0, "NFTCore: Initial CID already stored");
+    function storeInitialCID(uint256 tokenId, string memory cid) public onlyRole(UPDATER_ROLE) {
+        require(_exists(tokenId), "NFTCore: Token does not exist");
+        // require(ownerOf(tokenId) == msg.sender, "NFTCore: You do not own this NFT"); // Or specific role
         cidMapping[tokenId] = cid;
-        emit CIDStored(tokenId, cid); // Keep general event for any CID storage if needed elsewhere
-        emit InitialCIDStored(tokenId, cid, msg.sender); // Specific event for minting flow
+        emit InitialCIDStored(tokenId, cid, msg.sender, block.timestamp);
+        // Update lastActionTimestamp for msg.sender
+    }
+
+    function storeCIDToHistory(uint256 tokenId, string memory newCid) public onlyRole(UPDATER_ROLE) {
+        require(_exists(tokenId), "NFTCore: Token does not exist");
+        // Potentially add ownership or specific role check if needed
+        // This function is for updating the history, so the CID might change over time.
+        // The actual IPFS history log would be managed off-chain, this just stores the latest root CID.
+        cidMapping[tokenId] = newCid; 
+        emit CIDToHistoryStored(tokenId, newCid, msg.sender, block.timestamp);
+        // Update lastActionTimestamp for msg.sender
     }
 
     function uintToString(uint256 value) internal pure returns (string memory) {
@@ -153,88 +175,73 @@ contract NFTCore is ERC721URIStorage, AccessControl {
     }
     
     function _transferNFTInternal(address from, address to, uint256 tokenId) internal virtual {
-        // Basic owner check is done by ERC721 _transfer, but explicit check can be added if needed before specific logic
         _transfer(from, to, tokenId);
-        emit ProductTransferred(tokenId, from, to);
+        emit ProductTransferred(tokenId, from, to, block.timestamp);
+        // Update lastActionTimestamp for from, to, and potentially msg.sender if it's a separate entity triggering this
     }
 
     function depositPurchaseCollateral(uint256 tokenId) public payable {
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
         require(purchase.status == PurchaseStatus.AwaitingCollateral, "NFTCore: Not awaiting collateral");
-        require(purchase.buyer == msg.sender, "NFTCore: Only designated buyer can deposit");
-        require(msg.value == purchase.price, "NFTCore: Deposit must match price");
+        require(msg.value == purchase.price, "NFTCore: Incorrect collateral amount");
+        require(msg.sender == purchase.buyer, "NFTCore: Only buyer can deposit collateral");
 
-        // NFT is transferred to buyer upon collateral deposit, making buyer the owner.
-        // This aligns with the idea that buyer holds the NFT while payment is in escrow.
-        _transferNFTInternal(purchase.seller, purchase.buyer, tokenId);
-
-        purchase.status = PurchaseStatus.AwaitingRelease;
-        emit CollateralDepositedForPurchase(tokenId, msg.sender, msg.value);
+        purchase.status = PurchaseStatus.CollateralDeposited;
+        emit CollateralDepositedForPurchase(tokenId, msg.sender, msg.value, block.timestamp);
+        emit PurchaseStatusUpdated(tokenId, PurchaseStatus.AwaitingCollateral, PurchaseStatus.CollateralDeposited, msg.sender, block.timestamp);
+        // Update lastActionTimestamp for buyer (msg.sender)
     }
 
     function triggerDispute(uint256 tokenId) internal virtual {
-        // Ensure the caller has the right to trigger a dispute (e.g., current owner/buyer)
-        require(ownerOf(tokenId) == msg.sender, "NFTCore: Only owner can trigger dispute");
-        purchaseInfos[tokenId].status = PurchaseStatus.Disputed;
-        emit DisputeInitiated(tokenId, msg.sender, ownerOf(tokenId));
+        // This function is typically called internally when a dispute condition is met.
+        // The actual dispute opening with candidates might be in DisputeResolution contract.
+        emit DisputeInitiated(tokenId, msg.sender, ownerOf(tokenId), block.timestamp);
+        // Update lastActionTimestamp for msg.sender
     }
 
-    function releasePurchasePayment(
-        uint256 tokenId,
-        address transporter, // For potential incentive
-        bool meetsIncentiveCriteria // For transporter incentive
-    ) public {
+    // Renamed to _releasePurchasePaymentInternal, changed to internal, added actor, removed seller check
+    function _releasePurchasePaymentInternal(uint256 tokenId, bool meetsIncentiveCriteria, address actor) internal { 
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
-        require(purchase.status == PurchaseStatus.AwaitingRelease, "NFTCore: Payment not awaiting release");
-        require(purchase.buyer == msg.sender, "NFTCore: Only buyer can release payment");
-        require(ownerOf(tokenId) == msg.sender, "NFTCore: Caller must be current NFT owner (buyer)");
+        require(purchase.status == PurchaseStatus.TransportCompleted, "NFTCore: Payment can only be released after delivery confirmation");
+        // require(msg.sender == purchase.seller, "NFTCore: Only seller can release payment"); // REMOVED - Authorization handled by public calling function
 
-        address seller = purchase.seller;
-        uint256 amountToRelease = purchase.price;
+        uint256 paymentAmount = purchase.price;
+        (bool success, ) = payable(purchase.seller).call{value: paymentAmount}("");
+        require(success, "NFTCore: Payment transfer to seller failed");
 
-        payable(seller).transfer(amountToRelease);
-        emit PaymentReleased(tokenId, seller, amountToRelease);
+        emit PaymentReleased(tokenId, purchase.seller, paymentAmount, block.timestamp);
 
-        if (meetsIncentiveCriteria && transporter != address(0)) {
-            uint256 incentive = amountToRelease / 10; // 10% incentive
-            // Ensure contract has balance if incentives are paid from a central pool, 
-            // or ensure buyer's deposit covers this. For now, assume buyer's deposit is only for product price.
-            // This part needs careful thought on where incentive funds come from.
-            // For simplicity, we'll assume the incentive is a separate transaction or covered by other means.
-            // If it were to come from the buyer's deposited amount, the initial deposit logic would need to change.
-            // For now, emitting an event that an incentive *should* be paid.
-            // Actual transfer would require funds.
-            // payable(transporter).transfer(incentive); // This would fail if contract has no ETH other than purchase price.
-            emit TransporterIncentivePaid(tokenId, transporter, incentive);
-        }
+        // Incentive logic was previously removed as PurchaseInfo lacks transporter details.
+        // If re-added, meetsIncentiveCriteria should be used.
+        // Example:
+        // if (meetsIncentiveCriteria && /* condition for incentive */) {
+        //     // ... pay incentive ...
+        //     // emit TransporterIncentivePaid(...);
+        // }
 
-        purchase.status = PurchaseStatus.Complete;
-        // Emit a more comprehensive event for backend to log to IPFS
-        emit PaymentAndTransferCompleted(tokenId, purchase.buyer, seller, amountToRelease);
-        // Old: emit ProductHistoryUpdated(tokenId, history_string); // Removed
+        PurchaseStatus oldStatus = purchase.status;
+        purchase.status = PurchaseStatus.Complete; 
+        emit PurchaseStatusUpdated(tokenId, oldStatus, PurchaseStatus.Complete, actor, block.timestamp); // Use actor
     }
 
     function confirmReceipt(uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender, "NFTCore: Only current owner can confirm receipt.");
-
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
-        // If purchase was awaiting release, and buyer confirms receipt, it implies completion.
-        if (purchase.status == PurchaseStatus.AwaitingRelease) { 
-            purchase.status = PurchaseStatus.Complete;
-            // Emit PurchaseCompleted here if confirmReceipt is the explicit step to complete the purchase flow
-            // instead of releasePurchasePayment being the final step for status change.
-            // For now, releasePurchasePayment handles the .Complete status.
-        }
-        emit ReceiptConfirmed(tokenId, msg.sender);
-        // Backend listens for ReceiptConfirmed, uploads final history log to IPFS,
-        // and calls updateProductHistoryCID with the new CID.
+        require(purchase.status == PurchaseStatus.TransportCompleted, "NFTCore: Transport not completed or purchase not in correct status");
+        // Require that msg.sender is the buyer or an authorized party
+        require(msg.sender == purchase.buyer, "NFTCore: Only buyer can confirm receipt");
+
+        purchase.status = PurchaseStatus.ReceiptConfirmed;
+        emit ReceiptConfirmed(tokenId, msg.sender, block.timestamp);
+        emit PurchaseStatusUpdated(tokenId, PurchaseStatus.TransportCompleted, PurchaseStatus.ReceiptConfirmed, msg.sender, block.timestamp);
+        // Update lastActionTimestamp for buyer (msg.sender)
     }
 
     // Renamed for clarity: this is for ongoing history updates
     function updateProductHistoryCID(uint256 tokenId, string memory newCid) public onlyRole(UPDATER_ROLE) {
         require(bytes(cidMapping[tokenId]).length > 0, "NFTCore: Initial CID not set, cannot update history");
         cidMapping[tokenId] = newCid;
-        emit CIDToHistoryStored(tokenId, newCid);
+        emit CIDToHistoryStored(tokenId, newCid, msg.sender, block.timestamp);
+        // Update lastActionTimestamp for msg.sender
     }
 
     function _addressToString(address _addr) internal pure returns (string memory) {
@@ -248,6 +255,35 @@ contract NFTCore is ERC721URIStorage, AccessControl {
             str[3+i*2] = alphabet[uint(uint8(value[i + 12] & 0x0f))];
         }
         return string(str);
+    }
+
+    function confirmDeliveryAndFinalize(uint256 tokenId, bool meetsIncentiveCriteria) public {
+        PurchaseInfo storage purchase = purchaseInfos[tokenId];
+
+        require(purchase.status == PurchaseStatus.TransportCompleted, "NFTCore: Product not yet marked as transport completed by transporter"); 
+
+        require(msg.sender == purchase.buyer || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NFTCore: Only buyer or admin can confirm delivery");
+
+        address currentOwner = ownerOf(tokenId); 
+        require(currentOwner != purchase.buyer, "NFTCore: Buyer already owns the token");
+        require(currentOwner != address(0), "NFTCore: Invalid current owner for transfer");
+
+        _transferNFTInternal(currentOwner, purchase.buyer, tokenId);
+
+        // Call the internal function, passing msg.sender as the actor
+        _releasePurchasePaymentInternal(tokenId, meetsIncentiveCriteria, msg.sender);
+
+        emit PaymentAndTransferCompleted(tokenId, purchase.buyer, purchase.seller, purchase.price, block.timestamp);
+    }
+
+    // New public function for sellers to release funds independently
+    function sellerReleaseFunds(uint256 tokenId, bool meetsIncentiveCriteria) public {
+        PurchaseInfo storage purchase = purchaseInfos[tokenId];
+        require(msg.sender == purchase.seller, "NFTCore: Only seller can release payment");
+        // Ensure the status is appropriate for seller to release funds
+        require(purchase.status == PurchaseStatus.TransportCompleted || purchase.status == PurchaseStatus.ReceiptConfirmed, "NFTCore: Invalid status for seller to release funds");
+
+        _releasePurchasePaymentInternal(tokenId, meetsIncentiveCriteria, msg.sender);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721URIStorage, AccessControl) returns (bool) {
