@@ -1,11 +1,11 @@
 {
-  "contractAddress": "0xd9fb6aa150e33a85d1c03dd2812c7f6dd33e6e41",
+  "contractAddress": "0x88b7eb798735ce65eb282df165e01e30de8786e3",
   "manufacturerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
   "deployerAddress": "0x032041b4b356fEE1496805DD4749f181bC736FFA",
   "tokenIds": [
-    "28",
-    "29",
-    "30"
+    "4",
+    "5",
+    "6"
   ],
   "productDetails": [
     {
@@ -18,13 +18,14 @@
       "manufacturerID": "MANU_ACME_CORP",
       "quickAccessURL": "http://example.com/products/laptop001_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_001",
-      "tokenId": "28",
-      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "tokenId": "4",
+      "currentOwnerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
       "price": "100000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "CollateralDeposited",
+      "productStatus": "ExchangedInBatch_ToRetailer",
       "pendingBuyerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
-      "collateralAmount": "100000000000000000"
+      "collateralAmount": "100000000000000000",
+      "currentOwner": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23"
     },
     {
       "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
@@ -36,13 +37,14 @@
       "manufacturerID": "MANU_HEALTHCARE_INC",
       "quickAccessURL": "http://example.com/products/vaccine002_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_002",
-      "tokenId": "29",
-      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "tokenId": "5",
+      "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
       "price": "200000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "CollateralDeposited",
+      "productStatus": "ExchangedInBatch_ToBuyer1",
       "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
-      "collateralAmount": "200000000000000000"
+      "collateralAmount": "200000000000000000",
+      "currentOwner": "0x724876f86fA52568aBc51955BD3A68bFc1441097"
     },
     {
       "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
@@ -54,13 +56,14 @@
       "manufacturerID": "MANU_FASHION_LUXE",
       "quickAccessURL": "http://example.com/products/handbag003_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_003",
-      "tokenId": "30",
-      "currentOwnerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+      "tokenId": "6",
+      "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
       "price": "300000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "CollateralDeposited",
+      "productStatus": "ExchangedInBatch_ToBuyer1",
       "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
-      "collateralAmount": "300000000000000000"
+      "collateralAmount": "300000000000000000",
+      "currentOwner": "0x724876f86fA52568aBc51955BD3A68bFc1441097"
     }
   ]
 }

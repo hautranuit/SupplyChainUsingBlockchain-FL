@@ -61,39 +61,68 @@ async function initWeb3Storage() {
     return client;
 }
 
-async function uploadRawFileToIPFS(filePath, mimeType) {
+async function uploadRawFileToIPFS(filePath, mimeType, retries = 3, delayMs = 1000) {
     if (!ipfsClient) throw new Error("IPFS client not initialized");
-    // filePath is expected to be relative to __dirname_listener (location of backendListener.js)
     const absoluteFilePath = path.resolve(__dirname_listener, filePath);
     console.log(`[IPFS] Attempting to upload raw file from path: ${absoluteFilePath}`);
-    try {
-        if (!fs.existsSync(absoluteFilePath)) {
-            console.error(`[IPFS] File not found at path: ${absoluteFilePath}`);
-            return null; 
+    for (let i = 0; i < retries; i++) {
+        try {
+            if (!fs.existsSync(absoluteFilePath)) {
+                console.error(`[IPFS] File not found at path: ${absoluteFilePath}`);
+                return null;
+            }
+            const fileBuffer = fs.readFileSync(absoluteFilePath);
+            const blob = new Blob([fileBuffer], { type: mimeType });
+            const file = new File([blob], path.basename(filePath));
+            const cid = await ipfsClient.uploadFile(file);
+            console.log(`[IPFS] Raw file ${path.basename(filePath)} uploaded successfully. CID: ${cid.toString()}`);
+            return cid.toString();
+        } catch (error) {
+            console.error(`[IPFS] Error uploading raw file ${filePath} (attempt ${i + 1}/${retries}). Error:`, error.message);
+            if (error.code === 'ECONNRESET' && i < retries - 1) {
+                console.log(`   Retrying in ${delayMs / 1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                delayMs *= 2; // Exponential backoff
+            } else if (i === retries - 1) {
+                console.error(`[IPFS] Failed to upload raw file ${filePath} after ${retries} attempts.`);
+                return null;
+            } else {
+                // For errors other than ECONNRESET, or if it's the last retry for ECONNRESET
+                return null; // Or rethrow if you want the main loop to handle it differently
+            }
         }
-        const fileBuffer = fs.readFileSync(absoluteFilePath);
-        const blob = new Blob([fileBuffer], { type: mimeType });
-        const file = new File([blob], path.basename(filePath));
-        const cid = await ipfsClient.uploadFile(file);
-        console.log(`[IPFS] Raw file ${path.basename(filePath)} uploaded successfully. CID: ${cid.toString()}`);
-        return cid.toString();
-    } catch (error) {
-        console.error(`[IPFS] Error uploading raw file ${filePath} (resolved to ${absoluteFilePath}):`, error);
-        return null; 
     }
+    return null; // Should be unreachable if logic is correct
 }
 
-async function uploadToIPFS(data, filename = "product_data.json") {
+async function uploadToIPFS(data, filename = "product_data.json", retries = 3, delayMs = 1000) {
     if (!ipfsClient) throw new Error("IPFS client not initialized");
-    console.log(`[IPFS] Uploading data (${filename}):`, JSON.stringify(data, null, 2));
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const file = new File([blob], filename);
-    const cid = await ipfsClient.uploadFile(file);
-    console.log(`[IPFS] Data uploaded. CID: ${cid.toString()}`);
-    return cid.toString();
+    console.log(`[IPFS] Uploading data to file: ${filename}`);
+    for (let i = 0; i < retries; i++) {
+        try {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const file = new File([blob], filename);
+            const cid = await ipfsClient.uploadFile(file);
+            console.log(`[IPFS] Data uploaded (${filename}). CID: ${cid.toString()}`);
+            return cid.toString();
+        } catch (error) {
+            console.error(`[IPFS] Error uploading data for ${filename} (attempt ${i + 1}/${retries}). Error:`, error.message);
+            if (error.code === 'ECONNRESET' && i < retries - 1) {
+                console.log(`   Retrying in ${delayMs / 1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                delayMs *= 2; // Exponential backoff
+            } else if (i === retries - 1) {
+                console.error(`[IPFS] Failed to upload data for ${filename} after ${retries} attempts.`);
+                return null;
+            } else {
+                return null;
+            }
+        }
+    }
+    return null; // Should be unreachable
 }
 
-async function downloadFromIPFS(cid) {
+async function downloadFromIPFS(cid, retries = 3, delayMs = 1000) {
     if (!ipfsClient) throw new Error("IPFS client not initialized");
     if (!cid || cid.trim() === "") {
         console.warn("[IPFS] Attempted to download from null or empty CID. Returning default structure.");
@@ -151,8 +180,11 @@ async function main() {
     // --- Promise Queue for updateProductHistoryCID operations ---
     let updateHistoryCIDQueue = Promise.resolve(); // Initialize the new queue
 
+    // --- Promise Queue for Dispute IPFS operations ---
+    let disputeCIDUpdateQueue = Promise.resolve();
+
     // Listener for ProductMinted (from NFTCore.sol, inherited by SupplyChainNFT)
-    supplyChainContract.on("ProductMinted", async (tokenId, owner, uniqueProductID, batchNumber, manufacturingDate, event) => {
+    supplyChainContract.on("ProductMinted", async (tokenId, owner, uniqueProductID, batchNumber, manufacturingDate, eventData) => { // Added eventData
         console.log(`\\n--- 🎉 ProductMinted Event Received ---`);
         console.log(`   Token ID: ${tokenId.toString()}`);
         console.log(`   Owner: ${owner}`);
@@ -363,7 +395,7 @@ async function main() {
     });
 
     // Listener for CIDToHistoryStored (from NFTCore.sol - for logging/confirmation)
-    supplyChainContract.on("CIDToHistoryStored", (tokenId, newCid, event) => {
+    supplyChainContract.on("CIDToHistoryStored", (tokenId, newCid, eventData) => { // Added eventData
         console.log(`
 --- ℹ️ CIDToHistoryStored Event Received (Confirmation) ---`);
         console.log(`   Token ID: ${tokenId.toString()}`);
@@ -371,7 +403,124 @@ async function main() {
         console.log(`--- End CIDToHistoryStored Event ---`);
     });
 
-    console.log("\n⏳ Waiting for events...");
+    // Listener for DisputeOpened
+    // Assumes event DisputeOpened(uint256 indexed disputeId, uint256 indexed tokenId, address indexed plaintiff, string reason, string evidenceDataString, uint256 timestamp)
+    supplyChainContract.on("DisputeOpened", async (disputeId, tokenId, plaintiff, reason, evidenceDataStringOrCID, timestamp, eventData) => {
+        console.log(`\\n--- 🏛️ DisputeOpened Event Received ---`);
+        console.log(`   Dispute ID: ${disputeId.toString()}`);
+        console.log(`   Token ID: ${tokenId.toString()}`);
+        console.log(`   Plaintiff: ${plaintiff}`);
+        console.log(`   Reason: ${reason}`);
+        console.log(`   Evidence Data String (or placeholder CID): ${(evidenceDataStringOrCID || '').substring(0, 100)}...`);
+        console.log(`   Transaction Hash: ${eventData.log.transactionHash}`);
+
+        disputeCIDUpdateQueue = disputeCIDUpdateQueue.then(async () => {
+            try {
+                console.log(`   Processing DisputeOpened for dispute ${disputeId} (from queue)...`);
+                if (!evidenceDataStringOrCID || evidenceDataStringOrCID.startsWith('ipfs://') || evidenceDataStringOrCID.length < 20) { // Basic check if it's already a CID or too short for JSON
+                    console.warn(`   ⚠️ Evidence data for dispute ${disputeId} appears to be a CID already or is invalid/empty: "${evidenceDataStringOrCID}". Skipping IPFS upload by backend listener.`);
+                    return;
+                }
+
+                let evidenceData;
+                try {
+                    evidenceData = JSON.parse(evidenceDataStringOrCID);
+                } catch (parseError) {
+                    console.error(`   ❌ Error parsing evidenceDataString for dispute ${disputeId}:`, parseError);
+                    console.error(`      Raw evidenceDataString: ${evidenceDataStringOrCID}`);
+                    return; 
+                }
+
+                const evidenceFilename = `dispute_${disputeId}_evidence.json`;
+                console.log(`   Uploading evidence data for dispute ${disputeId} to IPFS as ${evidenceFilename}...`);
+                const actualEvidenceCID = await uploadToIPFS(evidenceData, evidenceFilename);
+
+                if (actualEvidenceCID) {
+                    console.log(`   Evidence for dispute ${disputeId} uploaded. Actual CID: ${actualEvidenceCID}`);
+                    console.log(`   Calling updateDisputeEvidenceCID(${disputeId}, "ipfs://${actualEvidenceCID}") on contract...`);
+                    
+                    const gasOptionsDispute = { maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), maxFeePerGas: ethers.parseUnits('80', 'gwei') }; 
+                    
+                    const tx = await supplyChainContract.updateDisputeEvidenceCID(disputeId.toString(), `ipfs://${actualEvidenceCID}`, gasOptionsDispute);
+                    console.log(`   Transaction sent for updateDisputeEvidenceCID (Dispute ${disputeId}): ${tx.hash}`);
+                    const receipt = await tx.wait();
+                    console.log(`   ✅ Transaction confirmed. Evidence CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                } else {
+                    console.error(`   ❌ Failed to upload evidence for dispute ${disputeId} to IPFS.`);
+                }
+            } catch (error) {
+                console.error(`   ❌ Error processing DisputeOpened for dispute ${disputeId} (from queue):`, error.message);
+                if (error.stack) console.error(error.stack);
+                if (error.message.includes("supplyChainContract.updateDisputeEvidenceCID is not a function")) {
+                    console.warn("      💡 HINT: The smart contract needs an 'updateDisputeEvidenceCID(uint256 disputeId, string memory evidenceCID)' function callable by this backend.");
+                }
+            }
+        }).catch(queueError => {
+            console.error(`   ❌ Error in disputeCIDUpdateQueue (DisputeOpened, Dispute ${disputeId}):`, queueError);
+        });
+        console.log(`--- End DisputeOpened Event ---`);
+    });
+
+    // Listener for DisputeDecisionRecorded
+    // Assumes event DisputeDecisionRecorded(uint256 indexed disputeId, uint256 indexed tokenId, address indexed arbitrator, string resolutionDetails, string resolutionDataString, uint8 outcome, uint256 timestamp)
+    supplyChainContract.on("DisputeDecisionRecorded", async (disputeId, tokenId, arbitrator, resolutionDetailsText, resolutionDataStringOrCID, outcome, timestamp, eventData) => {
+        console.log(`\\n--- ⚖️ DisputeDecisionRecorded Event Received ---`);
+        console.log(`   Dispute ID: ${disputeId.toString()}`);
+        console.log(`   Token ID: ${tokenId.toString()}`);
+        console.log(`   Arbitrator: ${arbitrator}`);
+        console.log(`   Resolution Details Text: ${resolutionDetailsText}`);
+        console.log(`   Resolution Data String (or placeholder CID): ${(resolutionDataStringOrCID || '').substring(0, 100)}...`);
+        console.log(`   Outcome: ${outcome.toString()}`);
+        console.log(`   Transaction Hash: ${eventData.log.transactionHash}`);
+
+        disputeCIDUpdateQueue = disputeCIDUpdateQueue.then(async () => {
+            try {
+                console.log(`   Processing DisputeDecisionRecorded for dispute ${disputeId} (from queue)...`);
+                if (!resolutionDataStringOrCID || resolutionDataStringOrCID.startsWith('ipfs://') || resolutionDataStringOrCID.length < 20) { 
+                    console.warn(`   ⚠️ Resolution data for dispute ${disputeId} appears to be a CID already or is invalid/empty: "${resolutionDataStringOrCID}". Skipping IPFS upload by backend listener.`);
+                    return;
+                }
+
+                let resolutionData;
+                try {
+                    resolutionData = JSON.parse(resolutionDataStringOrCID);
+                } catch (parseError) {
+                    console.error(`   ❌ Error parsing resolutionDataString for dispute ${disputeId}:`, parseError);
+                    console.error(`      Raw resolutionDataString: ${resolutionDataStringOrCID}`);
+                    return; 
+                }
+
+                const resolutionFilename = `dispute_${disputeId}_resolution.json`;
+                console.log(`   Uploading resolution data for dispute ${disputeId} to IPFS as ${resolutionFilename}...`);
+                const actualResolutionCID = await uploadToIPFS(resolutionData, resolutionFilename);
+
+                if (actualResolutionCID) {
+                    console.log(`   Resolution data for dispute ${disputeId} uploaded. Actual CID: ${actualResolutionCID}`);
+                    console.log(`   Calling updateDisputeResolutionCID(${disputeId}, "ipfs://${actualResolutionCID}") on contract...`);
+
+                    const gasOptionsDispute = { maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), maxFeePerGas: ethers.parseUnits('80', 'gwei') };
+
+                    const tx = await supplyChainContract.updateDisputeResolutionCID(disputeId.toString(), `ipfs://${actualResolutionCID}`, gasOptionsDispute);
+                    console.log(`   Transaction sent for updateDisputeResolutionCID (Dispute ${disputeId}): ${tx.hash}`);
+                    const receipt = await tx.wait();
+                    console.log(`   ✅ Transaction confirmed. Resolution CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                } else {
+                    console.error(`   ❌ Failed to upload resolution data for dispute ${disputeId} to IPFS.`);
+                }
+            } catch (error) {
+                console.error(`   ❌ Error processing DisputeDecisionRecorded for dispute ${disputeId} (from queue):`, error.message);
+                if (error.stack) console.error(error.stack);
+                if (error.message.includes("supplyChainContract.updateDisputeResolutionCID is not a function")) {
+                    console.warn("      💡 HINT: The smart contract needs an 'updateDisputeResolutionCID(uint256 disputeId, string memory resolutionCID)' function callable by this backend.");
+                }
+            }
+        }).catch(queueError => {
+            console.error(`   ❌ Error in disputeCIDUpdateQueue (DisputeDecisionRecorded, Dispute ${disputeId}):`, queueError);
+        });
+        console.log(`--- End DisputeDecisionRecorded Event ---`);
+    });
+
+    console.log("\\n⏳ Waiting for events...");
     await new Promise(() => { }); 
 
 }

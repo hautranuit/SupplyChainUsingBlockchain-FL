@@ -2,6 +2,11 @@ const { ethers } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 
+// Helper function for delays
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function main() {
     const signers = await ethers.getSigners();
     const deployer = signers[0]; // Will also be the initial admin for roles
@@ -20,7 +25,19 @@ async function main() {
 
     console.log("Deploying SupplyChainNFT with account:", deployer.address);
     const SupplyChainNFTFactory = await ethers.getContractFactory("SupplyChainNFT", deployer);
-    const supplyChainNFT = await SupplyChainNFTFactory.deploy(deployer.address);
+    
+    // Define gas options to override defaults if needed, especially for testnets like Amoy
+    const gasOptions = {
+        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'), // Adjusted to meet network demands
+        maxFeePerGas: ethers.parseUnits('100', 'gwei')       // Adjusted to meet network demands
+        // For local testing, you might not need these or can use lower values.
+    };
+
+    // Adding a small delay before deployment
+    await delay(500); 
+
+    console.log("Attempting deployment with gasOptions:", gasOptions);
+    const supplyChainNFT = await SupplyChainNFTFactory.deploy(deployer.address, gasOptions);
     await supplyChainNFT.waitForDeployment();
     const contractAddress = await supplyChainNFT.getAddress();
     console.log("SupplyChainNFT deployed to:", contractAddress);
@@ -31,13 +48,7 @@ async function main() {
     const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4 };
     const ContractNodeType = { Primary: 0, Secondary: 1 };
 
-    // Define gas options to override defaults if needed, especially for testnets like Amoy
-    const gasOptions = {
-        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'), // Adjust as needed
-        maxFeePerGas: ethers.parseUnits('100', 'gwei')       // Adjust as needed
-        // For local testing, you might not need these or can use lower values.
-    };
-    console.log("\\n--- Granting Contract-Level Roles ---");
+    console.log("\\\\n--- Granting Contract-Level Roles ---");
     const MINTER_ROLE = await supplyChainNFT.MINTER_ROLE();
     const UPDATER_ROLE = await supplyChainNFT.UPDATER_ROLE();
 
@@ -46,7 +57,7 @@ async function main() {
     console.log(`Granting UPDATER_ROLE to deployer (${deployer.address})...`);
     await (await supplyChainNFT.connect(deployer).grantRole(UPDATER_ROLE, deployer.address, gasOptions)).wait();
 
-    console.log("\\n--- Configuring Demo Participants ---");
+    console.log("\\\\n--- Configuring Demo Participants ---");
 
     async function configureParticipant(account, name, role, nodeType, initialReputation, isVerified = true) {
         console.log(`Configuring ${name} (${account.address})...`);

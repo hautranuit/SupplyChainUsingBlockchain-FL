@@ -42,6 +42,22 @@ def main():
     except Exception as e:
         log_message(f"Error reading demo context: {e}")
         return False
+
+    # Load sybil_attack_log.json
+    sybil_log_data = {}
+    try:
+        sybil_log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                                      "SupplyChain_dapp/scripts/lifecycle_demo/sybil_attack_log.json")
+        log_message(f"Looking for Sybil attack log file at: {sybil_log_path}")
+        if os.path.exists(sybil_log_path):
+            with open(sybil_log_path, "r", encoding='utf-8') as f:
+                sybil_log_data = json.load(f)
+            log_message(f"Successfully loaded sybil_attack_log.json with keys: {list(sybil_log_data.keys())}")
+        else:
+            log_message(f"Sybil attack log file not found at {sybil_log_path}. Proceeding without it.")
+    except Exception as e:
+        log_message(f"Error reading sybil_attack_log.json: {e}. Proceeding without it.")
+        sybil_log_data = {}
     
     # Extract batch-related data from context
     batch_data = []
@@ -83,6 +99,20 @@ def main():
         if key in context:
             node_addresses.append(context[key])
             log_message(f"Added transporter address: {context[key]}")
+
+    # Add retailer addresses if available
+    for i in range(1, 4): # Assuming up to 3 retailers
+        key = f"retailer{i}Address"
+        if key in context:
+            node_addresses.append(context[key])
+            log_message(f"Added retailer address: {context[key]}")
+            
+    # Add Sybil node addresses from sybil_attack_log.json
+    if "sybilNodes" in sybil_log_data:
+        for sybil_node in sybil_log_data["sybilNodes"]:
+            if "address" in sybil_node and sybil_node["address"] not in node_addresses:
+                node_addresses.append(sybil_node["address"])
+                log_message(f"Added Sybil node address from log: {sybil_node['address']}")
     
     # If no addresses found, use placeholder addresses
     if len(node_addresses) == 0:
@@ -101,7 +131,7 @@ def main():
         
         # Make federated datasets
         log_message("Preparing federated data...")
-        federated_data = make_federated_data_batch_monitoring_real(node_addresses, num_clients)
+        federated_data = make_federated_data_batch_monitoring_real(node_addresses, num_clients, sybil_log_data)
         
         # Here you would normally run the actual FL training
         # For demo purposes, we'll just log the data preparation success

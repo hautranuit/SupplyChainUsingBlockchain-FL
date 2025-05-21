@@ -19,199 +19,167 @@ def log_message(message):
 def main():
     log_message("=== Starting Node Behavior Timeseries FL Model ===")
     
-    # Read demo_context.json to get node activity data - adjusted for new directory structure
+    # --- Load demo_context.json ---
     try:
-        context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
-                                   "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json")
+        # Primary path for demo_context.json
+        context_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+            "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json"
+        )
         log_message(f"Looking for context file at: {context_path}")
-        
         if not os.path.exists(context_path):
-            log_message(f"Context file not found at {context_path}")
-            # Try alternative path
-            context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                       "demo_context.json")
+            log_message(f"Context file not found at {context_path}. Trying alternative path...")
+            # Alternative path (e.g., if fl_integration is at the same level as SupplyChain_dapp)
+            context_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 
+                "SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json"
+            )
             log_message(f"Trying alternative path: {context_path}")
-            
             if not os.path.exists(context_path):
-                log_message("Context file not found at alternative path either")
-                return False
+                 # Fallback path if script is run from within fl_integration directory directly
+                context_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                       "..", "SupplyChain_dapp", "scripts", "lifecycle_demo", "demo_context.json")
+                log_message(f"Trying yet another alternative path: {context_path}")
+                if not os.path.exists(context_path):
+                    log_message("Context file demo_context.json not found at any expected location.")
+                    return False
         
         with open(context_path, "r", encoding='utf-8') as f:
             context = json.load(f)
-            log_message(f"Successfully loaded context with keys: {list(context.keys())}")
+            log_message(f"Successfully loaded demo_context.json with keys: {list(context.keys())}")
     except Exception as e:
-        log_message(f"Error reading demo context: {e}")
+        log_message(f"Error reading demo_context.json: {e}")
+        return False
+
+    # --- Load sybil_attack_log.json ---
+    sybil_log_data = None
+    try:
+        # Path for sybil_attack_log.json (similar logic to demo_context.json)
+        sybil_log_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+            "SupplyChain_dapp/scripts/lifecycle_demo/sybil_attack_log.json"
+        )
+        log_message(f"Looking for sybil_attack_log.json at: {sybil_log_path}")
+        if not os.path.exists(sybil_log_path):
+            log_message(f"Sybil log file not found at {sybil_log_path}. Trying alternative path...")
+            sybil_log_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), 
+                "SupplyChain_dapp/scripts/lifecycle_demo/sybil_attack_log.json"
+            )
+            log_message(f"Trying alternative path for sybil log: {sybil_log_path}")
+            if not os.path.exists(sybil_log_path):
+                sybil_log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
+                                       "..", "SupplyChain_dapp", "scripts", "lifecycle_demo", "sybil_attack_log.json")
+                log_message(f"Trying yet another alternative path for sybil log: {sybil_log_path}")
+                if not os.path.exists(sybil_log_path):
+                    log_message("Sybil attack log file sybil_attack_log.json not found. Proceeding without it.")
+                else:
+                    with open(sybil_log_path, "r", encoding='utf-8') as f:
+                        sybil_log_data = json.load(f)
+                        log_message("Successfully loaded sybil_attack_log.json.")
+            else:
+                with open(sybil_log_path, "r", encoding='utf-8') as f:
+                    sybil_log_data = json.load(f)
+                    log_message("Successfully loaded sybil_attack_log.json.")
+        else:
+            with open(sybil_log_path, "r", encoding='utf-8') as f:
+                sybil_log_data = json.load(f)
+                log_message("Successfully loaded sybil_attack_log.json.")
+    except Exception as e:
+        log_message(f"Error reading sybil_attack_log.json: {e}. Proceeding without it.")
+        sybil_log_data = None
+
+    # --- Extract node addresses and their activities ---
+    node_data_for_fl = [] # Renamed to avoid confusion with 'node_data' from context if used directly
+    all_node_addresses = set() # Using a set to store unique addresses
+
+    # Helper to add node if address is present
+    def add_node_if_present(address, role_name, activities_list):
+        if address and address not in all_node_addresses:
+            node_data_for_fl.append({
+                "address": address,
+                "role": role_name,
+                "activities": activities_list # Activities will be populated by data prep script
+            })
+            all_node_addresses.add(address)
+            log_message(f"Added {role_name} ({address}) to FL client list.")
+
+    # Extract from demo_context.json
+    roles_to_extract = [
+        ("manufacturerAddress", "Manufacturer"),
+        ("transporter1Address", "Transporter1"),
+        ("transporter2Address", "Transporter2"),
+        ("transporter3Address", "Transporter3"),
+        ("retailerAddress", "Retailer"),
+        ("buyer1Address", "Buyer1"),
+        ("buyer2Address", "Buyer2"),
+        ("arbitratorAddress", "Arbitrator")
+    ]
+    for context_key, role_name in roles_to_extract:
+        add_node_if_present(context.get(context_key), role_name, [])
+
+    # Extract Sybil node addresses from sybil_attack_log.json
+    if sybil_log_data and "sybilNodes" in sybil_log_data:
+        for sybil_node_info in sybil_log_data["sybilNodes"]:
+            sybil_address = sybil_node_info.get("address")
+            # Role can be generic or from log if available, e.g., sybil_node_info.get("role", "SybilNode")
+            add_node_if_present(sybil_address, f"SybilNode_{sybil_node_info.get('id', '')}", [])
+    
+    # Extract Bribed node addresses from sybil_attack_log.json (Scenario D)
+    if sybil_log_data and "scenarioD" in sybil_log_data and "bribedNodes" in sybil_log_data["scenarioD"]:
+        for bribed_node_info in sybil_log_data["scenarioD"]["bribedNodes"]:
+            bribed_address = bribed_node_info.get("address")
+            bribed_role = bribed_node_info.get("role", "BribedNode") # Get role from log if available
+            add_node_if_present(bribed_address, f"Bribed_{bribed_role}", [])
+
+    if not node_data_for_fl:
+        log_message("No node data found in context or sybil log. Cannot proceed with FL training for node behavior.")
+        # Optionally, create placeholder data if essential for testing structure
+        # For now, we exit if no real participants are found.
         return False
     
-    # Extract node addresses and their activities
-    node_data = []
-    
-    # Add manufacturer address and activities
-    if "manufacturerAddress" in context:
-        manufacturer_address = context["manufacturerAddress"]
-        manufacturer_activities = []
-        
-        # Check product details for manufacturer activities
-        if "productDetails" in context:
-            for product in context["productDetails"]:
-                if "manufacturerID" in product:
-                    manufacturer_activities.append({
-                        "activity_type": "product_minting",
-                        "tokenId": product.get("tokenId", "unknown"),
-                        "timestamp": datetime.now().isoformat(),
-                        "details": f"Minted product {product.get('uniqueProductID', 'unknown')}"
-                    })
-        
-        node_data.append({
-            "address": manufacturer_address,
-            "role": "Manufacturer",
-            "activities": manufacturer_activities
-        })
-        log_message(f"Added manufacturer with {len(manufacturer_activities)} activities")
-    
-    # Add transporter addresses and activities
-    for i in range(1, 4):  # Assuming up to 3 transporters
-        key = f"transporter{i}Address"
-        if key in context:
-            transporter_address = context[key]
-            transporter_activities = []
-            
-            # Check product details for transport activities
-            if "productDetails" in context:
-                for product in context["productDetails"]:
-                    if "transportStatus" in product and product["transportStatus"] == "Completed":
-                        transporter_activities.append({
-                            "activity_type": "transport",
-                            "tokenId": product.get("tokenId", "unknown"),
-                            "timestamp": datetime.now().isoformat(),
-                            "details": f"Transported product {product.get('uniqueProductID', 'unknown')}"
-                        })
-            
-            node_data.append({
-                "address": transporter_address,
-                "role": f"Transporter{i}",
-                "activities": transporter_activities
-            })
-            log_message(f"Added transporter{i} with {len(transporter_activities)} activities")
-    
-    # Add buyer/retailer addresses and activities
-    for role in ["retailerAddress", "buyer1Address", "buyer2Address"]:
-        if role in context:
-            buyer_address = context[role]
-            buyer_activities = []
-            
-            # Check product details for purchase activities
-            if "productDetails" in context:
-                for product in context["productDetails"]:
-                    if "currentOwnerAddress" in product and product["currentOwnerAddress"] == buyer_address:
-                        buyer_activities.append({
-                            "activity_type": "purchase",
-                            "tokenId": product.get("tokenId", "unknown"),
-                            "timestamp": datetime.now().isoformat(),
-                            "details": f"Purchased product {product.get('uniqueProductID', 'unknown')}"
-                        })
-            
-            node_data.append({
-                "address": buyer_address,
-                "role": role.replace("Address", ""),
-                "activities": buyer_activities
-            })
-            log_message(f"Added {role} with {len(buyer_activities)} activities")
-    
-    # Add arbitrator address and activities
-    if "arbitratorAddress" in context:
-        arbitrator_address = context["arbitratorAddress"]
-        arbitrator_activities = []
-        
-        # In a real implementation, you would extract dispute resolution activities
-        # For demo purposes, we'll add a placeholder activity
-        arbitrator_activities.append({
-            "activity_type": "arbitration",
-            "disputeId": "1",
-            "timestamp": datetime.now().isoformat(),
-            "details": "Resolved dispute for product"
-        })
-        
-        node_data.append({
-            "address": arbitrator_address,
-            "role": "Arbitrator",
-            "activities": arbitrator_activities
-        })
-        log_message(f"Added arbitrator with {len(arbitrator_activities)} activities")
-    
-    # If no node data found, create placeholder data
-    if len(node_data) == 0:
-        log_message("No node data found in context, creating placeholder data")
-        node_data = [
-            {
-                "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                "role": "Manufacturer",
-                "activities": [
-                    {"activity_type": "product_minting", "tokenId": "1", "timestamp": datetime.now().isoformat()}
-                ]
-            },
-            {
-                "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-                "role": "Transporter",
-                "activities": [
-                    {"activity_type": "transport", "tokenId": "1", "timestamp": datetime.now().isoformat()}
-                ]
-            },
-            {
-                "address": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
-                "role": "Buyer",
-                "activities": [
-                    {"activity_type": "purchase", "tokenId": "1", "timestamp": datetime.now().isoformat()}
-                ]
-            }
-        ]
-        log_message(f"Created {len(node_data)} placeholder node entries")
-    
-    # Extract node addresses for FL clients
-    node_addresses = [node["address"] for node in node_data]
-    log_message(f"Extracted {len(node_addresses)} node addresses for FL clients")
-    
-    # Run the Federated Learning model
+    log_message(f"Total unique FL clients identified: {len(node_data_for_fl)}")
+
+    # --- Run the Federated Learning model ---
     try:
-        num_clients = min(len(node_addresses), 3)  # Use at most 3 clients for demo
-        log_message(f"Running Node Behavior Timeseries with {num_clients} FL clients")
+        num_clients_to_use = len(node_data_for_fl)
+        log_message(f"Running Node Behavior Timeseries with {num_clients_to_use} FL clients")
         
-        # Make federated datasets
         log_message("Preparing federated data...")
-        federated_data = make_federated_data_p3_timeseries_real(node_data, num_fl_clients=num_clients)
+        # Pass node_data_for_fl (which now just contains address and role) and sybil_log_data
+        federated_data = make_federated_data_p3_timeseries_real(
+            clients_info=node_data_for_fl, # List of dicts with {'address': ..., 'role': ...}
+            sybil_attack_log=sybil_log_data
+        )
         
-        # Here you would normally run the actual FL training
-        # For demo purposes, we'll just log the data preparation success
         log_message(f"Successfully prepared federated data for {len(federated_data)} clients")
         
-        # Save results to a file for later analysis
+        # --- Save results ---
         results = {
             "timestamp": datetime.now().isoformat(),
             "model": "Node Behavior Timeseries",
-            "num_clients": num_clients,
-            "node_addresses": node_addresses,
-            "node_data_summary": [{"address": node["address"], "role": node["role"], "activity_count": len(node["activities"])} for node in node_data],
-            "datasets_prepared": len(federated_data)
+            "num_clients_available": len(node_data_for_fl),
+            "num_datasets_prepared": len(federated_data),
+            "clients_info": node_data_for_fl,
+            "sybil_log_loaded": sybil_log_data is not None
         }
         
         results_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
         os.makedirs(results_dir, exist_ok=True)
-        
         results_path = os.path.join(results_dir, "node_behavior_timeseries_results.json")
         with open(results_path, "w", encoding='utf-8') as f:
-            json.dump(results, f, indent=2)
-        
-        log_message(f"Node Behavior Timeseries results saved to {results_path}")
+            json.dump(results, f, indent=4)
+        log_message(f"Results saved to {results_path}")
         return True
-        
+
     except Exception as e:
-        log_message(f"Error running Node Behavior Timeseries: {e}")
+        log_message(f"Error during Node Behavior Timeseries FL model execution: {e}")
         import traceback
-        log_message(traceback.format_exc())
+        log_message(traceback.format_exc()) # Log full traceback
         return False
-    finally:
-        log_message("=== Completed Node Behavior Timeseries FL Model ===")
 
 if __name__ == "__main__":
+    start_time = time.time()
     success = main()
-    sys.exit(0 if success else 1)
+    end_time = time.time()
+    log_message(f"Node Behavior Timeseries FL script finished in {end_time - start_time:.2f} seconds. Success: {success}")

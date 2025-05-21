@@ -41,6 +41,7 @@ contract NFTCore is ERC721URIStorage, AccessControl {
         address buyer;
         address seller;
         uint256 price;
+        uint256 collateral; // Added collateral field
         PurchaseStatus status;
     }
 
@@ -183,11 +184,13 @@ contract NFTCore is ERC721URIStorage, AccessControl {
     function depositPurchaseCollateral(uint256 tokenId) public payable {
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
         require(purchase.status == PurchaseStatus.AwaitingCollateral, "NFTCore: Not awaiting collateral");
-        require(msg.value == purchase.price, "NFTCore: Incorrect collateral amount");
+        // require(msg.value == purchase.price, "NFTCore: Incorrect collateral amount"); // Commented out, collateral can be different from price
+        require(msg.value > 0, "NFTCore: Collateral amount must be greater than 0"); // Ensure some collateral is sent
         require(msg.sender == purchase.buyer, "NFTCore: Only buyer can deposit collateral");
 
+        purchase.collateral = msg.value; // Set the collateral amount
         purchase.status = PurchaseStatus.CollateralDeposited;
-        emit CollateralDepositedForPurchase(tokenId, msg.sender, msg.value, block.timestamp);
+        emit CollateralDepositedForPurchase(tokenId, msg.sender, msg.value, block.timestamp); // Emit msg.value as collateral amount
         emit PurchaseStatusUpdated(tokenId, PurchaseStatus.AwaitingCollateral, PurchaseStatus.CollateralDeposited, msg.sender, block.timestamp);
         // Update lastActionTimestamp for buyer (msg.sender)
     }
@@ -199,7 +202,7 @@ contract NFTCore is ERC721URIStorage, AccessControl {
         // Update lastActionTimestamp for msg.sender
     }
 
-    // Renamed to _releasePurchasePaymentInternal, changed to internal, added actor, removed seller check
+    // Rename aymentInternal, changed to internal, added actor, removed seller check
     function _releasePurchasePaymentInternal(uint256 tokenId, bool meetsIncentiveCriteria, address actor) internal { 
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
         require(purchase.status == PurchaseStatus.TransportCompleted, "NFTCore: Payment can only be released after delivery confirmation");
@@ -261,16 +264,17 @@ contract NFTCore is ERC721URIStorage, AccessControl {
         PurchaseInfo storage purchase = purchaseInfos[tokenId];
 
         require(purchase.status == PurchaseStatus.TransportCompleted, "NFTCore: Product not yet marked as transport completed by transporter"); 
-
         require(msg.sender == purchase.buyer || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "NFTCore: Only buyer or admin can confirm delivery");
 
         address currentOwner = ownerOf(tokenId); 
-        require(currentOwner != purchase.buyer, "NFTCore: Buyer already owns the token");
-        require(currentOwner != address(0), "NFTCore: Invalid current owner for transfer");
 
-        _transferNFTInternal(currentOwner, purchase.buyer, tokenId);
+        if (currentOwner != purchase.buyer) {
+            // Only transfer if the buyer doesn't already own it
+            require(currentOwner != address(0), "NFTCore: Invalid current owner for transfer");
+            _transferNFTInternal(currentOwner, purchase.buyer, tokenId);
+        }
+        // If currentOwner == purchase.buyer, the token is already with the buyer, so we skip the transfer.
 
-        // Call the internal function, passing msg.sender as the actor
         _releasePurchasePaymentInternal(tokenId, meetsIncentiveCriteria, msg.sender);
 
         emit PaymentAndTransferCompleted(tokenId, purchase.buyer, purchase.seller, purchase.price, block.timestamp);

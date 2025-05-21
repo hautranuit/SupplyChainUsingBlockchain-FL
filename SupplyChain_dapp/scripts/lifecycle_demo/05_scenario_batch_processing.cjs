@@ -15,7 +15,8 @@ function getDemoContext() {
 }
 
 async function main() {
-    console.log("--- Starting 05: Batch Processing Scenarios ---");
+    console.log("--- Starting 05: Batch Processing Scenarios - Product Exchange ---");
+    const metrics = {}; // Initialize metrics object
 
     const context = getDemoContext();
     const contractAddress = context.contractAddress;
@@ -31,11 +32,12 @@ async function main() {
     // Signers configured in script 01:
     // deployer = signers[0]; manufacturerAcc = signers[1];
     // transporter1Acc = signers[2]; transporter2Acc = signers[3]; 
-    const batchProposerAcc = signers[4]; // transporter3Acc (Secondary Node)
-    // retailerAcc = signers[5]; buyer1Acc = signers[6]; arbitratorAcc = signers[7];
-    // Primary nodes (transporter1Acc, transporter2Acc) will act as validators.
-    // For more validators, we would need more signers or re-use, but script 01 configured 5 primary nodes if we include deployer and others not explicitly named transporterXAcc.
-    // For simplicity, we will use the configured primary nodes (T1, T2) and potentially others if the contract selects them.
+    // transporter3Acc = signers[4]; // Previously batchProposerAcc
+    const retailerAcc = signers[5]; 
+    const buyer1Acc = signers[6]; // Buyer1 will be the batch proposer (Secondary Node)
+    // arbitratorAcc = signers[7];
+    
+    const batchProposerAcc = buyer1Acc; // Buyer1 proposes the exchange batch
 
     if (signers.length < 8) {
         console.error("This script requires at least 8 signers as configured in 01_deploy_and_configure.js.");
@@ -43,56 +45,106 @@ async function main() {
     }
     const deployer = signers[0];
     const supplyChainNFT = await ethers.getContractAt("SupplyChainNFT", contractAddress, deployer);
-    console.log("Connected to contract.");
+    console.log("Connected to contract SupplyChainNFT.");
 
-    // Identify products that completed transport and might need a final batch transfer (e.g., to a final holding address or confirming state)
-    // For this demo, let's assume the transport completion in script 04 means the buyer (current owner) now wants to formally log this via a batch process, 
-    // or perhaps transfer to a different internal wallet. We will simulate a batch of transfers for products that completed transport.
+    // --- Kịch bản trao đổi sản phẩm qua Batch ---
+    // Buyer1 (batchProposerAcc) muốn đổi Product 1 của mình lấy Product 2 và Product 3 từ Retailer (retailerAcc).
 
-    const product1Info = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_001" && p.transportStatus === "Completed");
-    const product2Info = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_002" && p.transportStatus === "Completed");
+    console.log("\\n--- Product Exchange Simulation via Batch ---");
+    console.log(`Proposer (Buyer1 - Secondary Node): ${batchProposerAcc.address}`);
+    console.log(`Counterparty (Retailer): ${retailerAcc.address}`);
 
-    if (!product1Info || !product2Info) {
-        console.error("Could not find completed transport details for Product 1 or Product 2. Run previous scripts.");
+    // Lấy thông tin sản phẩm từ context (giả định script 04 đã cập nhật đúng)
+    // Product 1: DEMO_PROD_001, thuộc sở hữu của Buyer1
+    // Product 2: DEMO_PROD_002, thuộc sở hữu của Retailer
+    // Product 3: DEMO_PROD_003, thuộc sở hữu của Retailer (cần thêm vào demo_context nếu chưa có)
+
+    const product1Context = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_001");
+    const product2Context = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_002");
+    const product3Context = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_003"); // Giả sử Product 3 được tạo và chuyển cho Retailer ở script trước
+
+    if (!product1Context || !product2Context || !product3Context) {
+        console.error("Could not find required product details (DEMO_PROD_001, DEMO_PROD_002, DEMO_PROD_003) in demo_context.json. Ensure previous scripts ran successfully and updated context.");
+        if (!product1Context) console.error("Missing: DEMO_PROD_001");
+        if (!product2Context) console.error("Missing: DEMO_PROD_002");
+        if (!product3Context) console.error("Missing: DEMO_PROD_003");
+        process.exit(1);
+    }
+    
+    // Kiểm tra tokenId và currentOwnerAddress
+    if (!product1Context.tokenId || !product1Context.currentOwnerAddress ||
+        !product2Context.tokenId || !product2Context.currentOwnerAddress ||
+        !product3Context.tokenId || !product3Context.currentOwnerAddress) {
+        console.error("Missing tokenId or currentOwnerAddress for one or more products in demo_context.json.");
+        console.log("Product 1 Context:", product1Context);
+        console.log("Product 2 Context:", product2Context);
+        console.log("Product 3 Context:", product3Context);
         process.exit(1);
     }
 
-    // Verify that we have the required fields
-    if (!product1Info.currentOwnerAddress || !product1Info.tokenId || 
-        !product2Info.currentOwnerAddress || !product2Info.tokenId) {
-        console.error("Missing required fields in product details. Required: currentOwnerAddress and tokenId");
-        console.error("Product 1 details:", product1Info);
-        console.error("Product 2 details:", product2Info);
+    // Xác minh chủ sở hữu ban đầu (quan trọng cho logic script)
+    if (product1Context.currentOwnerAddress.toLowerCase() !== buyer1Acc.address.toLowerCase()) {
+        console.error(`Error: Product 1 (Token ID: ${product1Context.tokenId}) is expected to be owned by Buyer1 (${buyer1Acc.address}), but found owner: ${product1Context.currentOwnerAddress}. Check demo_context.json.`);
+        process.exit(1);
+    }
+    if (product2Context.currentOwnerAddress.toLowerCase() !== retailerAcc.address.toLowerCase()) {
+        console.error(`Error: Product 2 (Token ID: ${product2Context.tokenId}) is expected to be owned by Retailer (${retailerAcc.address}), but found owner: ${product2Context.currentOwnerAddress}. Check demo_context.json.`);
+        process.exit(1);
+    }
+    if (product3Context.currentOwnerAddress.toLowerCase() !== retailerAcc.address.toLowerCase()) {
+        console.error(`Error: Product 3 (Token ID: ${product3Context.tokenId}) is expected to be owned by Retailer (${retailerAcc.address}), but found owner: ${product3Context.currentOwnerAddress}. Check demo_context.json.`);
         process.exit(1);
     }
 
-    const transactionsForBatch1 = [];
-    // Example: Transfer Product 1 from current owner (buyer1) to a new internal wallet (e.g., retailerAcc for demo)
-        transactionsForBatch1.push({
-            from: product1Info.currentOwnerAddress,
-            to: signers[5].address, // retailerAcc, let's say this is the final destination wallet
-            tokenId: ethers.BigNumber.from(product1Info.tokenId) // Ensure tokenId is BigNumber
-        });
+    console.log("Debug ethers.BigNumber:", ethers.BigNumber); // This will likely show undefined
+    console.log("Debug ethers.utils:", ethers.utils); // In v5, BigNumber might have been here
+    console.log("Using ethers.BigInt for conversion if available, or global BigInt");
 
-    // Example: Transfer Product 2 from current owner (buyer2/retailer) to another internal wallet (e.g., deployer for demo)
-        transactionsForBatch1.push({
-            from: product2Info.currentOwnerAddress,
-            to: deployer.address, // deployer's address
-            tokenId: ethers.BigNumber.from(product2Info.tokenId) // Ensure tokenId is BigNumber
-        });
+    const transactionsForExchangeBatch = [
+        { // Buyer1 chuyển Product 1 cho Retailer
+            from: buyer1Acc.address,
+            to: retailerAcc.address,
+            tokenId: BigInt(product1Context.tokenId) // Corrected: Use global BigInt
+        },
+        { // Retailer chuyển Product 2 cho Buyer1
+            from: retailerAcc.address,
+            to: buyer1Acc.address,
+            tokenId: BigInt(product2Context.tokenId) // Corrected: Use global BigInt
+        },
+        { // Retailer chuyển Product 3 cho Buyer1
+            from: retailerAcc.address,
+            to: buyer1Acc.address,
+            tokenId: BigInt(product3Context.tokenId) // Corrected: Use global BigInt
+        }
+    ];
 
-    if (transactionsForBatch1.length === 0) {
+    if (transactionsForExchangeBatch.length === 0) {
         console.log("No transactions to batch process. Exiting.");
         return;
     }
 
-    console.log(`\n--- Scenario 1: Proposing and Committing a Batch of ${transactionsForBatch1.length} Transactions ---`);
-    console.log("Transactions to be batched:", transactionsForBatch1.map(t => ({from: t.from, to: t.to, tokenId: t.tokenId.toString() })));
-    console.log(`Batch Proposer: ${batchProposerAcc.address}`);
+    console.log(`\\n--- Scenario: Proposing and Committing Product Exchange Batch (${transactionsForExchangeBatch.length} Transactions) ---`);
+    console.log("Detailed transactions for the exchange batch:");
+    console.log(`  1. Product ${product2Context.uniqueProductID} (Token ID: ${product2Context.tokenId}) from Retailer (${retailerAcc.address}) to Buyer1 (${buyer1Acc.address})`);
+    console.log(`  2. Product ${product3Context.uniqueProductID} (Token ID: ${product3Context.tokenId}) from Retailer (${retailerAcc.address}) to Buyer1 (${buyer1Acc.address})`);
+    console.log(`  3. Product ${product1Context.uniqueProductID} (Token ID: ${product1Context.tokenId}) from Buyer1 (${buyer1Acc.address}) to Retailer (${retailerAcc.address})`);
+    
+    console.log("\\nRationale for Batching these transactions:");
+    console.log("  Instead of executing 3 separate NFT transfer transactions (each incurring gas fees and requiring individual confirmation), we are batching them.");
+    console.log("  This approach offers several advantages:");
+    console.log("    - Optimized Gas Costs: A single 'proposeBatch' and 'commitBatch' operation (plus validator votes) is generally more gas-efficient than multiple individual 'transferFrom' calls, especially as the number of batched items grows.");
+    console.log("    - Improved Time Efficiency: Waiting for confirmations for fewer batch-level transactions is faster than for many individual ones.");
+    console.log("    - Enhanced Atomicity: The entire exchange (all 3 transfers) either succeeds together or fails together if the batch isn't committed. This prevents partial exchanges, which is crucial for such multi-party swaps.");
 
-    let tx = await supplyChainNFT.connect(batchProposerAcc).proposeBatch(transactionsForBatch1);
+    console.log(`\\nBatch Proposer (Buyer1): ${batchProposerAcc.address}`);
+
+    // Kiểm tra quyền của Proposer (Buyer1) để chuyển Product 1
+    // và quyền của Retailer để chuyển Product 2 & 3 (thông qua việc Proposer tạo batch)
+    // Smart contract sẽ kiểm tra quyền sở hữu và phê duyệt (approval) khi commit batch.
+
+    let tx = await supplyChainNFT.connect(batchProposerAcc).proposeBatch(transactionsForExchangeBatch);
     let receipt = await tx.wait(1);
-    console.log(`  Batch proposed. Gas Used: ${receipt.gasUsed.toString()}`);
+    console.log(`  Batch proposed for exchange. Gas Used: ${receipt.gasUsed.toString()}`);
 
     let proposeEvent;
     for (const log of receipt.logs) {
@@ -106,10 +158,10 @@ async function main() {
     }
     if (!proposeEvent) throw new Error("BatchProposed event not found.");
     const batchId = proposeEvent.args.batchId;
-    const selectedValidators = proposeEvent.args.selectedValidators;
-    console.log(`  Batch ID: ${batchId.toString()}, Selected Validators (${selectedValidators.length}): ${selectedValidators.join(", ")}`);
+    const selectedValidators = proposeEvent.args.selectedValidators; // These are Primary Nodes
+    console.log(`  Batch ID for Exchange: ${batchId.toString()}, Selected Validators (${selectedValidators.length}): ${selectedValidators.join(", ")}`);
 
-    console.log("  Validators voting (aiming for supermajority approval)...");
+    console.log("\\n  Validators voting for the exchange batch (aiming for supermajority approval)...");
     let approvals = 0;
     const superMajorityFraction = await supplyChainNFT.superMajorityFraction();
     const numSelectedValidators = selectedValidators.length;
@@ -142,16 +194,59 @@ async function main() {
 
         const batchDetails = await supplyChainNFT.getBatchDetails(batchId);
         if (batchDetails.committed) {
-            console.log("    Batch successfully committed!");
+            console.log("    Exchange Batch successfully committed!");
             metrics.successfulBatches = (metrics.successfulBatches || 0) + 1;
-            // Verify ownership changes
-            for (const batchedTx of transactionsForBatch1) {
-                const newOwner = await supplyChainNFT.ownerOf(batchedTx.tokenId);
-                console.log(`      Token ID ${batchedTx.tokenId.toString()} new owner: ${newOwner} (Expected: ${batchedTx.to})`);
-                if (newOwner !== batchedTx.to) {
-                    console.error(`        ERROR: Ownership mismatch for Token ID ${batchedTx.tokenId.toString()}!`);
-                }
+            
+            console.log("\\n    Verifying ownership changes after exchange batch commit:");
+            // Giao dịch 1: Product 2 từ Retailer sang Buyer1
+            let newOwnerP2 = await supplyChainNFT.ownerOf(product2Context.tokenId);
+            console.log(`      Product ${product2Context.uniqueProductID} (Token ID: ${product2Context.tokenId}) new owner: ${newOwnerP2} (Expected: ${buyer1Acc.address})`);
+            if (newOwnerP2.toLowerCase() !== buyer1Acc.address.toLowerCase()) {
+                console.error(`        ERROR: Ownership mismatch for Token ID ${product2Context.tokenId}!`);
             }
+
+            // Giao dịch 2: Product 3 từ Retailer sang Buyer1
+            let newOwnerP3 = await supplyChainNFT.ownerOf(product3Context.tokenId);
+            console.log(`      Product ${product3Context.uniqueProductID} (Token ID: ${product3Context.tokenId}) new owner: ${newOwnerP3} (Expected: ${buyer1Acc.address})`);
+            if (newOwnerP3.toLowerCase() !== buyer1Acc.address.toLowerCase()) {
+                console.error(`        ERROR: Ownership mismatch for Token ID ${product3Context.tokenId}!`);
+            }
+
+            // Giao dịch 3: Product 1 từ Buyer1 sang Retailer
+            let newOwnerP1 = await supplyChainNFT.ownerOf(product1Context.tokenId);
+            console.log(`      Product ${product1Context.uniqueProductID} (Token ID: ${product1Context.tokenId}) new owner: ${newOwnerP1} (Expected: ${retailerAcc.address})`);
+            if (newOwnerP1.toLowerCase() !== retailerAcc.address.toLowerCase()) {
+                console.error(`        ERROR: Ownership mismatch for Token ID ${product1Context.tokenId}!`);
+            }
+            console.log("\\n    Batch processing for product exchange completed. This demonstrates efficient, atomic handling of multiple transfers.");
+
+            // --- Cập nhật demo_context.json ---
+            console.log("\\n    Updating demo_context.json with new ownership and status...");
+            const product1Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_001");
+            const product2Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_002");
+            const product3Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_003");
+
+            if (product1Index !== -1) {
+                context.productDetails[product1Index].currentOwnerAddress = retailerAcc.address;
+                context.productDetails[product1Index].productStatus = "ExchangedInBatch_ToRetailer";
+                console.log(`      Updated Product 1 (DEMO_PROD_001) owner to ${retailerAcc.address}, status to ExchangedInBatch_ToRetailer`);
+            }
+            if (product2Index !== -1) {
+                context.productDetails[product2Index].currentOwnerAddress = buyer1Acc.address;
+                context.productDetails[product2Index].productStatus = "ExchangedInBatch_ToBuyer1";
+                console.log(`      Updated Product 2 (DEMO_PROD_002) owner to ${buyer1Acc.address}, status to ExchangedInBatch_ToBuyer1`);
+            }
+            if (product3Index !== -1) {
+                context.productDetails[product3Index].currentOwnerAddress = buyer1Acc.address;
+                context.productDetails[product3Index].productStatus = "ExchangedInBatch_ToBuyer1";
+                console.log(`      Updated Product 3 (DEMO_PROD_003) owner to ${buyer1Acc.address}, status to ExchangedInBatch_ToBuyer1`);
+            }
+            
+            const demoContextPath = path.join(__dirname, "demo_context.json");
+            fs.writeFileSync(demoContextPath, JSON.stringify(context, null, 2));
+            console.log(`    demo_context.json updated successfully at ${demoContextPath}`);
+            // --- Kết thúc cập nhật demo_context.json ---
+
         } else if (batchDetails.flagged) {
             console.log("    Batch was flagged, not committed (as expected if approvals were insufficient or other issue).");
             metrics.failedBatches = (metrics.failedBatches || 0) + 1;
@@ -168,9 +263,9 @@ async function main() {
 
     // Update context (if necessary, e.g., new owners)
     // For now, just logging completion.
-    fs.appendFileSync(path.join(__dirname, "demo_run.log"), `Batch Processing for Batch ID ${batchId.toString()} completed at ${new Date().toISOString()}\n`);
+    fs.appendFileSync(path.join(__dirname, "demo_run.log"), `Product Exchange Batch Processing for Batch ID ${batchId ? batchId.toString() : 'N/A'} completed at ${new Date().toISOString()}\\n`);
 
-    console.log("--- 05: Batch Processing Scenarios Complete ---");
+    console.log("\\n--- 05: Batch Processing Scenarios (Product Exchange) Complete ---");
 }
 
 main()

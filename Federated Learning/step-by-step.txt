@@ -16,8 +16,7 @@
 (WSL Ubuntu) python fl_integration/run_arbitrator_bias.py
 
 # Attack simulation
-(cmd window) npx hardhat run 07_simulate_sybil_attack.cjs --network amoy
-(cmd window) npx hardhat run 08_simulate_bribery_attack.cjs --network amoy
+(cmd window) npx hardhat run 07_simulate_sybil_bribery_attack.cjs --network amoy
 
 # Retrain ALL models with anomalous data
 (WSL Ubuntu) python fl_integration/run_sybil_detection.py

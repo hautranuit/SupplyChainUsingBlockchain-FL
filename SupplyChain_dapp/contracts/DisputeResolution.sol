@@ -2,96 +2,117 @@
 pragma solidity 0.8.28;
 
 abstract contract DisputeResolution {
-    mapping(uint256 => address[]) public arbitratorCandidates;
-    mapping(uint256 => mapping(address => uint256)) public disputeVotes;
-    mapping(uint256 => address) public selectedArbitrator;
-    mapping(uint256 => bool) public disputeResolved;
+    // --- Data Structures ---
+    struct Dispute {
+        uint256 tokenId;
+        address plaintiff; // Party who opened the dispute
+        address defendant; // Counterparty (e.g., seller or previous owner)
+        string reason;
+        // MODIFIED: evidenceCID now stores the actual IPFS CID, updated by backend
+        string evidenceCID; // CID for plaintiff's evidence (updated by backend)
+        address[] candidates; // Arbitrator candidates
+        mapping(address => uint256) votes; // Votes for each candidate
+        address selectedArbitrator;
+        bool decisionRecorded;
+        string resolutionDetails; // Arbitrator's textual decision
+        // MODIFIED: resolutionCID now stores the actual IPFS CID, updated by backend
+        string resolutionCID;     // CID for arbitrator's resolution document (updated by backend)
+        uint8 outcome;            // Enum-like: 0=Dismissed, 1=FavorPlaintiff, 2=FavorDefendant, 3=Partial
+        bool nftReturnEnforced; // Added
+        bool refundEnforced;    // Added
+        bool enforced;
+        uint256 openedTimestamp;
+        uint256 decisionTimestamp;
+        uint256 enforcedTimestamp;
+    }
+
+    // --- State Variables ---
+    // Instead of direct mappings by tokenId, we'll use a disputeId.
+    // The concrete contract (SupplyChainNFT) will manage the mapping from disputeId to Dispute struct.
+    // It will also manage nextDisputeId and potentially a mapping from tokenId to activeDisputeId.
 
     // --- Events ---
-    event DisputeOpened(uint256 indexed tokenId);
-    event ArbitratorVoted(uint256 indexed tokenId, address indexed voter, address indexed candidate);
-    event ArbitratorSelected(uint256 indexed tokenId, address indexed arbitrator);
-    event DisputeResolved(uint256 indexed tokenId, bool result);
+    // Parameters updated to use disputeId and include more details
+    // MODIFIED: DisputeOpened event now emits evidenceDataString (or placeholder) initially
+    event DisputeOpened(uint256 indexed disputeId, uint256 indexed tokenId, address indexed plaintiff, string reason, string evidenceDataString, uint256 timestamp);
+    event ArbitratorCandidateProposed(uint256 indexed disputeId, address indexed candidate, address indexed proposer, uint256 timestamp);
+    event ArbitratorVoted(uint256 indexed disputeId, address indexed voter, address indexed candidate, uint256 timestamp);
+    event ArbitratorSelected(uint256 indexed disputeId, uint256 indexed tokenId, address indexed selectedArbitrator, uint256 timestamp);
+    
+    // MODIFIED: DisputeDecisionRecorded event now emits resolutionDataString (or placeholder) initially
+    event DisputeDecisionRecorded(
+        uint256 indexed disputeId,
+        uint256 indexed tokenId,
+        address indexed arbitrator,
+        string resolutionDetails,
+        string resolutionDataString, // Was resolutionCID, now data string for backend to process
+        uint8 outcome,
+        uint256 timestamp
+    );
+    event NFTReturnEnforced(
+        uint256 indexed disputeId,
+        uint256 indexed tokenId,
+        address indexed arbitrator,
+        address from,
+        address to,
+        uint256 timestamp
+    );
+    event RefundEnforced(
+        uint256 indexed disputeId,
+        address arbitrator, // Removed indexed
+        address indexed refundFrom, // Account deemed responsible for the refund
+        address indexed refundTo,   // Account receiving the refund
+        uint256 amount,
+        uint256 timestamp
+    );
+    event DisputeConcluded(uint256 indexed disputeId, uint256 indexed tokenId, bool wasEnforced, uint256 timestamp);
 
-    // Abstract function: must be implemented by the inheriting contract.
-    // Function to get the product's history based on the tokenId
+
+    // --- Abstract Functions ---
+    // These functions will be implemented in SupplyChainNFT.sol
+
+    // Function to get the product's history based on the tokenId (remains the same)
     function getProductHistory(uint256 tokenId) public view virtual returns (string memory);
     
-    // Function to check if a candidate is verified
+    // Function to check if a candidate is verified (remains the same)
     function isVerified(address candidate) public view virtual returns (bool);
 
-    // Open a dispute for a specific product
-    function openDispute(uint256 tokenId, address[] memory candidates) public virtual {
-        require(!disputeResolved[tokenId], "Dispute already resolved");
-        
-        // Ensure all candidates are verified before allowing them to be part of the arbitration
-        for (uint256 i = 0; i < candidates.length; i++) {
-            require(isVerified(candidates[i]), "Candidate not verified");
-        }
+    // --- Dispute Lifecycle Functions (Signatures for concrete implementation) ---
 
-        // Assign the candidates to the dispute
-        arbitratorCandidates[tokenId] = candidates;
-        emit DisputeOpened(tokenId);
-    }
+    // openDispute now needs to be defined in the concrete contract to return a disputeId
+    // and handle the new Dispute struct.
+    // The old signature: function openDispute(uint256 tokenId, address[] memory candidates) public virtual;
+    // will be effectively replaced by a new one in SupplyChainNFT.sol that takes reason, evidenceCID etc.
+    // NEW: Abstract functions for backend to update CIDs
+    function updateDisputeEvidenceCID(uint256 disputeId, string memory newEvidenceCID) public virtual;
+    function updateDisputeResolutionCID(uint256 disputeId, string memory newResolutionCID) public virtual;
 
-    // Vote for an arbitrator for a specific dispute
-    function voteForArbitrator(uint256 tokenId, address candidate) public virtual {
-        require(isCandidate(tokenId, candidate), "Not a valid arbitrator candidate");
-        disputeVotes[tokenId][candidate] += 1;
-        emit ArbitratorVoted(tokenId, msg.sender, candidate);
-    }
+    function proposeArbitratorCandidate(uint256 disputeId, address candidate) public virtual;
 
-    // Check if a candidate is part of the dispute's candidates list
-    function isCandidate(uint256 tokenId, address candidate) internal view virtual returns (bool) {
-        address[] memory candidates = arbitratorCandidates[tokenId];
-        for (uint256 i = 0; i < candidates.length; i++) {
-            if (candidates[i] == candidate) {
-                return true;
-            }
-        }
-        return false;
-    }
+    function voteForArbitrator(uint256 disputeId, address candidate) public virtual;
 
-    // Select the arbitrator with the highest votes
-    function selectArbitrator(uint256 tokenId) public virtual {
-        require(arbitratorCandidates[tokenId].length > 0, "No candidates available");
-        
-        address winner;
-        uint256 highestVotes = 0;
-        address[] memory candidates = arbitratorCandidates[tokenId];
+    function selectArbitrator(uint256 disputeId) public virtual;
 
-        // Determine the candidate with the highest number of votes
-        for (uint256 i = 0; i < candidates.length; i++) {
-            address candidate = candidates[i];
-            if (disputeVotes[tokenId][candidate] > highestVotes) {
-                highestVotes = disputeVotes[tokenId][candidate];
-                winner = candidate;
-            }
-        }
-        
-        require(winner != address(0), "No valid arbitrator selected");
-        selectedArbitrator[tokenId] = winner;
-        emit ArbitratorSelected(tokenId, winner);
-    }
+    function recordDecision(
+        uint256 disputeId,
+        string memory resolutionDetails,
+        string memory resolutionDataString, // Was resolutionCID, now data string
+        uint8 outcome
+    ) public virtual;
 
-    // Resolve a dispute with a decision (true or false)
-    function resolveDispute(uint256 tokenId, uint256 disputeBlockNumber, bool decision) public virtual {
-        // Only the selected arbitrator can resolve the dispute
-        require(msg.sender == selectedArbitrator[tokenId], "Only selected arbitrator can resolve");
-        require(!disputeResolved[tokenId], "Dispute already resolved");
+    function enforceNFTReturn(uint256 disputeId, address returnToAddress) public virtual;
 
-        // Get the product's history as evidence
-        string memory evidence = getProductHistory(tokenId);
-        require(bytes(evidence).length > 0, "No blockchain evidence found");
+    function enforceRefund(uint256 disputeId, address refundTo, address refundFrom, uint256 amount) public virtual;
 
-        // Ensure that the dispute resolution is happening within a valid block range
-        require(block.number > disputeBlockNumber && block.number - disputeBlockNumber <= 256, "Block number out of range");
+    // Future: function enforceRefund(...) public virtual;
 
-        // For demonstration purposes, the decision is directly used as the resolution result
-        bool resolutionResult = decision;
+    function concludeDispute(uint256 disputeId) public virtual;
 
-        // Mark the dispute as resolved and emit the event
-        disputeResolved[tokenId] = true;
-        emit DisputeResolved(tokenId, resolutionResult);
-    }
+
+    // Helper: Check if a candidate is part of the dispute's candidates list
+    // This will be implemented in the concrete contract using the Dispute struct.
+    // function isCandidate(uint256 disputeId, address candidate) internal view virtual returns (bool);
+
+    // The old resolveDispute is now broken into recordDecision, enforce actions, and concludeDispute.
+    // Old: function resolveDispute(uint256 tokenId, uint256 disputeBlockNumber, bool decision) public virtual;
 }

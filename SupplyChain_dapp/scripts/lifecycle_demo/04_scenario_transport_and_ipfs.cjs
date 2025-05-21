@@ -161,15 +161,15 @@ async function main() {
     console.log(`    Buyer: ${buyer1.address}`);
     const currentOwnerOfToken1 = await supplyChainNFT.ownerOf(tokenId1);
     console.log(`    Current Owner of Token ${tokenId1}: ${currentOwnerOfToken1}`);
-    const purchaseInfoP1 = await supplyChainNFT.getPurchaseInfo(tokenId1); // Assuming getPurchaseInfo is on supplyChainNFT (NFTCore)
+    const purchaseInfoP1 = await supplyChainNFT.purchaseInfos(tokenId1); // Changed from getPurchaseInfo
     console.log(`    Purchase Info for Token ${tokenId1}:`);
     console.log(`      Seller: ${purchaseInfoP1.seller}`);
     console.log(`      Buyer: ${purchaseInfoP1.buyer}`);
     console.log(`      Price: ${ethers.formatEther(purchaseInfoP1.price)} ETH`);
     console.log(`      Collateral: ${ethers.formatEther(purchaseInfoP1.collateral)} ETH`);
     console.log(`      Status (Enum): ${purchaseInfoP1.status}`); // 0: Empty, 1: Listed, 2: Initiated, 3: CollateralDeposited, 4: InTransit, 5: TransportCompleted, 6: Complete, 7: Cancelled
-    const marketplaceBalance = await ethers.provider.getBalance(marketplace.target);
-    console.log(`    Marketplace Contract (${marketplace.target}) Balance: ${ethers.formatEther(marketplaceBalance)} ETH`);
+    const marketplaceBalance = await ethers.provider.getBalance(supplyChainNFT.target); // Changed marketplace.target to supplyChainNFT.target
+    console.log(`    Marketplace Contract (${supplyChainNFT.target}) Balance: ${ethers.formatEther(marketplaceBalance)} ETH`);
     const buyer1Balance = await ethers.provider.getBalance(buyer1.address);
     console.log(`    Buyer (${buyer1.address}) Balance: ${ethers.formatEther(buyer1Balance)} ETH`);
     const sellerP1Balance = await ethers.provider.getBalance(product1Info.sellerAddress);
@@ -343,8 +343,61 @@ async function main() {
     product3Info.productStatus = "Completed";
     product3Info.currentOwner = retailer.address;
 
-    console.log("--- Scenario 2: Product 2 & 3 Completed ---");
-    console.log("\n--- 04: Transport, Batch Processing, and Finalization Scenario Complete ---");
+    // --- Update demo_context.json with final ownership and status ---
+    console.log("\\n--- Updating demo_context.json with final states ---");
+
+    // Update Product 1 (DEMO_PROD_001)
+    const product1Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_001");
+    if (product1Index !== -1) {
+        context.productDetails[product1Index].currentOwnerAddress = buyer1.address; // Assuming buyer1 is the final owner variable
+        context.productDetails[product1Index].productStatus = "PurchaseFinalizedByBuyer1";
+        console.log(`  Updated Product 1 (Token ID: ${context.productDetails[product1Index].tokenId}) owner to ${buyer1.address} and status.`);
+    } else {
+        console.warn("  Warning: Could not find Product 1 (DEMO_PROD_001) in demo_context to update.");
+    }
+
+    // Update Product 2 (DEMO_PROD_002)
+    const product2Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_002");
+    if (product2Index !== -1) {
+        // Assuming retailer is the final owner of P2 after confirmDeliveryAndFinalize by retailer
+        context.productDetails[product2Index].currentOwnerAddress = retailer.address; 
+        context.productDetails[product2Index].productStatus = "PurchaseFinalizedAtRetailer";
+        console.log(`  Updated Product 2 (Token ID: ${context.productDetails[product2Index].tokenId}) owner to ${retailer.address} and status.`);
+    } else {
+        console.warn("  Warning: Could not find Product 2 (DEMO_PROD_002) in demo_context to update.");
+    }
+
+    // Update Product 3 (DEMO_PROD_003)
+    const product3Index = context.productDetails.findIndex(p => p.uniqueProductID === "DEMO_PROD_003");
+    if (product3Index !== -1) {
+        // Assuming retailer is the final owner of P3 after confirmDeliveryAndFinalize by retailer
+        context.productDetails[product3Index].currentOwnerAddress = retailer.address;
+        context.productDetails[product3Index].productStatus = "PurchaseFinalizedAtRetailer";
+        console.log(`  Updated Product 3 (Token ID: ${context.productDetails[product3Index].tokenId}) owner to ${retailer.address} and status.`);
+    } else {
+        console.warn("  Warning: Could not find Product 3 (DEMO_PROD_003) in demo_context to update.");
+    }
+    
+    // Ensure all tokenIds are strings if they were converted to BigNumber earlier for contract calls
+    context.tokenIds = context.productDetails.map(p => p.tokenId.toString());
+    context.productDetails.forEach(p => {
+        if (typeof p.tokenId !== 'string') {
+            p.tokenId = p.tokenId.toString();
+        }
+        // Ensure price and collateral are also strings for JSON consistency
+        if (p.price && typeof p.price !== 'string') {
+            p.price = p.price.toString();
+        }
+        if (p.collateralAmount && typeof p.collateralAmount !== 'string') {
+            p.collateralAmount = p.collateralAmount.toString();
+        }
+    });
+
+
+    fs.writeFileSync(path.join(__dirname, "demo_context.json"), JSON.stringify(context, null, 2));
+    console.log("  demo_context.json updated successfully.");
+
+    console.log("\\n--- Scenario 04: Transport, Batch Processing, and Finalization Scenario Complete ---");
 }
 
 main()

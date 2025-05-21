@@ -42,8 +42,24 @@ def main():
     except Exception as e:
         log_message(f"Error reading demo context: {e}")
         return False
+
+    # Load sybil_attack_log.json
+    sybil_log_data = {}
+    try:
+        sybil_log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                                      "SupplyChain_dapp/scripts/lifecycle_demo/sybil_attack_log.json")
+        log_message(f"Looking for Sybil attack log file at: {sybil_log_path}")
+        if os.path.exists(sybil_log_path):
+            with open(sybil_log_path, "r", encoding='utf-8') as f:
+                sybil_log_data = json.load(f)
+            log_message(f"Successfully loaded sybil_attack_log.json with keys: {list(sybil_log_data.keys())}")
+        else:
+            log_message(f"Sybil attack log file not found at {sybil_log_path}. Proceeding without it.")
+    except Exception as e:
+        log_message(f"Error reading sybil_attack_log.json: {e}. Proceeding without it.")
+        sybil_log_data = {}
     
-    # Extract transaction and product data for dispute risk analysis
+    # Extract transaction and product data for dispute risk analysis (primarily for logging summary)
     transaction_data = []
     
     # Check if product details are in context
@@ -110,9 +126,19 @@ def main():
     node_addresses = []
     
     # Add addresses from context for FL clients
-    for role in ["manufacturerAddress", "transporter1Address", "retailerAddress", "buyer1Address", "arbitratorAddress"]:
-        if role in context:
-            node_addresses.append(context[role])
+    for role_key in ["manufacturerAddress", "transporter1Address", "transporter2Address", "transporter3Address", 
+                     "retailer1Address", "retailer2Address", "retailer3Address", 
+                     "buyer1Address", "buyer2Address", "buyer3Address", "arbitratorAddress"]:
+        if role_key in context and context[role_key] not in node_addresses:
+            node_addresses.append(context[role_key])
+            log_message(f"Added legitimate node from context: {context[role_key]} ({role_key})")
+
+    # Add Sybil node addresses from sybil_attack_log.json
+    if "sybilNodes" in sybil_log_data:
+        for sybil_node in sybil_log_data["sybilNodes"]:
+            if "address" in sybil_node and sybil_node["address"] not in node_addresses:
+                node_addresses.append(sybil_node["address"])
+                log_message(f"Added Sybil node address from log: {sybil_node['address']}")
     
     # If not enough addresses, add placeholder addresses
     if len(node_addresses) < 3:
@@ -132,11 +158,19 @@ def main():
     # Run the Federated Learning model
     try:
         num_clients = min(len(node_addresses), 3)  # Use at most 3 clients for demo
-        log_message(f"Running Dispute Risk analysis with {num_clients} FL clients")
+        if num_clients == 0 and len(node_addresses) > 0: # Ensure at least 1 client if addresses exist
+            num_clients = 1
+            
+        log_message(f"Running Dispute Risk analysis with {num_clients} FL clients using a pool of {len(node_addresses)} available nodes.")
         
         # Make federated datasets
+        # The make_federated_data_dispute_risk_real function primarily uses num_fl_clients to distribute
+        # dispute data fetched from blockchain events. Node_addresses are for context/logging here.
+        # transaction_data is also primarily for logging in this script.
         log_message("Preparing federated data...")
-        federated_data = make_federated_data_dispute_risk_real(transaction_data, node_addresses, num_fl_clients=num_clients)
+        federated_data = make_federated_data_dispute_risk_real(num_fl_clients=num_clients, 
+                                                               sybil_attack_log=sybil_log_data,
+                                                               all_node_addresses=node_addresses)
         
         # Here you would normally run the actual FL training
         # For demo purposes, we'll just log the data preparation success
