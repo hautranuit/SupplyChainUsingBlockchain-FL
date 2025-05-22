@@ -1048,3 +1048,514 @@ AttributeError: 'BlockchainConnector' object has no attribute 'w3'
 2025-05-22 13:00:04,764 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
 2025-05-22 13:00:04,764 - dispute_risk - INFO - Fetched 0 DisputeInitiated events for DR.
 2025-05-22 13:00:04,764 - dispute_risk - ERROR - Critical Error: Failed to fetch DisputeInitiated events (Dispute Risk).
+2025-05-22 13:14:22,212 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 13:14:22,216 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:14:22,216 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:14:22,216 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:14:22,221 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:14:23,664 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:14:24,803 - connectors.blockchain_connector - INFO - Current block number: 21968527
+2025-05-22 13:14:24,809 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:14:24,857 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:14:24,857 - sybil_detection - INFO - FL Client real_data_client_0: Loading real data for 1 nodes
+2025-05-22 13:14:24,857 - sybil_detection - INFO - Client real_data_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:14:26,389 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:26,389 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:26,758 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:27,488 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:27,489 - connectors.blockchain_connector - WARNING - Function 'getNodeReputation' not found in contract ABI. Returning default reputation 0 for node 0x032041b4b356fEE1496805DD4749f181bC736FFA.
+2025-05-22 13:14:28,229 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:28,229 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:28,632 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:29,601 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:31,686 - blockchain_connector - INFO - Retrieved 9 InitialCIDStored events from SupplyChainNFT
+2025-05-22 13:14:32,412 - blockchain_connector - ERROR - Error getting events DirectSaleAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:32,412 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:32,779 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:33,538 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:34,270 - blockchain_connector - ERROR - Error getting events DirectSaleAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:34,271 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:34,647 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:35,382 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:37,901 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:14:38,723 - blockchain_connector - ERROR - Error getting events PaymentAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:38,723 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:39,088 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:39,821 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:40,553 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:40,553 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:40,916 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:41,645 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:42,373 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:42,374 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:42,733 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:43,461 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:44,187 - blockchain_connector - ERROR - Error getting events BatchProposed from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:44,187 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:44,548 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:45,275 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:46,007 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:46,008 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:46,375 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:47,099 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:47,826 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:47,826 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:48,209 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:48,942 - blockchain_connector - INFO - Retrieved 0 events from blocks 0-999
+2025-05-22 13:14:49,043 - blockchain_connector - INFO - Fetching events from blocks 1000 to 1999...
+2025-05-22 13:14:49,774 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:49,775 - connectors.blockchain_connector - WARNING - Function 'isNodeVerified' not found in contract ABI. Returning default verification status False for node 0x032041b4b356fEE1496805DD4749f181bC736FFA.
+2025-05-22 13:14:49,775 - sybil_detection - INFO - Node 0x032041b4b356fEE1496805DD4749f181bC736FFA labeled as SYBIL (1) based on heuristic rules.
+2025-05-22 13:14:50,294 - sybil_detection - INFO - Client real_data_client_0: Created dataset with 1 samples
+2025-05-22 13:14:50,302 - sybil_detection - INFO - FL Client real_data_client_1: Loading real data for 1 nodes
+2025-05-22 13:14:50,302 - sybil_detection - INFO - Client real_data_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:14:51,034 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:51,035 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:51,398 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:52,135 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:52,136 - connectors.blockchain_connector - WARNING - Function 'getNodeReputation' not found in contract ABI. Returning default reputation 0 for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711.
+2025-05-22 13:14:52,961 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:52,962 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:53,328 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:54,054 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:54,786 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:54,786 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:55,151 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:55,871 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:56,600 - blockchain_connector - ERROR - Error getting events DirectSaleAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:56,601 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:14:56,986 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:14:57,716 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:14:59,800 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:15:00,543 - blockchain_connector - ERROR - Error getting events PaymentAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:00,544 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:00,908 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:01,633 - blockchain_connector - INFO - Retrieved 0 events from blocks 0-999
+2025-05-22 13:15:01,735 - blockchain_connector - INFO - Fetching events from blocks 1000 to 1999...
+2025-05-22 13:15:02,461 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:03,179 - blockchain_connector - ERROR - Error getting events PaymentAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:03,186 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:03,548 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:04,279 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:05,003 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:05,005 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:05,365 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:06,088 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:06,805 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:06,812 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:07,205 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:08,016 - blockchain_connector - INFO - Retrieved 0 events from blocks 0-999
+2025-05-22 13:15:08,117 - blockchain_connector - INFO - Fetching events from blocks 1000 to 1999...
+2025-05-22 13:15:08,845 - blockchain_connector - INFO - Retrieved 0 events from blocks 1000-1999
+2025-05-22 13:15:08,946 - blockchain_connector - INFO - Fetching events from blocks 2000 to 2999...
+2025-05-22 13:15:09,680 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:10,404 - blockchain_connector - ERROR - Error getting events BatchProposed from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:10,405 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:10,765 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:11,506 - blockchain_connector - INFO - Retrieved 0 events from blocks 0-999
+2025-05-22 13:15:11,607 - blockchain_connector - INFO - Fetching events from blocks 1000 to 1999...
+2025-05-22 13:15:12,337 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:13,056 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:13,057 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:13,431 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:14,160 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:14,884 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:14,885 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:15,248 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:15,970 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:15,974 - connectors.blockchain_connector - WARNING - Function 'isNodeVerified' not found in contract ABI. Returning default verification status False for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711.
+2025-05-22 13:15:15,975 - sybil_detection - INFO - Node 0x04351e7dF40d04B5E610c4aA033faCf435b98711 labeled as SYBIL (1) based on heuristic rules.
+2025-05-22 13:15:16,176 - sybil_detection - INFO - Client real_data_client_1: Created dataset with 1 samples
+2025-05-22 13:15:16,177 - sybil_detection - INFO - Created 2 federated datasets for Sybil detection
+2025-05-22 13:15:16,263 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 13:15:16,268 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:16,269 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:16,364 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:16,743 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:15:17,108 - connectors.blockchain_connector - INFO - Current block number: 21968553
+2025-05-22 13:15:17,121 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:17,129 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:15:17,130 - batch_monitoring - INFO - Fetching and caching batch processing events...
+2025-05-22 13:15:17,856 - blockchain_connector - ERROR - Error getting events BatchProposed from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:17,856 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:18,221 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:18,953 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:22,431 - blockchain_connector - INFO - Retrieved 21 BatchValidated events from SupplyChainNFT
+2025-05-22 13:15:28,014 - blockchain_connector - INFO - Retrieved 9 BatchCommitted events from SupplyChainNFT
+2025-05-22 13:15:28,015 - blockchain_connector - ERROR - Contract BatchProcessing not loaded.
+2025-05-22 13:15:28,015 - batch_monitoring - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:15:28,016 - batch_monitoring - INFO - Fetched 21 BatchValidated events.
+2025-05-22 13:15:28,016 - batch_monitoring - INFO - Fetched 9 BatchCommitted events.
+2025-05-22 13:15:28,017 - batch_monitoring - INFO - Fetched 0 BatchStateChanged events.
+2025-05-22 13:15:28,017 - batch_monitoring - INFO - FL Client batch_monitoring_client_0: Loading real data for 1 nodes
+2025-05-22 13:15:28,017 - batch_monitoring - INFO - Client batch_monitoring_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:15:28,027 - batch_monitoring - INFO - Client batch_monitoring_client_0: Created dataset with 1 samples
+2025-05-22 13:15:28,029 - batch_monitoring - INFO - FL Client batch_monitoring_client_1: Loading real data for 1 nodes
+2025-05-22 13:15:28,029 - batch_monitoring - INFO - Client batch_monitoring_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:15:28,030 - batch_monitoring - INFO - Client batch_monitoring_client_1: Created dataset with 1 samples
+2025-05-22 13:15:28,031 - batch_monitoring - INFO - Created 2 federated datasets for batch monitoring
+2025-05-22 13:15:28,102 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 13:15:28,103 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:28,103 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:28,108 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:28,470 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:15:28,833 - connectors.blockchain_connector - INFO - Current block number: 21968558
+2025-05-22 13:15:28,851 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:28,858 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:15:28,859 - node_behavior - INFO - Fetching and caching events for Node Behavior Timeseries...
+2025-05-22 13:15:29,584 - blockchain_connector - ERROR - Error getting events PaymentAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:29,585 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:29,944 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:30,688 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:30,689 - node_behavior - INFO - Fetched 0 PaymentAndTransferCompleted events.
+2025-05-22 13:15:31,405 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:31,406 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:31,768 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:32,503 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:32,504 - node_behavior - INFO - Fetched 0 ProductMinted events.
+2025-05-22 13:15:33,248 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:33,249 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:33,607 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:34,339 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:34,340 - node_behavior - INFO - Fetched 0 InitialCIDStored events.
+2025-05-22 13:15:35,063 - blockchain_connector - ERROR - Error getting events DirectSaleAndTransferCompleted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:35,064 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:35,426 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:36,150 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:36,150 - node_behavior - INFO - Fetched 0 DirectSaleAndTransferCompleted events.
+2025-05-22 13:15:36,873 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:36,874 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:37,234 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:37,961 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:37,962 - node_behavior - INFO - Fetched 0 DisputeInitiated events.
+2025-05-22 13:15:38,712 - blockchain_connector - ERROR - Error getting events BatchProposed from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:38,713 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:39,071 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:39,803 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:39,804 - node_behavior - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:15:43,126 - blockchain_connector - INFO - Retrieved 21 BatchValidated events from SupplyChainNFT
+2025-05-22 13:15:43,128 - node_behavior - INFO - Fetched 21 BatchValidated events.
+2025-05-22 13:15:51,523 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:51,523 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:51,892 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:52,611 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:52,611 - node_behavior - INFO - Fetched 0 ArbitratorVoted events.
+2025-05-22 13:15:53,363 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:53,363 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:15:53,737 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:15:54,457 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:15:54,458 - node_behavior - INFO - Fetched 0 NodeVerified events.
+2025-05-22 13:15:54,458 - node_behavior - INFO - Total relevant events processed and sorted: 21
+2025-05-22 13:15:54,459 - node_behavior - INFO - FL Client timeseries_client_0 (0x04351e7dF40d04B5E610c4aA033faCf435b98711): Loading real timeseries data
+2025-05-22 13:15:54,459 - node_behavior - INFO - Generated timeseries for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:15:54,461 - node_behavior - INFO - Client timeseries_client_0: Created dataset with 1 samples
+2025-05-22 13:15:54,462 - node_behavior - INFO - Created 1 federated datasets for node behavior timeseries
+2025-05-22 13:15:54,569 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 13:15:54,569 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:54,569 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:54,572 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:15:54,933 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:15:55,291 - connectors.blockchain_connector - INFO - Current block number: 21968571
+2025-05-22 13:15:55,298 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:15:55,308 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:15:55,309 - dispute_risk - INFO - Fetching and caching events for dispute risk analysis...
+2025-05-22 13:16:01,594 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:16:02,316 - blockchain_connector - ERROR - Error getting events ProductListedForSale from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:02,316 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:16:02,693 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:16:03,443 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:07,952 - blockchain_connector - INFO - Retrieved 9 CollateralDepositedForPurchase events from SupplyChainNFT
+2025-05-22 13:16:08,728 - blockchain_connector - ERROR - Error getting events CIDStored from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:08,793 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:16:09,160 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:16:09,961 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:10,734 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:10,735 - blockchain_connector - INFO - Attempting fallback method for event retrieval...
+2025-05-22 13:16:11,096 - blockchain_connector - INFO - Fetching events from blocks 0 to 999...
+2025-05-22 13:16:11,833 - blockchain_connector - ERROR - Fallback method also failed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 13:16:11,834 - dispute_risk - INFO - Fetched 0 DisputeInitiated events for DR.
+2025-05-22 13:16:11,835 - dispute_risk - ERROR - Critical Error: Failed to fetch DisputeInitiated events (Dispute Risk).
+2025-05-22 13:38:15,240 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 13:38:15,245 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:38:15,245 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:38:15,246 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:38:15,252 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:38:15,729 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:38:16,093 - connectors.blockchain_connector - INFO - Current block number: 21969199
+2025-05-22 13:38:16,098 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:38:16,111 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:38:16,113 - sybil_detection - INFO - FL Client real_data_client_0: Loading real data for 1 nodes
+2025-05-22 13:38:16,113 - sybil_detection - INFO - Client real_data_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:38:16,114 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:16,114 - blockchain_connector - INFO - Using mock events for NodeVerified due to retrieval error
+2025-05-22 13:38:16,114 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 13:38:19,162 - connectors.blockchain_connector - ERROR - Error getting reputation for node 0x032041b4b356fEE1496805DD4749f181bC736FFA: Could not decode contract function call to getNodeReputation with return data: b'', output_types: ['uint256']
+2025-05-22 13:38:19,163 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:19,164 - blockchain_connector - INFO - Using mock events for ProductMinted due to retrieval error
+2025-05-22 13:38:19,164 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 13:38:19,164 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:19,164 - blockchain_connector - INFO - Using mock events for InitialCIDStored due to retrieval error
+2025-05-22 13:38:19,164 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 13:38:21,126 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:23,775 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:25,437 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:27,920 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:27,921 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:27,921 - blockchain_connector - INFO - Using mock events for DisputeInitiated due to retrieval error
+2025-05-22 13:38:27,921 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 13:38:27,922 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:27,922 - blockchain_connector - INFO - Using mock events for DisputeInitiated due to retrieval error
+2025-05-22 13:38:27,922 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 13:38:30,563 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:38:32,791 - blockchain_connector - INFO - Retrieved 0 BatchValidated events from SupplyChainNFT
+2025-05-22 13:38:32,792 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:32,792 - blockchain_connector - INFO - Using mock events for ArbitratorVoted due to retrieval error
+2025-05-22 13:38:32,792 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 13:38:34,011 - connectors.blockchain_connector - ERROR - Error checking verification for node 0x032041b4b356fEE1496805DD4749f181bC736FFA: Could not decode contract function call to isNodeVerified with return data: b'', output_types: ['bool']
+2025-05-22 13:38:34,012 - sybil_detection - INFO - Node 0x032041b4b356fEE1496805DD4749f181bC736FFA labeled as NORMAL (0) based on heuristic rules.
+2025-05-22 13:38:34,410 - sybil_detection - INFO - Client real_data_client_0: Created dataset with 1 samples
+2025-05-22 13:38:34,420 - sybil_detection - INFO - FL Client real_data_client_1: Loading real data for 1 nodes
+2025-05-22 13:38:34,420 - sybil_detection - INFO - Client real_data_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:38:34,421 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:34,421 - blockchain_connector - INFO - Using mock events for NodeVerified due to retrieval error
+2025-05-22 13:38:34,421 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 13:38:37,617 - connectors.blockchain_connector - ERROR - Error getting reputation for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711: Could not decode contract function call to getNodeReputation with return data: b'', output_types: ['uint256']
+2025-05-22 13:38:37,619 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:37,619 - blockchain_connector - INFO - Using mock events for ProductMinted due to retrieval error
+2025-05-22 13:38:37,620 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 13:38:37,620 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:37,620 - blockchain_connector - INFO - Using mock events for InitialCIDStored due to retrieval error
+2025-05-22 13:38:37,620 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 13:38:39,431 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:40,916 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:42,722 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:44,485 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:38:44,487 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:44,488 - blockchain_connector - INFO - Using mock events for DisputeInitiated due to retrieval error
+2025-05-22 13:38:44,488 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 13:38:44,489 - blockchain_connector - ERROR - Error getting events DisputeInitiated from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:44,489 - blockchain_connector - INFO - Using mock events for DisputeInitiated due to retrieval error
+2025-05-22 13:38:44,489 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 13:38:48,070 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:38:50,357 - blockchain_connector - INFO - Retrieved 0 BatchValidated events from SupplyChainNFT
+2025-05-22 13:38:50,357 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:38:50,358 - blockchain_connector - INFO - Using mock events for ArbitratorVoted due to retrieval error
+2025-05-22 13:38:50,358 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 13:38:51,521 - connectors.blockchain_connector - ERROR - Error checking verification for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711: Could not decode contract function call to isNodeVerified with return data: b'', output_types: ['bool']
+2025-05-22 13:38:51,522 - sybil_detection - INFO - Node 0x04351e7dF40d04B5E610c4aA033faCf435b98711 labeled as NORMAL (0) based on heuristic rules.
+2025-05-22 13:38:51,723 - sybil_detection - INFO - Client real_data_client_1: Created dataset with 1 samples
+2025-05-22 13:38:51,724 - sybil_detection - INFO - Created 2 federated datasets for Sybil detection
+2025-05-22 13:38:51,854 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 13:38:51,855 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:38:51,855 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:38:51,863 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:38:53,015 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:38:53,376 - connectors.blockchain_connector - INFO - Current block number: 21969217
+2025-05-22 13:38:53,380 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:38:53,384 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:38:53,385 - batch_monitoring - INFO - Fetching and caching batch processing events...
+2025-05-22 13:38:59,007 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:39:05,182 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: Expected 2 log topics.  Got 0
+2025-05-22 13:39:05,183 - blockchain_connector - INFO - Using mock events for BatchValidated due to retrieval error
+2025-05-22 13:39:05,183 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 13:39:05,183 - blockchain_connector - ERROR - Event BatchCommitted not found in contract SupplyChainNFT.
+2025-05-22 13:39:05,183 - blockchain_connector - ERROR - Contract BatchProcessing not loaded.
+2025-05-22 13:39:05,184 - batch_monitoring - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:39:05,184 - batch_monitoring - INFO - Fetched 1 BatchValidated events.
+2025-05-22 13:39:05,184 - batch_monitoring - INFO - Fetched 0 BatchCommitted events.
+2025-05-22 13:39:05,185 - batch_monitoring - INFO - Fetched 0 BatchStateChanged events.
+2025-05-22 13:39:05,185 - batch_monitoring - INFO - FL Client batch_monitoring_client_0: Loading real data for 1 nodes
+2025-05-22 13:39:05,186 - batch_monitoring - INFO - Client batch_monitoring_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:39:05,188 - batch_monitoring - INFO - Client batch_monitoring_client_0: Created dataset with 1 samples
+2025-05-22 13:39:05,189 - batch_monitoring - INFO - FL Client batch_monitoring_client_1: Loading real data for 1 nodes
+2025-05-22 13:39:05,189 - batch_monitoring - INFO - Client batch_monitoring_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:39:05,190 - batch_monitoring - INFO - Client batch_monitoring_client_1: Created dataset with 1 samples
+2025-05-22 13:39:05,191 - batch_monitoring - INFO - Created 2 federated datasets for batch monitoring
+2025-05-22 13:39:05,254 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 13:39:05,255 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:39:05,255 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:39:05,258 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:39:05,618 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:39:05,996 - connectors.blockchain_connector - INFO - Current block number: 21969223
+2025-05-22 13:39:06,002 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:39:06,006 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:39:06,007 - node_behavior - INFO - Fetching and caching events for Node Behavior Timeseries...
+2025-05-22 13:39:10,220 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:39:10,234 - node_behavior - INFO - Fetched 0 PaymentAndTransferCompleted events.
+2025-05-22 13:39:14,731 - blockchain_connector - INFO - Retrieved 0 ProductMinted events from SupplyChainNFT
+2025-05-22 13:39:14,732 - node_behavior - INFO - Fetched 0 ProductMinted events.
+2025-05-22 13:39:17,636 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events from SupplyChainNFT
+2025-05-22 13:39:17,637 - node_behavior - INFO - Fetched 0 InitialCIDStored events.
+2025-05-22 13:39:20,054 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:39:20,055 - node_behavior - INFO - Fetched 0 DirectSaleAndTransferCompleted events.
+2025-05-22 13:39:22,694 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:39:22,695 - node_behavior - INFO - Fetched 0 DisputeInitiated events.
+2025-05-22 13:39:24,762 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:39:24,763 - node_behavior - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:39:26,824 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: Expected 2 log topics.  Got 0
+2025-05-22 13:39:26,826 - blockchain_connector - INFO - Using mock events for BatchValidated due to retrieval error
+2025-05-22 13:39:26,826 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 13:39:26,827 - node_behavior - INFO - Fetched 1 BatchValidated events.
+2025-05-22 13:39:29,339 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events from SupplyChainNFT
+2025-05-22 13:39:29,339 - node_behavior - INFO - Fetched 0 ArbitratorVoted events.
+2025-05-22 13:39:33,884 - blockchain_connector - INFO - Retrieved 0 NodeVerified events from SupplyChainNFT
+2025-05-22 13:39:33,885 - node_behavior - INFO - Fetched 0 NodeVerified events.
+2025-05-22 13:39:33,885 - node_behavior - INFO - Total relevant events processed and sorted: 1
+2025-05-22 13:39:33,885 - node_behavior - INFO - FL Client timeseries_client_0 (0x04351e7dF40d04B5E610c4aA033faCf435b98711): Loading real timeseries data
+2025-05-22 13:39:33,886 - node_behavior - INFO - Generated timeseries for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:39:33,887 - node_behavior - INFO - Client timeseries_client_0: Created dataset with 1 samples
+2025-05-22 13:39:33,889 - node_behavior - INFO - Created 1 federated datasets for node behavior timeseries
+2025-05-22 13:39:33,975 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 13:39:33,976 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:39:33,976 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:39:33,979 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:39:34,349 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:39:34,722 - connectors.blockchain_connector - INFO - Current block number: 21969236
+2025-05-22 13:39:34,728 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:39:34,732 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:39:34,733 - dispute_risk - INFO - Fetching and caching events for dispute risk analysis...
+2025-05-22 13:39:36,710 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:39:39,668 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events from SupplyChainNFT
+2025-05-22 13:39:41,784 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events from SupplyChainNFT
+2025-05-22 13:39:44,787 - blockchain_connector - INFO - Retrieved 0 CIDStored events from SupplyChainNFT
+2025-05-22 13:39:48,470 - blockchain_connector - INFO - Retrieved 0 NodeVerified events from SupplyChainNFT
+2025-05-22 13:39:48,471 - dispute_risk - INFO - Fetched 0 DisputeInitiated events for DR.
+2025-05-22 13:39:48,471 - dispute_risk - ERROR - Critical Error: Failed to fetch DisputeInitiated events (Dispute Risk).
+2025-05-22 13:49:10,196 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 13:49:10,209 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:49:10,210 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:49:10,210 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:49:10,213 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:49:10,853 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:49:11,221 - connectors.blockchain_connector - INFO - Current block number: 21969508
+2025-05-22 13:49:11,237 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:49:11,255 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:49:11,256 - sybil_detection - INFO - FL Client real_data_client_0: Loading real data for 1 nodes
+2025-05-22 13:49:11,256 - sybil_detection - INFO - Client real_data_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:49:11,256 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:11,256 - blockchain_connector - INFO - Using mock events for NodeVerified due to retrieval error
+2025-05-22 13:49:11,256 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 13:49:12,851 - connectors.blockchain_connector - ERROR - Error getting reputation for node 0x032041b4b356fEE1496805DD4749f181bC736FFA: Could not decode contract function call to getNodeReputation with return data: b'', output_types: ['uint256']
+2025-05-22 13:49:12,852 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:12,852 - blockchain_connector - INFO - Using mock events for ProductMinted due to retrieval error
+2025-05-22 13:49:12,853 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 13:49:12,853 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:12,853 - blockchain_connector - INFO - Using mock events for InitialCIDStored due to retrieval error
+2025-05-22 13:49:12,853 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 13:49:14,474 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:18,364 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:19,625 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:21,288 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:24,231 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:49:27,556 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:49:30,147 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:49:32,122 - blockchain_connector - INFO - Retrieved 0 BatchValidated events from SupplyChainNFT
+2025-05-22 13:49:32,125 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:32,126 - blockchain_connector - INFO - Using mock events for ArbitratorVoted due to retrieval error
+2025-05-22 13:49:32,126 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 13:49:33,325 - connectors.blockchain_connector - ERROR - Error checking verification for node 0x032041b4b356fEE1496805DD4749f181bC736FFA: Could not decode contract function call to isNodeVerified with return data: b'', output_types: ['bool']
+2025-05-22 13:49:33,326 - sybil_detection - INFO - Node 0x032041b4b356fEE1496805DD4749f181bC736FFA labeled as SYBIL (1) based on heuristic rules.
+2025-05-22 13:49:33,787 - sybil_detection - INFO - Client real_data_client_0: Created dataset with 1 samples
+2025-05-22 13:49:33,800 - sybil_detection - INFO - FL Client real_data_client_1: Loading real data for 1 nodes
+2025-05-22 13:49:33,801 - sybil_detection - INFO - Client real_data_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:49:33,801 - blockchain_connector - ERROR - Error getting events NodeVerified from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:33,802 - blockchain_connector - INFO - Using mock events for NodeVerified due to retrieval error
+2025-05-22 13:49:33,802 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 13:49:35,368 - connectors.blockchain_connector - ERROR - Error getting reputation for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711: Could not decode contract function call to getNodeReputation with return data: b'', output_types: ['uint256']
+2025-05-22 13:49:35,369 - blockchain_connector - ERROR - Error getting events ProductMinted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:35,370 - blockchain_connector - INFO - Using mock events for ProductMinted due to retrieval error
+2025-05-22 13:49:35,370 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 13:49:35,370 - blockchain_connector - ERROR - Error getting events InitialCIDStored from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:35,371 - blockchain_connector - INFO - Using mock events for InitialCIDStored due to retrieval error
+2025-05-22 13:49:35,371 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 13:49:36,708 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:39,117 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:43,904 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:45,574 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:49:48,098 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:49:50,603 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:49:52,239 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:49:54,075 - blockchain_connector - INFO - Retrieved 0 BatchValidated events from SupplyChainNFT
+2025-05-22 13:49:54,076 - blockchain_connector - ERROR - Error getting events ArbitratorVoted from SupplyChainNFT: When filtering by argument names, all argument names must be present in the contract's event ABI.
+2025-05-22 13:49:54,076 - blockchain_connector - INFO - Using mock events for ArbitratorVoted due to retrieval error
+2025-05-22 13:49:54,076 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 13:49:55,343 - connectors.blockchain_connector - ERROR - Error checking verification for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711: Could not decode contract function call to isNodeVerified with return data: b'', output_types: ['bool']
+2025-05-22 13:49:55,344 - sybil_detection - INFO - Node 0x04351e7dF40d04B5E610c4aA033faCf435b98711 labeled as SYBIL (1) based on heuristic rules.
+2025-05-22 13:49:55,546 - sybil_detection - INFO - Client real_data_client_1: Created dataset with 1 samples
+2025-05-22 13:49:55,547 - sybil_detection - INFO - Created 2 federated datasets for Sybil detection
+2025-05-22 13:49:55,638 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 13:49:55,638 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:49:55,639 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:49:55,661 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:49:56,027 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:49:56,402 - connectors.blockchain_connector - INFO - Current block number: 21969529
+2025-05-22 13:49:56,414 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:49:56,418 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:49:56,419 - batch_monitoring - INFO - Fetching and caching batch processing events...
+2025-05-22 13:49:59,893 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:50:03,412 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: Expected 2 log topics.  Got 0
+2025-05-22 13:50:03,413 - blockchain_connector - INFO - Using mock events for BatchValidated due to retrieval error
+2025-05-22 13:50:03,413 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 13:50:03,414 - blockchain_connector - ERROR - Event BatchCommitted not found in contract SupplyChainNFT.
+2025-05-22 13:50:03,414 - blockchain_connector - ERROR - Contract BatchProcessing not loaded.
+2025-05-22 13:50:03,414 - batch_monitoring - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:50:03,415 - batch_monitoring - INFO - Fetched 1 BatchValidated events.
+2025-05-22 13:50:03,415 - batch_monitoring - INFO - Fetched 0 BatchCommitted events.
+2025-05-22 13:50:03,415 - batch_monitoring - INFO - Fetched 0 BatchStateChanged events.
+2025-05-22 13:50:03,415 - batch_monitoring - INFO - FL Client batch_monitoring_client_0: Loading real data for 1 nodes
+2025-05-22 13:50:03,416 - batch_monitoring - INFO - Client batch_monitoring_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 13:50:03,417 - batch_monitoring - INFO - Client batch_monitoring_client_0: Created dataset with 1 samples
+2025-05-22 13:50:03,419 - batch_monitoring - INFO - FL Client batch_monitoring_client_1: Loading real data for 1 nodes
+2025-05-22 13:50:03,419 - batch_monitoring - INFO - Client batch_monitoring_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:50:03,420 - batch_monitoring - INFO - Client batch_monitoring_client_1: Created dataset with 1 samples
+2025-05-22 13:50:03,420 - batch_monitoring - INFO - Created 2 federated datasets for batch monitoring
+2025-05-22 13:50:03,471 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 13:50:03,471 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:50:03,471 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:50:03,474 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:50:03,838 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:50:04,218 - connectors.blockchain_connector - INFO - Current block number: 21969533
+2025-05-22 13:50:04,228 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:50:04,233 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:50:04,234 - node_behavior - INFO - Fetching and caching events for Node Behavior Timeseries...
+2025-05-22 13:50:07,335 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:50:07,335 - node_behavior - INFO - Fetched 0 PaymentAndTransferCompleted events.
+2025-05-22 13:50:09,947 - blockchain_connector - INFO - Retrieved 0 ProductMinted events from SupplyChainNFT
+2025-05-22 13:50:09,947 - node_behavior - INFO - Fetched 0 ProductMinted events.
+2025-05-22 13:50:13,548 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events from SupplyChainNFT
+2025-05-22 13:50:13,549 - node_behavior - INFO - Fetched 0 InitialCIDStored events.
+2025-05-22 13:50:16,718 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events from SupplyChainNFT
+2025-05-22 13:50:16,718 - node_behavior - INFO - Fetched 0 DirectSaleAndTransferCompleted events.
+2025-05-22 13:50:19,485 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:50:19,486 - node_behavior - INFO - Fetched 0 DisputeInitiated events.
+2025-05-22 13:50:22,683 - blockchain_connector - INFO - Retrieved 0 BatchProposed events from SupplyChainNFT
+2025-05-22 13:50:22,684 - node_behavior - INFO - Fetched 0 BatchProposed events.
+2025-05-22 13:50:27,389 - blockchain_connector - ERROR - Error getting events BatchValidated from SupplyChainNFT: Expected 2 log topics.  Got 0
+2025-05-22 13:50:27,391 - blockchain_connector - INFO - Using mock events for BatchValidated due to retrieval error
+2025-05-22 13:50:27,391 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 13:50:27,391 - node_behavior - INFO - Fetched 1 BatchValidated events.
+2025-05-22 13:50:29,910 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events from SupplyChainNFT
+2025-05-22 13:50:29,911 - node_behavior - INFO - Fetched 0 ArbitratorVoted events.
+2025-05-22 13:50:32,141 - blockchain_connector - INFO - Retrieved 0 NodeVerified events from SupplyChainNFT
+2025-05-22 13:50:32,142 - node_behavior - INFO - Fetched 0 NodeVerified events.
+2025-05-22 13:50:32,142 - node_behavior - INFO - Total relevant events processed and sorted: 1
+2025-05-22 13:50:32,142 - node_behavior - INFO - FL Client timeseries_client_0 (0x04351e7dF40d04B5E610c4aA033faCf435b98711): Loading real timeseries data
+2025-05-22 13:50:32,143 - node_behavior - INFO - Generated timeseries for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 13:50:32,144 - node_behavior - INFO - Client timeseries_client_0: Created dataset with 1 samples
+2025-05-22 13:50:32,153 - node_behavior - INFO - Created 1 federated datasets for node behavior timeseries
+2025-05-22 13:50:32,188 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 13:50:32,189 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:50:32,189 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:50:32,201 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 13:50:32,586 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 13:50:32,959 - connectors.blockchain_connector - INFO - Current block number: 21969546
+2025-05-22 13:50:32,964 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 13:50:32,968 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 13:50:32,970 - dispute_risk - INFO - Fetching and caching events for dispute risk analysis...
+2025-05-22 13:50:34,994 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events from SupplyChainNFT
+2025-05-22 13:50:37,130 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events from SupplyChainNFT
+2025-05-22 13:50:42,241 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events from SupplyChainNFT
+2025-05-22 13:50:45,897 - blockchain_connector - INFO - Retrieved 0 CIDStored events from SupplyChainNFT
+2025-05-22 13:50:47,895 - blockchain_connector - INFO - Retrieved 0 NodeVerified events from SupplyChainNFT
+2025-05-22 13:50:47,896 - dispute_risk - INFO - Fetched 0 DisputeInitiated events for DR.
+2025-05-22 13:50:47,897 - dispute_risk - ERROR - Critical Error: Failed to fetch DisputeInitiated events (Dispute Risk).

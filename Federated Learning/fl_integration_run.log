@@ -523,3 +523,144 @@ AttributeError: 'BlockchainConnector' object has no attribute '_load_contract_ad
 [2025-05-22T13:00:04.764331] === Completed Dispute Risk FL Model ===
 [2025-05-22T13:00:04.764331] Model dispute_risk completed successfully
 [2025-05-22T13:00:04.764331] === Completed Federated Learning Run ===
+[2025-05-22T13:14:22.185524] === Starting Federated Learning Run ===
+[2025-05-22T13:14:22.188984] Arguments: {
+  "model": "all",
+  "num_clients": 0,
+  "debug": false,
+  "attack_mode": "auto"
+}
+[2025-05-22T13:14:22.193944] Successfully loaded Context file (demo_context.json) with keys: ['contractAddress', 'manufacturerAddress', 'deployerAddress', 'tokenIds', 'productDetails']
+[2025-05-22T13:14:22.197274] Sybil attack log (sybil_attack_log.json) file not found at any expected location
+[2025-05-22T13:14:22.198704] Auto-detected attack mode: False
+[2025-05-22T13:14:22.205000] === Running model: sybil_detection ===
+[2025-05-22T13:14:22.206525] === Starting Sybil Detection FL Model ===
+[2025-05-22T13:14:22.208085] Total unique node addresses: 2
+[2025-05-22T13:14:22.209673] Running Sybil Detection with 2 FL clients
+[2025-05-22T13:14:22.211009] Preparing federated data...
+[2025-05-22T13:15:16.178071] Successfully prepared federated data for 2 clients
+[2025-05-22T13:15:16.206278] Sybil Detection results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/sybil_detection_results.json
+[2025-05-22T13:15:16.217106] === Completed Sybil Detection FL Model ===
+[2025-05-22T13:15:16.220189] Model sybil_detection completed successfully
+[2025-05-22T13:15:16.236667] === Running model: batch_monitoring ===
+[2025-05-22T13:15:16.244031] === Starting Batch Monitoring FL Model ===
+[2025-05-22T13:15:16.245878] Total unique node addresses: 2
+[2025-05-22T13:15:16.247306] Found 3 products in context
+[2025-05-22T13:15:16.248733] Running Batch Monitoring with 2 FL clients
+[2025-05-22T13:15:16.260355] Preparing federated data...
+[2025-05-22T13:15:28.031990] Successfully prepared federated data for 2 clients
+[2025-05-22T13:15:28.069732] Batch Monitoring results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/batch_monitoring_results.json
+[2025-05-22T13:15:28.076853] === Completed Batch Monitoring FL Model ===
+[2025-05-22T13:15:28.078993] Model batch_monitoring completed successfully
+[2025-05-22T13:15:28.091773] === Running model: node_behavior ===
+[2025-05-22T13:15:28.093670] === Starting Node Behavior Timeseries FL Model ===
+[2025-05-22T13:15:28.095288] Running Node Behavior Timeseries with 1 FL clients
+[2025-05-22T13:15:28.096885] Preparing federated data...
+[2025-05-22T13:15:54.462954] Successfully prepared federated data for 1 clients for Node Behavior Timeseries
+[2025-05-22T13:15:54.524992] Node Behavior Timeseries results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/node_behavior_timeseries_results.json
+[2025-05-22T13:15:54.535524] === Completed Node Behavior Timeseries FL Model ===
+[2025-05-22T13:15:54.539186] Model node_behavior completed successfully
+[2025-05-22T13:15:54.548456] === Running model: dispute_risk ===
+[2025-05-22T13:15:54.549920] === Starting Dispute Risk FL Model ===
+[2025-05-22T13:15:54.551208] Total unique node addresses: 2
+[2025-05-22T13:15:54.559222] Running Dispute Risk with 2 FL clients
+[2025-05-22T13:15:54.567988] Preparing federated data...
+[2025-05-22T13:16:11.836630] Successfully prepared federated data for 2 clients for Dispute Risk
+[2025-05-22T13:16:11.859085] Dispute Risk results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/dispute_risk_results.json
+[2025-05-22T13:16:11.867544] === Completed Dispute Risk FL Model ===
+[2025-05-22T13:16:11.879172] Model dispute_risk completed successfully
+[2025-05-22T13:16:11.880773] === Completed Federated Learning Run ===
+[2025-05-22T13:38:15.196700] === Starting Federated Learning Run ===
+[2025-05-22T13:38:15.197961] Arguments: {
+  "model": "all",
+  "num_clients": 0,
+  "debug": false,
+  "attack_mode": "auto"
+}
+[2025-05-22T13:38:15.221555] Successfully loaded Context file (demo_context.json) with keys: ['contractAddress', 'manufacturerAddress', 'deployerAddress', 'tokenIds', 'productDetails']
+[2025-05-22T13:38:15.224171] Sybil attack log (sybil_attack_log.json) file not found at any expected location
+[2025-05-22T13:38:15.225780] Auto-detected attack mode: False
+[2025-05-22T13:38:15.226688] === Running model: sybil_detection ===
+[2025-05-22T13:38:15.227501] === Starting Sybil Detection FL Model ===
+[2025-05-22T13:38:15.228360] Total unique node addresses: 2
+[2025-05-22T13:38:15.229191] Running Sybil Detection with 2 FL clients
+[2025-05-22T13:38:15.230422] Preparing federated data...
+[2025-05-22T13:38:51.725021] Successfully prepared federated data for 2 clients
+[2025-05-22T13:38:51.792000] Sybil Detection results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/sybil_detection_results.json
+[2025-05-22T13:38:51.801743] === Completed Sybil Detection FL Model ===
+[2025-05-22T13:38:51.812298] Model sybil_detection completed successfully
+[2025-05-22T13:38:51.822436] === Running model: batch_monitoring ===
+[2025-05-22T13:38:51.831713] === Starting Batch Monitoring FL Model ===
+[2025-05-22T13:38:51.833927] Total unique node addresses: 2
+[2025-05-22T13:38:51.839443] Found 3 products in context
+[2025-05-22T13:38:51.842704] Running Batch Monitoring with 2 FL clients
+[2025-05-22T13:38:51.853216] Preparing federated data...
+[2025-05-22T13:39:05.191724] Successfully prepared federated data for 2 clients
+[2025-05-22T13:39:05.212693] Batch Monitoring results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/batch_monitoring_results.json
+[2025-05-22T13:39:05.214147] === Completed Batch Monitoring FL Model ===
+[2025-05-22T13:39:05.223405] Model batch_monitoring completed successfully
+[2025-05-22T13:39:05.234216] === Running model: node_behavior ===
+[2025-05-22T13:39:05.244851] === Starting Node Behavior Timeseries FL Model ===
+[2025-05-22T13:39:05.246450] Running Node Behavior Timeseries with 1 FL clients
+[2025-05-22T13:39:05.247912] Preparing federated data...
+[2025-05-22T13:39:33.891207] Successfully prepared federated data for 1 clients for Node Behavior Timeseries
+[2025-05-22T13:39:33.910964] Node Behavior Timeseries results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/node_behavior_timeseries_results.json
+[2025-05-22T13:39:33.927677] === Completed Node Behavior Timeseries FL Model ===
+[2025-05-22T13:39:33.933113] Model node_behavior completed successfully
+[2025-05-22T13:39:33.939203] === Running model: dispute_risk ===
+[2025-05-22T13:39:33.941620] === Starting Dispute Risk FL Model ===
+[2025-05-22T13:39:33.953304] Total unique node addresses: 2
+[2025-05-22T13:39:33.965256] Running Dispute Risk with 2 FL clients
+[2025-05-22T13:39:33.974081] Preparing federated data...
+[2025-05-22T13:39:48.472464] Successfully prepared federated data for 2 clients for Dispute Risk
+[2025-05-22T13:39:48.491049] Dispute Risk results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/dispute_risk_results.json
+[2025-05-22T13:39:48.493105] === Completed Dispute Risk FL Model ===
+[2025-05-22T13:39:48.503813] Model dispute_risk completed successfully
+[2025-05-22T13:39:48.514315] === Completed Federated Learning Run ===
+[2025-05-22T13:49:10.158073] === Starting Federated Learning Run ===
+[2025-05-22T13:49:10.159347] Arguments: {
+  "model": "all",
+  "num_clients": 0,
+  "debug": false,
+  "attack_mode": "auto"
+}
+[2025-05-22T13:49:10.173052] Successfully loaded Context file (demo_context.json) with keys: ['contractAddress', 'manufacturerAddress', 'deployerAddress', 'tokenIds', 'productDetails']
+[2025-05-22T13:49:10.188056] Sybil attack log (sybil_attack_log.json) file not found at any expected location
+[2025-05-22T13:49:10.190172] Auto-detected attack mode: False
+[2025-05-22T13:49:10.191338] === Running model: sybil_detection ===
+[2025-05-22T13:49:10.192389] === Starting Sybil Detection FL Model ===
+[2025-05-22T13:49:10.193405] Total unique node addresses: 2
+[2025-05-22T13:49:10.194268] Running Sybil Detection with 2 FL clients
+[2025-05-22T13:49:10.195464] Preparing federated data...
+[2025-05-22T13:49:55.548006] Successfully prepared federated data for 2 clients
+[2025-05-22T13:49:55.581840] Sybil Detection results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/sybil_detection_results.json
+[2025-05-22T13:49:55.584433] === Completed Sybil Detection FL Model ===
+[2025-05-22T13:49:55.605094] Model sybil_detection completed successfully
+[2025-05-22T13:49:55.607128] === Running model: batch_monitoring ===
+[2025-05-22T13:49:55.608526] === Starting Batch Monitoring FL Model ===
+[2025-05-22T13:49:55.610145] Total unique node addresses: 2
+[2025-05-22T13:49:55.617131] Found 3 products in context
+[2025-05-22T13:49:55.627750] Running Batch Monitoring with 2 FL clients
+[2025-05-22T13:49:55.637469] Preparing federated data...
+[2025-05-22T13:50:03.420859] Successfully prepared federated data for 2 clients
+[2025-05-22T13:50:03.444713] Batch Monitoring results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/batch_monitoring_results.json
+[2025-05-22T13:50:03.446942] === Completed Batch Monitoring FL Model ===
+[2025-05-22T13:50:03.448108] Model batch_monitoring completed successfully
+[2025-05-22T13:50:03.456970] === Running model: node_behavior ===
+[2025-05-22T13:50:03.466801] === Starting Node Behavior Timeseries FL Model ===
+[2025-05-22T13:50:03.469039] Running Node Behavior Timeseries with 1 FL clients
+[2025-05-22T13:50:03.470420] Preparing federated data...
+[2025-05-22T13:50:32.153696] Successfully prepared federated data for 1 clients for Node Behavior Timeseries
+[2025-05-22T13:50:32.170527] Node Behavior Timeseries results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/node_behavior_timeseries_results.json
+[2025-05-22T13:50:32.171639] === Completed Node Behavior Timeseries FL Model ===
+[2025-05-22T13:50:32.180576] Model node_behavior completed successfully
+[2025-05-22T13:50:32.181909] === Running model: dispute_risk ===
+[2025-05-22T13:50:32.182923] === Starting Dispute Risk FL Model ===
+[2025-05-22T13:50:32.184728] Total unique node addresses: 2
+[2025-05-22T13:50:32.185929] Running Dispute Risk with 2 FL clients
+[2025-05-22T13:50:32.187121] Preparing federated data...
+[2025-05-22T13:50:47.898063] Successfully prepared federated data for 2 clients for Dispute Risk
+[2025-05-22T13:50:47.915201] Dispute Risk results saved to /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/fl_integration/results/dispute_risk_results.json
+[2025-05-22T13:50:47.916206] === Completed Dispute Risk FL Model ===
+[2025-05-22T13:50:47.917127] Model dispute_risk completed successfully
+[2025-05-22T13:50:47.927040] === Completed Federated Learning Run ===
