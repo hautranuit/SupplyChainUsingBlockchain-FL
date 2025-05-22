@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-05-22T12:59:14.195180",
+  "model": "Batch Monitoring",
+  "num_clients": 2,
+  "node_addresses": [
+    "0x032041b4b356fEE1496805DD4749f181bC736FFA",
+    "0x04351e7dF40d04B5E610c4aA033faCf435b98711"
+  ],
+  "batch_data_summary": [
+    {
+      "tokenId": "7",
+      "batchNumber": "B_ALPHA_001"
+    },
+    {
+      "tokenId": "8",
+      "batchNumber": "B_BETA_002"
+    },
+    {
+      "tokenId": "9",
+      "batchNumber": "B_GAMMA_003"
+    }
+  ],
+  "datasets_prepared": 2,
+  "attack_mode": false
+}

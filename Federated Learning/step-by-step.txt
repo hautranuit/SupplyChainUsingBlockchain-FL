@@ -9,21 +9,13 @@
 (cmd window) npx hardhat run 06_scenario_dispute_resolution.cjs --network amoy
 
 # Train the initial model with normal data
-(WSL Ubuntu) python fl_integration/run_sybil_detection.py
-(WSL Ubuntu) python fl_integration/run_node_behavior_timeseries.py
-(WSL Ubuntu) python fl_integration/run_batch_monitoring.py
-(WSL Ubuntu) python fl_integration/run_dispute_risk.py
-(WSL Ubuntu) python fl_integration/run_arbitrator_bias.py
+python fl_integration/run_federated_learning.py --model all
 
 # Attack simulation
 (cmd window) npx hardhat run 07_simulate_sybil_bribery_attack.cjs --network amoy
 
 # Retrain ALL models with anomalous data
-(WSL Ubuntu) python fl_integration/run_sybil_detection.py
-(WSL Ubuntu) python fl_integration/run_node_behavior_timeseries.py
-(WSL Ubuntu) python fl_integration/run_batch_monitoring.py
-(WSL Ubuntu) python fl_integration/run_dispute_risk.py
-(WSL Ubuntu) python fl_integration/run_arbitrator_bias.py
+python fl_integration/run_federated_learning.py --model all
 
 # Validation and evaluation
 (WSL Ubuntu) python fl_integration/validate_integration.py

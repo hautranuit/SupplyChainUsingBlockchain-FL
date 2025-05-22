@@ -3,9 +3,9 @@
   "manufacturerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
   "deployerAddress": "0x032041b4b356fEE1496805DD4749f181bC736FFA",
   "tokenIds": [
-    "4",
-    "5",
-    "6"
+    "7",
+    "8",
+    "9"
   ],
   "productDetails": [
     {
@@ -18,7 +18,7 @@
       "manufacturerID": "MANU_ACME_CORP",
       "quickAccessURL": "http://example.com/products/laptop001_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_001",
-      "tokenId": "4",
+      "tokenId": "7",
       "currentOwnerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
       "price": "100000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
@@ -37,7 +37,7 @@
       "manufacturerID": "MANU_HEALTHCARE_INC",
       "quickAccessURL": "http://example.com/products/vaccine002_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_002",
-      "tokenId": "5",
+      "tokenId": "8",
       "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
       "price": "200000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
@@ -56,7 +56,7 @@
       "manufacturerID": "MANU_FASHION_LUXE",
       "quickAccessURL": "http://example.com/products/handbag003_qa",
       "nftReference": "http://example.com/products/DEMO_PROD_003",
-      "tokenId": "6",
+      "tokenId": "9",
       "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
       "price": "300000000000000000",
       "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",

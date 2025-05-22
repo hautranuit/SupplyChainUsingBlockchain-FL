@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-05-22T13:00:04.764331",
+  "model": "Dispute Risk",
+  "num_clients": 2,
+  "node_addresses": [
+    "0x032041b4b356fEE1496805DD4749f181bC736FFA",
+    "0x04351e7dF40d04B5E610c4aA033faCf435b98711"
+  ],
+  "datasets_prepared": 2,
+  "attack_mode": false
+}

@@ -117,11 +117,11 @@ async function main() {
     const supplyChainNFT = await ethers.getContractAt("SupplyChainNFT", contractAddress, deployer);
     console.log("Connected to contract.");
 
-    // MODIFIED: Target DEMO_PROD_003 for dispute
-    const productInfo = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_003"); 
+    // MODIFIED: Target DEMO_PROD_002 for dispute
+    const productInfo = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_002"); 
     if (!productInfo || !productInfo.tokenId || !productInfo.currentOwnerAddress) {
-        // MODIFIED: Updated error message for DEMO_PROD_003
-        console.error("Product 3 (DEMO_PROD_003) details or owner not found in context. Run previous scripts, including those that might assign ownership of Product 3.");
+        // MODIFIED: Updated error message for DEMO_PROD_002
+        console.error("Product 2 (DEMO_PROD_002) details or owner not found in context. Run previous scripts, including those that might assign ownership of Product 2.");
         process.exit(1);
     }
     const tokenIdToDispute = productInfo.tokenId;
@@ -538,6 +538,19 @@ async function main() {
             // await delay(INFURA_DELAY_MS); // REMOVED delay as INFURA_DELAY_MS is not defined and queue handles delays
 
             let refundEnforcedEvent = receipt.events?.find(e => e.event === "RefundEnforced");
+            if (!refundEnforcedEvent) {
+                const rawLogs = receipt.logs || [];
+                for (const log of rawLogs) {
+                    try {
+                        const parsedLog = supplyChainNFT.interface.parseLog(log);
+                        if (parsedLog && parsedLog.name === "RefundEnforced") {
+                            refundEnforcedEvent = parsedLog;
+                            break;
+                        }
+                    } catch (e) { /* Ignore if log is not from this contract's ABI */ }
+                }
+            }
+
             if (refundEnforcedEvent) {
                 console.log(`      RefundEnforced: DisputeID=${refundEnforcedEvent.args.disputeId}, To=${refundEnforcedEvent.args.refundTo}, From=${refundEnforcedEvent.args.refundFrom}, Amount=${ethers.formatEther(refundEnforcedEvent.args.amount)} ETH`);
             } else {
@@ -587,7 +600,8 @@ async function main() {
         }
 
         if (disputeConcludedEvent) {
-            console.log(`      DisputeConcluded: DisputeID=${disputeConcludedEvent.args.disputeId}, WasEnforced=${disputeConcludedEvent.args.wasEnforced}, ConcludedBy=${disputeConcludedEvent.args.concludedBy}, Timestamp=${new Date(disputeConcludedEvent.args.timestamp.toNumber() * 1000).toISOString()}`);
+            // MODIFIED: Convert BigInt timestamp to Number for Date constructor
+            console.log(`      DisputeConcluded: DisputeID=${disputeConcludedEvent.args.disputeId}, WasEnforced=${disputeConcludedEvent.args.wasEnforced}, ConcludedBy=${disputeConcludedEvent.args.concludedBy}, Timestamp=${new Date(Number(disputeConcludedEvent.args.timestamp) * 1000).toISOString()}`);
         } else {
             console.warn("      WARN: Could not find DisputeConcluded event in receipt.");
         }

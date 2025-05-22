@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-05-21T23:55:12.978931",
+  "models_run": [
+    "sybil_detection",
+    "batch_monitoring",
+    "node_behavior",
+    "dispute_risk"
+  ],
+  "results": {
+    "sybil_detection": true,
+    "batch_monitoring": true,
+    "node_behavior": true,
+    "dispute_risk": false
+  },
+  "execution_time_seconds": 0.061649322509765625,
+  "overall_success": false,
+  "attack_mode": false
+}
