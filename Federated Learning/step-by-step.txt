@@ -3,20 +3,18 @@
 
 # Generate normal activity data
 (cmd window) npx hardhat run 02_scenario_product_creation.cjs --network amoy
-(cmd window) npx hardhat run-scenario03 --network amoy --tokenid1 <TOKEN_ID_1> --cid1 <IPFS_CID_FOR_TOKEN_1> --tokenid2 <TOKEN_ID_2> --cid2 <IPFS_CID_FOR_TOKEN_2> --tokenid3 <TOKEN_ID_3> --cid3 <IPFS_CID_FOR_TOKEN_3>
+
+(cmd window) npx hardhat run-scenario03 --network amoy --tokenid1 "TOKEN_ID_1" --cid1 "IPFS_CID_FOR_TOKEN_1" --tokenid2 "TOKEN_ID_2" --cid2 "IPFS_CID_FOR_TOKEN_ 2" --tokenid3 "TOKEN_ID_3" --cid3 "IPFS_CID_FOR_TOKEN_3"
+
 (cmd window) npx hardhat run 04_scenario_transport_and_ipfs.cjs --network amoy
 (cmd window) npx hardhat run 05_scenario_batch_processing.cjs --network amoy
 (cmd window) npx hardhat run 06_scenario_dispute_resolution.cjs --network amoy
 
 # Train the initial model with normal data
-python fl_integration/run_federated_learning.py --model all
+python run_federated_learning.py --mode full --output-dir ./output/normal
 
 # Attack simulation
 (cmd window) npx hardhat run 07_simulate_sybil_bribery_attack.cjs --network amoy
 
 # Retrain ALL models with anomalous data
-python fl_integration/run_federated_learning.py --model all
-
-# Validation and evaluation
-(WSL Ubuntu) python fl_integration/validate_integration.py
-(WSL Ubuntu) python fl_integration/validate_attack_detection.py
+python run_federated_learning.py --mode full --output_dir ./output/attack

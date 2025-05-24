@@ -66,10 +66,10 @@ class BlockchainConnector:
         self.rpc_url = rpc_url # Passed rpc_url takes precedence
         self.contract_address = contract_address
         self.contracts = {} # Initialize contracts dictionary
-        self.max_block_range = 1000  # Maximum block range for chunked queries
+        self.max_block_range = 200  # Maximum block range for chunked queries (reduced from 500 to 200)
         self.max_retries = 3  # Maximum number of retries for failed queries
         self.max_chunks = 100  # Maximum number of chunks to process before using mock data
-        self.use_mock_data = False  # Always use mock data for faster development and testing
+        self.use_mock_data = False  # Set to True to use mock data instead of real blockchain data
 
         # Determine ABI path
         actual_abi_path = contract_abi_path
@@ -247,71 +247,152 @@ class BlockchainConnector:
     def get_events(self, contract_name: str, event_name: str, argument_filters: Optional[Dict[str, Any]] = None, 
                   from_block: int = 0, to_block: Optional[Union[int, str]] = 'latest') -> List[Dict[str, Any]]:
         """
-        Get events from a contract
-        
-        Args:
-            contract_name: Name of the contract
-            event_name: Name of the event
-            argument_filters: Optional filters for event arguments
-            from_block: Block number to start from
-            to_block: Block number to end at
-            
-        Returns:
-            List of event dictionaries
+        Get events from a contract.
+        Attempts to use create_filter first. If that fails, falls back to chunked eth_getLogs.
         """
-        # Always use mock data for faster development and testing
+        # Use mock data if flag is set
         if self.use_mock_data:
-            logger.info(f"Using mock events for {event_name} to avoid blockchain API rate limits")
+            self.logger.info(f"Using mock events for {event_name} because use_mock_data is True")
             mock_events = self.get_mock_events(event_name)
             return mock_events
             
-        if not self.w3:
-            logger.error("Web3 not initialized. Cannot get events.")
+        if not self.web3:
+            self.logger.error("Web3 not initialized. Cannot get events.")
             return []
             
         if contract_name not in self.contracts:
-            logger.error(f"Contract {contract_name} not loaded.")
+            self.logger.error(f"Contract {contract_name} not loaded.")
             return []
             
         contract = self.contracts[contract_name]
         
         if not hasattr(contract.events, event_name):
-            logger.error(f"Event {event_name} not found in contract {contract_name}.")
+            self.logger.error(f"Event {event_name} not found in contract {contract_name}.")
+            self.logger.warning(f"Returning empty list for {event_name} as event not found and use_mock_data=False.")
             return []
+
+        event_instance = getattr(contract.events, event_name)
+
+        # Preserve original argument filter validation logic
+        if argument_filters:
+            event_abi = None
+            for item in contract.abi:
+                if item.get('type') == 'event' and item.get('name') == event_name:
+                    event_abi = item
+                    break
             
-        try:
-            # Try using getLogs instead of create_filter for better compatibility
-            event_instance = getattr(contract.events, event_name)
-            
-            # Handle different Web3 versions
+            if event_abi:
+                valid_args = {input_item.get('name') for input_item in event_abi.get('inputs', [])}
+                filtered_args = {arg_name: arg_value for arg_name, arg_value in argument_filters.items() if arg_name in valid_args}
+                
+                if len(filtered_args) < len(argument_filters):
+                    removed_args = set(argument_filters.keys()) - set(filtered_args.keys())
+                    self.logger.warning(f"Arguments {removed_args} not found in event '{event_name}' ABI, removing from filters.")
+                
+                argument_filters = filtered_args if filtered_args else None
+            else: # Should not happen if hasattr check passed, but good for safety
+                self.logger.warning(f"Could not find ABI for event {event_name} to validate argument_filters.")
+
+        # MODIFICATION: Always use chunked eth_getLogs, bypass create_filter
+        self.logger.info(f"Using chunked eth_getLogs directly for {event_name} (range {from_block}-{to_block}, args: {argument_filters}).")
+
+        # Fallback: Use chunked eth_getLogs
+        all_retrieved_logs: List[Any] = [] # Stores decoded log entries (AttributeDict)
+        
+        actual_from_block = from_block
+        actual_to_block: int
+        
+        if isinstance(to_block, str) and to_block.lower() == 'latest':
             try:
-                logs = event_instance.get_logs(fromBlock=from_block, toBlock=to_block, argument_filters=argument_filters or {})
-            except (TypeError, AttributeError):
-                # Fallback for older Web3 versions
-                event_filter = event_instance.create_filter(
-                    fromBlock=from_block,
-                    toBlock=to_block,
-                    argument_filters=argument_filters or {}
-                )
-                logs = event_filter.get_all_entries()
+                actual_to_block = self.web3.eth.block_number
+            except Exception as e_block_num:
+                self.logger.error(f"Failed to resolve 'latest' block for eth_getLogs of {event_name}: {e_block_num}. Cannot proceed.")
+                return []
+        elif isinstance(to_block, int):
+            actual_to_block = to_block
+        else:
+            self.logger.error(f"Invalid to_block type ('{to_block}') for eth_getLogs of {event_name}. Cannot proceed.")
+            return []
+
+        current_chunk_from_block = actual_from_block
+        event_signature_hash = ""
+        try:
+            # Ensure contract object is valid before accessing abi
+            if not contract or not hasattr(contract, 'abi'):
+                self.logger.error(f"Contract object or ABI is invalid for {contract_name}. Cannot get event signature.")
+                return []
+            event_signature = self.get_event_signature(contract, event_name) # Pass contract object
+            event_signature_hash = self.web3.keccak(text=event_signature).hex()
+            event_signature_hash = self.ensure_hex_prefix(event_signature_hash)
+        except Exception as e_sig:
+            self.logger.error(f"Failed to get event signature for {event_name}: {e_sig}")
+            return []
+
+        while current_chunk_from_block <= actual_to_block:
+            current_chunk_to_block = min(current_chunk_from_block + self.max_block_range - 1, actual_to_block)
+            self.logger.debug(f"Fetching {event_name} via eth_getLogs: chunk {current_chunk_from_block}-{current_chunk_to_block}")
+
+            try:
+                # For eth_getLogs, argument_filters need to be translated to topics.
+                # This simplified fallback filters by event signature (topic0).
+                # If argument_filters were provided for indexed fields, they are NOT used here to form specific topics.
+                # The calling function (get_all_events_for_node) will handle further Python-side filtering if necessary.
+                # For direct eth_getLogs usage, we need to construct topics if argument_filters are provided for indexed fields.
                 
-            logger.info(f"Retrieved {len(logs)} {event_name} events from {contract_name}")
-            
-            # Process logs to extract event data
-            processed_events = []
-            for log in logs:
-                event_data = self.log_to_dict(log)
-                processed_events.append(event_data)
+                topics_for_getlogs = [event_signature_hash]
+                if argument_filters:
+                    # Simplified topic construction: Assumes argument_filters keys are indexed event parameters.
+                    # This part needs to be robust and aware of ABI to correctly format topics.
+                    # For now, we'll keep it simple and primarily filter by event signature.
+                    # Proper indexed filtering requires knowing which arguments are indexed and their types.
+                    # Example: if 'nodeAddress' is indexed, topics_for_getlogs.append(self.web3.to_hex(self.web3.to_bytes(hexstr=node_address_checksummed))))
+                    # This is a placeholder for more advanced topic building if needed.
+                    # For now, we rely on the Python-side filtering in get_all_events_for_node for argument specifics.
+                    pass
+
+
+                filter_params_for_getlogs = {
+                    'address': contract.address,
+                    'topics': topics_for_getlogs,
+                    'fromBlock': current_chunk_from_block,
+                    'toBlock': current_chunk_to_block
+                }
                 
-            return processed_events
-        except Exception as e:
-            logger.error(f"Error getting events {event_name} from {contract_name}: {e}")
+                raw_logs_chunk = self.web3.eth.get_logs(filter_params_for_getlogs)
+                
+                decoded_logs_in_chunk = []
+                for raw_log in raw_logs_chunk:
+                    try:
+                        # Use the same event_instance for process_log
+                        decoded_log = event_instance.process_log(raw_log)
+                        decoded_logs_in_chunk.append(decoded_log)
+                    except Exception as decode_error:
+                        # Log specific raw_log details if possible, but be careful about log size
+                        self.logger.error(f"Error decoding individual log for {event_name} in chunk {current_chunk_from_block}-{current_chunk_to_block}: {decode_error}. Log: {raw_log}")
+                all_retrieved_logs.extend(decoded_logs_in_chunk)
+                
+                self.logger.info(f"Retrieved {len(decoded_logs_in_chunk)} decoded logs ({len(raw_logs_chunk)} raw) for {event_name} via eth_getLogs (chunk {current_chunk_from_block}-{current_chunk_to_block})")
+
+            except Exception as getLogs_chunk_error:
+                self.logger.error(f"eth_getLogs failed for {event_name} (chunk {current_chunk_from_block}-{current_chunk_to_block}): {getLogs_chunk_error}")
+                # If a chunk fails, return what has been collected so far.
+                # A more robust implementation might retry the chunk or skip it.
+                processed_events = [self.log_to_dict(log) for log in all_retrieved_logs]
+                self.logger.warning(f"Returning {len(processed_events)} partially collected {event_name} events due to error in chunk.")
+                return processed_events
             
-            # Fallback to using mock data directly instead of trying chunked approach
-            # This avoids potential infinite loops or excessive API calls
-            logger.info(f"Using mock events for {event_name} due to retrieval error")
-            mock_events = self.get_mock_events(event_name)
-            return mock_events
+            if current_chunk_from_block > actual_to_block : # Should be covered by while condition, but as safeguard
+                break
+            if current_chunk_from_block == current_chunk_to_block and current_chunk_to_block == actual_to_block and self.max_block_range <=1 : # Prevent infinite loop if max_block_range is too small
+                break
+            current_chunk_from_block = current_chunk_to_block + 1
+            
+            # Only sleep if we made a request, successful or not, to avoid tight loop on errors before this point.
+            time.sleep(0.75) # Small delay to be polite to the RPC node (increased from 0.5 to 0.75)
+
+        processed_events = [self.log_to_dict(log) for log in all_retrieved_logs]
+        self.logger.info(f"Successfully retrieved a total of {len(processed_events)} {event_name} events using chunked eth_getLogs (range {actual_from_block}-{actual_to_block}).")
+        return processed_events
     
     def get_event_signature(self, contract, event_name):
         """Get the signature for an event"""
@@ -348,23 +429,6 @@ class BlockchainConnector:
             # Fallback
             return dict(log_entry)
 
-    def get_events_from_block_range(self, event_name: str, from_block: Union[int, str], to_block: Union[int, str]) -> list:
-        """
-        Get events from a specific block range using direct eth_getLogs
-        
-        Args:
-            event_name: Name of the event
-            from_block: Block number to start from
-            to_block: Block number to end at
-            
-        Returns:
-            List of processed events
-        """
-        # Use mock data directly for faster development and testing
-        self.logger.info(f"Using mock data for {event_name} events to avoid blockchain API rate limits")
-        mock_events = self.get_mock_events(event_name)
-        return mock_events
-
     def get_node_reputation(self, node_address: str) -> int:
         """
         Get reputation score for a node
@@ -377,7 +441,7 @@ class BlockchainConnector:
         """
         if self.use_mock_data:
             # Return mock reputation score
-            self.logger.info(f"Using mock reputation score for node {node_address}")
+            self.logger.info(f"Using mock reputation score for node {node_address} (use_mock_data=True)")
             # Generate a deterministic but seemingly random score based on address
             score = int(int(node_address[-4:], 16) % 100)  # Last 4 hex chars as score between 0-99
             return score
@@ -399,11 +463,17 @@ class BlockchainConnector:
                 return 0
                 
             # Call the function
-            reputation = self.contract.functions.getNodeReputation(node_address).call()
-            return reputation
+            try:
+                reputation = self.contract.functions.getNodeReputation(node_address).call()
+                return reputation
+            except Exception as call_error:
+                self.logger.error(f"Error calling getNodeReputation for node {node_address}: {call_error}")
+                # DO NOT Fallback to mock data if use_mock_data is False
+                self.logger.warning(f"Returning 0 for reputation of {node_address} due to call error and use_mock_data=False.")
+                return 0
         except Exception as e:
             self.logger.error(f"Error getting reputation for node {node_address}: {e}")
-            return 0
+            return 0 # Default value on error
             
     def is_node_verified(self, node_address: str) -> bool:
         """
@@ -417,7 +487,7 @@ class BlockchainConnector:
         """
         if self.use_mock_data:
             # Return mock verification status
-            self.logger.info(f"Using mock verification status for node {node_address}")
+            self.logger.info(f"Using mock verification status for node {node_address} (use_mock_data=True)")
             # Generate a deterministic but seemingly random verification based on address
             is_verified = int(node_address[-1], 16) % 2 == 0  # Even last hex char means verified
             return is_verified
@@ -439,74 +509,139 @@ class BlockchainConnector:
                 return False
                 
             # Call the function
-            is_verified = self.contract.functions.isNodeVerified(node_address).call()
-            return is_verified
+            try:
+                is_verified = self.contract.functions.isNodeVerified(node_address).call()
+                return is_verified
+            except Exception as call_error:
+                self.logger.error(f"Error calling isNodeVerified for node {node_address}: {call_error}")
+                # DO NOT Fallback to mock data if use_mock_data is False
+                self.logger.warning(f"Returning False for verification of {node_address} due to call error and use_mock_data=False.")
+                return False
         except Exception as e:
             self.logger.error(f"Error checking verification for node {node_address}: {e}")
-            return False
+            return False # Default value on error
 
     def get_all_events_for_node(self, node_address: str, from_block: int = 0, to_block: Union[int, str] = 'latest') -> Dict[str, List[Dict[str, Any]]]:
         """
-        Get all events related to a specific node
+        Get all events related to a specific node by trying to filter by common address fields 
+        or fetching all and then filtering locally.
         
         Args:
-            node_address: Ethereum address of the node
-            from_block: Block number to start from
-            to_block: Block number to end at
+            node_address: Ethereum address of the node (expected to be checksummed or lowercase).
+            from_block: Block number to start from.
+            to_block: Block number to end at.
             
         Returns:
-            Dictionary mapping event names to lists of events
+            Dictionary mapping event names to lists of relevant events.
         """
-        if not self.contract:
-            self.logger.error("Contract not loaded. Cannot get events for node.")
+        if not self.web3 or not self.contract_abi or not self.contract_name:
+            self.logger.error("Blockchain connector not fully initialized (web3, ABI, or contract name missing). Cannot get events for node.")
             return {}
-            
-        # Define all possible events that might involve a node
-        event_names = [
-            "NodeVerified",
-            "ProductMinted", 
-            "InitialCIDStored",
-            "DirectSaleAndTransferCompleted",
-            "PaymentAndTransferCompleted",
-            "DisputeInitiated",
-            "BatchProposed",
-            "BatchValidated",
-            "ArbitratorVoted",
-            "CIDStored"
-        ]
-        
-        all_events = {}
-        
-        for event_name in event_names:
-            # Check if the event exists in the ABI
-            event_exists = False
+
+        node_address_lower = node_address.lower() # Ensure consistent comparison
+
+        # Define all event names from the ABI that might be relevant.
+        # It's better to iterate through ABI than to hardcode event names.
+        event_names_from_abi = []
+        for item in self.contract_abi:
+            if item.get('type') == 'event' and item.get('name'):
+                event_names_from_abi.append(item['name'])
+
+        if not event_names_from_abi:
+            self.logger.warning("No event definitions found in ABI. Cannot fetch events.")
+            return {}
+
+        all_node_specific_events: Dict[str, List[Dict[str, Any]]] = {}
+
+        for event_name in event_names_from_abi:
+            if self.use_mock_data:
+                # If using mock data, get_mock_events should ideally return all mock events for that type,
+                # and then we filter them here for the specific node.
+                mock_events_for_type = self.get_mock_events(event_name)
+                filtered_mock_events = []
+                for event_data in mock_events_for_type:
+                    # Check all string values in 'args' for the node_address_lower
+                    if 'args' in event_data and isinstance(event_data['args'], dict):
+                        if any(isinstance(val, str) and val.lower() == node_address_lower for val in event_data['args'].values()):
+                            filtered_mock_events.append(event_data)
+                if filtered_mock_events:
+                    all_node_specific_events[event_name] = filtered_mock_events
+                continue # Move to next event_name if using mock data
+
+            # Logic for real data fetching
+            event_abi_inputs = []
             for item in self.contract_abi:
                 if item.get('type') == 'event' and item.get('name') == event_name:
-                    event_exists = True
+                    event_abi_inputs = item.get('inputs', [])
                     break
-                    
-            if not event_exists:
-                self.logger.warning(f"Event '{event_name}' not found in contract ABI. Skipping.")
-                continue
-                
-            # Get events for this event type - using mock data for faster development
-            events = self.get_mock_events(event_name)
             
-            # Filter events related to this node
-            # This is a simplified approach - in reality, you'd need to check different fields
-            # depending on the event type
-            node_events = []
-            for event in events:
-                # Check common fields that might contain node addresses
-                for key, value in event.items():
-                    if isinstance(value, str) and value.lower() == node_address.lower():
-                        node_events.append(event)
-                        break
+            indexed_address_fields = [inp['name'] for inp in event_abi_inputs if inp.get('indexed') and inp.get('type') == 'address']
+            non_indexed_address_fields = [inp['name'] for inp in event_abi_inputs if not inp.get('indexed') and inp.get('type') == 'address']
+
+            fetched_events_for_this_type: List[Dict[str, Any]] = []
+
+            # Try filtering by indexed address fields first (more efficient)
+            if indexed_address_fields:
+                for field_name in indexed_address_fields:
+                    try:
+                        events = self.get_events(
+                            contract_name=self.contract_name,
+                            event_name=event_name,
+                            argument_filters={field_name: node_address}, # web3.py handles checksumming if node_address is not
+                            from_block=from_block,
+                            to_block=to_block
+                        )
+                        fetched_events_for_this_type.extend(events)
+                        self.logger.debug(f"Fetched {len(events)} '{event_name}' events filtering by indexed arg '{field_name}' for node {node_address}")
+                    except Exception as e:
+                        self.logger.warning(f"Could not fetch '{event_name}' events by indexed arg '{field_name}' for node {node_address}: {e}. This might be okay if the node isn't involved via this field.")
             
-            if node_events:
-                all_events[event_name] = node_events
-                
-        return all_events
+            # If no events found via indexed filters, or if there are non-indexed address fields to check,
+            # fetch all events for the type and filter locally.
+            # This is less efficient but necessary for non-indexed fields or complex scenarios.
+            if not fetched_events_for_this_type or non_indexed_address_fields:
+                self.logger.debug(f"Fetching all '{event_name}' events and filtering locally for node {node_address} (due to no indexed results or non-indexed address fields).")
+                all_events_of_this_type = self.get_events(
+                    contract_name=self.contract_name,
+                    event_name=event_name,
+                    argument_filters=None, # Fetch all
+                    from_block=from_block,
+                    to_block=to_block
+                )
+                self.logger.debug(f"Retrieved {len(all_events_of_this_type)} total '{event_name}' events for local filtering.")
+
+                for event_data in all_events_of_this_type:
+                    # Check all string values in 'args' for the node_address_lower
+                    if 'args' in event_data and isinstance(event_data['args'], dict):
+                        if any(isinstance(val, str) and val.lower() == node_address_lower for val in event_data['args'].values()):
+                            # Avoid duplicates if already added via indexed filter
+                            # A simple check based on transactionHash and logIndex can suffice
+                            is_duplicate = False
+                            for existing_event in fetched_events_for_this_type:
+                                if existing_event.get('transactionHash') == event_data.get('transactionHash') and \
+                                   existing_event.get('logIndex') == event_data.get('logIndex'):
+                                    is_duplicate = True
+                                    break
+                            if not is_duplicate:
+                                fetched_events_for_this_type.append(event_data)
+            
+            # Remove duplicates that might have been added if an event matched multiple indexed fields
+            # or matched both an indexed field and the general fetch.
+            unique_events = []
+            seen_event_ids = set() # (transactionHash, logIndex)
+            for event_data in fetched_events_for_this_type:
+                event_id = (event_data.get('transactionHash'), event_data.get('logIndex'))
+                if event_id not in seen_event_ids:
+                    unique_events.append(event_data)
+                    seen_event_ids.add(event_id)
+
+            if unique_events:
+                all_node_specific_events[event_name] = unique_events
+                self.logger.info(f"Found {len(unique_events)} unique '{event_name}' events relevant to node {node_address}")
+            else:
+                self.logger.debug(f"No '{event_name}' events found relevant to node {node_address}")
+
+        return all_node_specific_events
 
     def get_mock_events(self, event_name: str) -> List[Dict[str, Any]]:
         """
@@ -600,7 +735,7 @@ class BlockchainConnector:
                     "args": {
                         "batchId": "1",
                         "proposer": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                        "tokenIds": ["1", "2", "3"]
+                        "selectedValidators": ["0x90F79bf6EB2c4f870365E785982E1f101E93b906", "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"]
                     },
                     "event": "BatchProposed",
                     "blockNumber": 400,
@@ -615,7 +750,8 @@ class BlockchainConnector:
                     "args": {
                         "tokenId": "1",
                         "cid": "QmXyZ...",
-                        "storer": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                        "actor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+                        "timestamp": current_time - 86400
                     },
                     "event": "CIDStored",
                     "blockNumber": 500,
@@ -627,7 +763,8 @@ class BlockchainConnector:
                     "args": {
                         "tokenId": "2",
                         "cid": "QmAbc...",
-                        "storer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+                        "actor": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                        "timestamp": current_time - 43200
                     },
                     "event": "CIDStored",
                     "blockNumber": 600,
@@ -655,9 +792,10 @@ class BlockchainConnector:
             mock_events = [
                 {
                     "args": {
-                        "buyer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
                         "tokenId": "1",
-                        "amount": "1000000000000000000"
+                        "buyer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                        "amount": "1000000000000000000",
+                        "timestamp": current_time - 86400
                     },
                     "event": "CollateralDepositedForPurchase",
                     "blockNumber": 800,
@@ -672,7 +810,9 @@ class BlockchainConnector:
                     "args": {
                         "tokenId": "1",
                         "seller": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-                        "buyer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+                        "buyer": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                        "price": "1000000000000000000",
+                        "oldCIDForVerification": "QmXyZ..."
                     },
                     "event": "DirectSaleAndTransferCompleted",
                     "blockNumber": 900,
@@ -703,7 +843,7 @@ class BlockchainConnector:
                     "args": {
                         "batchId": "1",
                         "validator": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-                        "isValid": True
+                        "approve": True
                     },
                     "event": "BatchValidated",
                     "blockNumber": 1100,
@@ -716,9 +856,10 @@ class BlockchainConnector:
             mock_events = [
                 {
                     "args": {
-                        "arbitrator": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
                         "disputeId": "1",
-                        "votedInFavorOfComplainant": True
+                        "voter": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+                        "candidate": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+                        "timestamp": current_time - 86400
                     },
                     "event": "ArbitratorVoted",
                     "blockNumber": 1200,
@@ -737,6 +878,20 @@ class BlockchainConnector:
                     },
                     "event": "InitialCIDStored",
                     "blockNumber": 1300,
+                    "transactionHash": "0xf678901234abcdeff678901234abcdeff678901234abcdeff678901234abcdef",
+                    "logIndex": 0,
+                    "timestamp": current_time - 86400
+                }
+            ]
+        elif event_name == "BatchCommitted":
+            mock_events = [
+                {
+                    "args": {
+                        "batchId": "1",
+                        "success": True
+                    },
+                    "event": "BatchCommitted",
+                    "blockNumber": 1400,
                     "transactionHash": "0xf678901234abcdeff678901234abcdeff678901234abcdeff678901234abcdef",
                     "logIndex": 0,
                     "timestamp": current_time - 86400

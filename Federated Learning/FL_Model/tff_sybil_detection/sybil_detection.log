@@ -1559,3 +1559,243 @@ AttributeError: 'BlockchainConnector' object has no attribute 'w3'
 2025-05-22 13:50:47,895 - blockchain_connector - INFO - Retrieved 0 NodeVerified events from SupplyChainNFT
 2025-05-22 13:50:47,896 - dispute_risk - INFO - Fetched 0 DisputeInitiated events for DR.
 2025-05-22 13:50:47,897 - dispute_risk - ERROR - Critical Error: Failed to fetch DisputeInitiated events (Dispute Risk).
+2025-05-22 14:12:56,660 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 14:12:56,663 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:56,663 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:12:56,663 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:56,666 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:58,128 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:12:58,513 - connectors.blockchain_connector - INFO - Current block number: 21970177
+2025-05-22 14:12:58,530 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:12:58,530 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:12:58,530 - sybil_detection - ERROR - BlockchainConnector not initialized properly. Check RPC URL and network connection.
+2025-05-22 14:12:58,849 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 14:12:58,853 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:12:58,855 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:58,864 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:59,230 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:12:59,596 - connectors.blockchain_connector - INFO - Current block number: 21970178
+2025-05-22 14:12:59,606 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:12:59,607 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:12:59,607 - batch_monitoring - ERROR - BlockchainConnector not properly initialized. Check RPC URL and contract loading.
+2025-05-22 14:12:59,650 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 14:12:59,652 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:12:59,652 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:12:59,655 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:13:00,021 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:13:00,388 - connectors.blockchain_connector - INFO - Current block number: 21970178
+2025-05-22 14:13:00,399 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:13:00,400 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:13:00,400 - node_behavior - ERROR - BlockchainConnector not properly initialized. Exiting.
+2025-05-22 14:13:00,432 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 14:13:00,432 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:13:00,433 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:13:00,437 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:13:00,803 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:13:01,171 - connectors.blockchain_connector - INFO - Current block number: 21970178
+2025-05-22 14:13:01,178 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:13:01,178 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:13:01,178 - dispute_risk - ERROR - BlockchainConnector not properly initialized. Exiting.
+2025-05-22 14:25:31,741 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 14:25:31,753 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:31,754 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:25:31,754 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:31,760 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:33,144 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:25:34,287 - connectors.blockchain_connector - INFO - Current block number: 21970531
+2025-05-22 14:25:34,293 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:25:34,293 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:25:34,293 - sybil_detection - ERROR - BlockchainConnector not initialized properly. Check RPC URL and network connection.
+2025-05-22 14:25:34,584 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 14:25:34,585 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:25:34,585 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:34,589 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:35,734 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:25:36,105 - connectors.blockchain_connector - INFO - Current block number: 21970532
+2025-05-22 14:25:36,119 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:25:36,119 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:25:36,120 - batch_monitoring - ERROR - BlockchainConnector not properly initialized. Check RPC URL and contract loading.
+2025-05-22 14:25:36,195 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 14:25:36,196 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:25:36,196 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:36,202 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:36,572 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:25:36,937 - connectors.blockchain_connector - INFO - Current block number: 21970532
+2025-05-22 14:25:36,948 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:25:36,949 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:25:36,949 - node_behavior - ERROR - BlockchainConnector not properly initialized. Exiting.
+2025-05-22 14:25:37,011 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 14:25:37,012 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:25:37,012 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:37,017 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:25:37,393 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:25:37,758 - connectors.blockchain_connector - INFO - Current block number: 21970533
+2025-05-22 14:25:37,773 - connectors.blockchain_connector - ERROR - Error reading ABI file /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json: Expecting value: line 1 column 9 (char 8)
+2025-05-22 14:25:37,773 - connectors.blockchain_connector - WARNING - Web3, ABI, or Contract Address not available. Contract not loaded.
+2025-05-22 14:25:37,774 - dispute_risk - ERROR - BlockchainConnector not properly initialized. Exiting.
+2025-05-22 14:38:03,845 - sybil_detection - INFO - Creating federated data for Sybil detection with 2 clients
+2025-05-22 14:38:03,851 - sybil_detection - INFO - Loaded RPC URL from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:03,851 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:03,851 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:03,855 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:05,268 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:38:05,634 - connectors.blockchain_connector - INFO - Current block number: 21970884
+2025-05-22 14:38:05,648 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:05,663 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 14:38:05,664 - sybil_detection - INFO - FL Client real_data_client_0: Loading real data for 1 nodes
+2025-05-22 14:38:05,664 - sybil_detection - INFO - Client real_data_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 14:38:05,664 - blockchain_connector - INFO - Using mock events for NodeVerified to avoid blockchain API rate limits
+2025-05-22 14:38:05,665 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 14:38:06,049 - connectors.blockchain_connector - INFO - Using mock reputation score for node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 14:38:06,050 - blockchain_connector - INFO - Using mock events for ProductMinted to avoid blockchain API rate limits
+2025-05-22 14:38:06,050 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 14:38:06,050 - blockchain_connector - INFO - Using mock events for InitialCIDStored to avoid blockchain API rate limits
+2025-05-22 14:38:06,051 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 14:38:06,051 - blockchain_connector - INFO - Using mock events for DirectSaleAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,051 - connectors.blockchain_connector - WARNING - Generating mock DirectSaleAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,051 - blockchain_connector - INFO - Using mock events for DirectSaleAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,051 - connectors.blockchain_connector - WARNING - Generating mock DirectSaleAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,052 - blockchain_connector - INFO - Using mock events for PaymentAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,052 - connectors.blockchain_connector - WARNING - Generating mock PaymentAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,052 - blockchain_connector - INFO - Using mock events for PaymentAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,058 - connectors.blockchain_connector - WARNING - Generating mock PaymentAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,058 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:06,058 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:06,059 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:06,059 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:06,060 - blockchain_connector - INFO - Using mock events for BatchProposed to avoid blockchain API rate limits
+2025-05-22 14:38:06,060 - connectors.blockchain_connector - WARNING - Generating mock BatchProposed events for testing purposes
+2025-05-22 14:38:06,060 - blockchain_connector - INFO - Using mock events for BatchValidated to avoid blockchain API rate limits
+2025-05-22 14:38:06,060 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 14:38:06,061 - blockchain_connector - INFO - Using mock events for ArbitratorVoted to avoid blockchain API rate limits
+2025-05-22 14:38:06,061 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 14:38:06,061 - connectors.blockchain_connector - INFO - Using mock verification status for node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 14:38:06,061 - sybil_detection - INFO - Node 0x032041b4b356fEE1496805DD4749f181bC736FFA labeled as NORMAL (0) based on heuristic rules.
+2025-05-22 14:38:06,447 - sybil_detection - INFO - Client real_data_client_0: Created dataset with 1 samples
+2025-05-22 14:38:06,457 - sybil_detection - INFO - FL Client real_data_client_1: Loading real data for 1 nodes
+2025-05-22 14:38:06,457 - sybil_detection - INFO - Client real_data_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 14:38:06,458 - blockchain_connector - INFO - Using mock events for NodeVerified to avoid blockchain API rate limits
+2025-05-22 14:38:06,458 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 14:38:06,820 - connectors.blockchain_connector - INFO - Using mock reputation score for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 14:38:06,821 - blockchain_connector - INFO - Using mock events for ProductMinted to avoid blockchain API rate limits
+2025-05-22 14:38:06,821 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 14:38:06,821 - blockchain_connector - INFO - Using mock events for InitialCIDStored to avoid blockchain API rate limits
+2025-05-22 14:38:06,822 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 14:38:06,827 - blockchain_connector - INFO - Using mock events for DirectSaleAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,827 - connectors.blockchain_connector - WARNING - Generating mock DirectSaleAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,828 - blockchain_connector - INFO - Using mock events for DirectSaleAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,828 - connectors.blockchain_connector - WARNING - Generating mock DirectSaleAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,829 - blockchain_connector - INFO - Using mock events for PaymentAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,829 - connectors.blockchain_connector - WARNING - Generating mock PaymentAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,830 - blockchain_connector - INFO - Using mock events for PaymentAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:06,830 - connectors.blockchain_connector - WARNING - Generating mock PaymentAndTransferCompleted events for testing purposes
+2025-05-22 14:38:06,830 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:06,830 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:06,831 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:06,831 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:06,831 - blockchain_connector - INFO - Using mock events for BatchProposed to avoid blockchain API rate limits
+2025-05-22 14:38:06,832 - connectors.blockchain_connector - WARNING - Generating mock BatchProposed events for testing purposes
+2025-05-22 14:38:06,832 - blockchain_connector - INFO - Using mock events for BatchValidated to avoid blockchain API rate limits
+2025-05-22 14:38:06,832 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 14:38:06,833 - blockchain_connector - INFO - Using mock events for ArbitratorVoted to avoid blockchain API rate limits
+2025-05-22 14:38:06,833 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 14:38:06,833 - connectors.blockchain_connector - INFO - Using mock verification status for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 14:38:06,833 - sybil_detection - INFO - Node 0x04351e7dF40d04B5E610c4aA033faCf435b98711 labeled as NORMAL (0) based on heuristic rules.
+2025-05-22 14:38:07,034 - sybil_detection - INFO - Client real_data_client_1: Created dataset with 1 samples
+2025-05-22 14:38:07,035 - sybil_detection - INFO - Created 2 federated datasets for Sybil detection
+2025-05-22 14:38:07,074 - batch_monitoring - INFO - Creating federated data for batch monitoring with 2 clients
+2025-05-22 14:38:07,075 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:07,075 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:07,082 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:08,228 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:38:08,604 - connectors.blockchain_connector - INFO - Current block number: 21970885
+2025-05-22 14:38:08,610 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:08,615 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 14:38:08,616 - batch_monitoring - INFO - Fetching and caching batch processing events...
+2025-05-22 14:38:08,616 - blockchain_connector - INFO - Using mock events for BatchProposed to avoid blockchain API rate limits
+2025-05-22 14:38:08,616 - connectors.blockchain_connector - WARNING - Generating mock BatchProposed events for testing purposes
+2025-05-22 14:38:08,617 - blockchain_connector - INFO - Using mock events for BatchValidated to avoid blockchain API rate limits
+2025-05-22 14:38:08,617 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 14:38:08,618 - blockchain_connector - INFO - Using mock events for BatchCommitted to avoid blockchain API rate limits
+2025-05-22 14:38:08,618 - connectors.blockchain_connector - WARNING - Generating mock BatchCommitted events for testing purposes
+2025-05-22 14:38:08,618 - blockchain_connector - INFO - Using mock events for BatchStateChanged to avoid blockchain API rate limits
+2025-05-22 14:38:08,619 - connectors.blockchain_connector - WARNING - Generating mock BatchStateChanged events for testing purposes
+2025-05-22 14:38:08,619 - batch_monitoring - INFO - Fetched 1 BatchProposed events.
+2025-05-22 14:38:08,619 - batch_monitoring - INFO - Fetched 1 BatchValidated events.
+2025-05-22 14:38:08,619 - batch_monitoring - INFO - Fetched 1 BatchCommitted events.
+2025-05-22 14:38:08,619 - batch_monitoring - INFO - Fetched 0 BatchStateChanged events.
+2025-05-22 14:38:08,620 - batch_monitoring - INFO - FL Client batch_monitoring_client_0: Loading real data for 1 nodes
+2025-05-22 14:38:08,620 - batch_monitoring - INFO - Client batch_monitoring_client_0: Processing node 0x032041b4b356fEE1496805DD4749f181bC736FFA
+2025-05-22 14:38:08,622 - batch_monitoring - INFO - Client batch_monitoring_client_0: Created dataset with 1 samples
+2025-05-22 14:38:08,623 - batch_monitoring - INFO - FL Client batch_monitoring_client_1: Loading real data for 1 nodes
+2025-05-22 14:38:08,623 - batch_monitoring - INFO - Client batch_monitoring_client_1: Processing node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 14:38:08,624 - batch_monitoring - INFO - Client batch_monitoring_client_1: Created dataset with 1 samples
+2025-05-22 14:38:08,624 - batch_monitoring - INFO - Created 2 federated datasets for batch monitoring
+2025-05-22 14:38:08,687 - node_behavior - INFO - Creating federated data for node behavior timeseries with 1 clients
+2025-05-22 14:38:08,688 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:08,688 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:08,696 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:09,066 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:38:09,432 - connectors.blockchain_connector - INFO - Current block number: 21970886
+2025-05-22 14:38:09,440 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:09,445 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 14:38:09,445 - node_behavior - INFO - Fetching and caching events for Node Behavior Timeseries...
+2025-05-22 14:38:09,446 - blockchain_connector - INFO - Using mock events for PaymentAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:09,446 - connectors.blockchain_connector - WARNING - Generating mock PaymentAndTransferCompleted events for testing purposes
+2025-05-22 14:38:09,446 - node_behavior - INFO - Fetched 1 PaymentAndTransferCompleted events.
+2025-05-22 14:38:09,817 - blockchain_connector - INFO - Using mock events for ProductMinted to avoid blockchain API rate limits
+2025-05-22 14:38:09,817 - connectors.blockchain_connector - WARNING - Generating mock ProductMinted events for testing purposes
+2025-05-22 14:38:09,818 - node_behavior - INFO - Fetched 2 ProductMinted events.
+2025-05-22 14:38:10,548 - blockchain_connector - INFO - Using mock events for InitialCIDStored to avoid blockchain API rate limits
+2025-05-22 14:38:10,548 - connectors.blockchain_connector - WARNING - Generating mock InitialCIDStored events for testing purposes
+2025-05-22 14:38:10,549 - node_behavior - INFO - Fetched 1 InitialCIDStored events.
+2025-05-22 14:38:10,916 - blockchain_connector - INFO - Using mock events for DirectSaleAndTransferCompleted to avoid blockchain API rate limits
+2025-05-22 14:38:10,917 - connectors.blockchain_connector - WARNING - Generating mock DirectSaleAndTransferCompleted events for testing purposes
+2025-05-22 14:38:10,918 - node_behavior - INFO - Fetched 1 DirectSaleAndTransferCompleted events.
+2025-05-22 14:38:11,291 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:11,291 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:11,291 - node_behavior - INFO - Fetched 1 DisputeInitiated events.
+2025-05-22 14:38:11,661 - blockchain_connector - INFO - Using mock events for BatchProposed to avoid blockchain API rate limits
+2025-05-22 14:38:11,662 - connectors.blockchain_connector - WARNING - Generating mock BatchProposed events for testing purposes
+2025-05-22 14:38:11,662 - node_behavior - INFO - Fetched 1 BatchProposed events.
+2025-05-22 14:38:12,038 - blockchain_connector - INFO - Using mock events for BatchValidated to avoid blockchain API rate limits
+2025-05-22 14:38:12,039 - connectors.blockchain_connector - WARNING - Generating mock BatchValidated events for testing purposes
+2025-05-22 14:38:12,040 - node_behavior - INFO - Fetched 1 BatchValidated events.
+2025-05-22 14:38:12,421 - blockchain_connector - INFO - Using mock events for ArbitratorVoted to avoid blockchain API rate limits
+2025-05-22 14:38:12,422 - connectors.blockchain_connector - WARNING - Generating mock ArbitratorVoted events for testing purposes
+2025-05-22 14:38:12,422 - node_behavior - INFO - Fetched 1 ArbitratorVoted events.
+2025-05-22 14:38:12,791 - blockchain_connector - INFO - Using mock events for NodeVerified to avoid blockchain API rate limits
+2025-05-22 14:38:12,793 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 14:38:12,793 - node_behavior - INFO - Fetched 2 NodeVerified events.
+2025-05-22 14:38:13,525 - node_behavior - INFO - Total relevant events processed and sorted: 11
+2025-05-22 14:38:13,526 - node_behavior - INFO - FL Client timeseries_client_0 (0x04351e7dF40d04B5E610c4aA033faCf435b98711): Loading real timeseries data
+2025-05-22 14:38:13,527 - node_behavior - INFO - Generated timeseries for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 14:38:13,528 - node_behavior - INFO - Client timeseries_client_0: Created dataset with 1 samples
+2025-05-22 14:38:13,536 - node_behavior - INFO - Created 1 federated datasets for node behavior timeseries
+2025-05-22 14:38:13,584 - dispute_risk - INFO - Creating federated data for dispute risk with 2 clients
+2025-05-22 14:38:13,591 - connectors.blockchain_connector - INFO - Defaulting contract_abi_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:13,592 - connectors.blockchain_connector - INFO - Defaulting env_file_path to: /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:13,604 - connectors.blockchain_connector - INFO - Loaded Contract Address from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/w3storage-upload-script/ifps_qr.env
+2025-05-22 14:38:13,965 - connectors.blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 14:38:14,340 - connectors.blockchain_connector - INFO - Current block number: 21970888
+2025-05-22 14:38:14,344 - connectors.blockchain_connector - INFO - Loaded ABI from /mnt/e/NAM3/DO_AN_CHUYEN_NGANH/SupplyChain_dapp/artifacts/contracts/SupplyChainNFT.sol/SupplyChainNFT.json
+2025-05-22 14:38:14,349 - connectors.blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 14:38:14,350 - dispute_risk - INFO - Fetching and caching events for dispute risk analysis...
+2025-05-22 14:38:14,352 - blockchain_connector - INFO - Using mock events for DisputeInitiated to avoid blockchain API rate limits
+2025-05-22 14:38:14,353 - connectors.blockchain_connector - WARNING - Generating mock DisputeInitiated events for testing purposes
+2025-05-22 14:38:14,353 - blockchain_connector - INFO - Using mock events for ProductListedForSale to avoid blockchain API rate limits
+2025-05-22 14:38:14,353 - connectors.blockchain_connector - WARNING - Generating mock ProductListedForSale events for testing purposes
+2025-05-22 14:38:14,353 - blockchain_connector - INFO - Using mock events for CollateralDepositedForPurchase to avoid blockchain API rate limits
+2025-05-22 14:38:14,353 - connectors.blockchain_connector - WARNING - Generating mock CollateralDepositedForPurchase events for testing purposes
+2025-05-22 14:38:14,353 - blockchain_connector - INFO - Using mock events for CIDStored to avoid blockchain API rate limits
+2025-05-22 14:38:14,354 - connectors.blockchain_connector - WARNING - Generating mock CIDStored events for testing purposes
+2025-05-22 14:38:14,354 - blockchain_connector - INFO - Using mock events for NodeVerified to avoid blockchain API rate limits
+2025-05-22 14:38:14,354 - connectors.blockchain_connector - WARNING - Generating mock NodeVerified events for testing purposes
+2025-05-22 14:38:14,354 - dispute_risk - INFO - Fetched 1 DisputeInitiated events for DR.
+2025-05-22 14:38:14,355 - dispute_risk - INFO - FL Client real_dr_client_0_0x032041 (0x032041b4b356fEE1496805DD4749f181bC736FFA): Loading real dispute risk data
+2025-05-22 14:38:14,355 - dispute_risk - INFO - Client real_dr_client_0_0x032041 has 0 relevant disputes out of 1 total.
+2025-05-22 14:38:14,355 - dispute_risk - WARNING - No valid data for client real_dr_client_0_0x032041. Returning empty dataset.
+2025-05-22 14:38:14,356 - dispute_risk - INFO - FL Client real_dr_client_1_0x04351e (0x04351e7dF40d04B5E610c4aA033faCf435b98711): Loading real dispute risk data
+2025-05-22 14:38:14,357 - dispute_risk - INFO - Client real_dr_client_1_0x04351e has 0 relevant disputes out of 1 total.
+2025-05-22 14:38:14,357 - dispute_risk - WARNING - No valid data for client real_dr_client_1_0x04351e. Returning empty dataset.
+2025-05-22 14:38:14,358 - dispute_risk - INFO - Created 2 client datasets for dispute risk based on 2 node addresses.

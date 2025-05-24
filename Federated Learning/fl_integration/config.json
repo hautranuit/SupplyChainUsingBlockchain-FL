@@ -1,0 +1,25 @@
+{
+  "_comment": "Configuration file for the Federated Learning system",
+  "blockchain_url": "http://localhost:8545",
+  "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "abi_path": "../SupplyChain_dapp/artifacts/contracts/SupplyChain.sol/SupplyChain.json",
+  "private_key": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+  "client_auth_enabled": true,
+  "secure_aggregation": true,
+  "differential_privacy": false,
+  "detection_threshold": 0.7,
+  "response_engine": {
+    "sybil_node_threshold": 1,
+    "suspicious_batch_threshold": 1,
+    "high_risk_dispute_threshold": 1,
+    "bribery_attack_threshold": 1,
+    "overall_confidence_threshold": 0.7,
+    "actions": {
+      "log_alert": true,
+      "notify_admin": false,
+      "flag_node_on_chain": false,
+      "flag_batch_on_chain": false
+    }
+  },
+  "notification_channels": ["log"]
+}

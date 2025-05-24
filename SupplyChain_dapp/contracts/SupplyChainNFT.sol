@@ -189,6 +189,38 @@ contract SupplyChainNFT is Marketplace, BatchProcessing, DisputeResolution, Node
         emit ArbitratorCandidateProposed(disputeId, candidate, msg.sender, block.timestamp);
     }
 
+    /**
+     * @dev Records a decision for a dispute.
+     * @param disputeId The ID of the dispute.
+     * @param resolutionDetails Details of the resolution.
+     * @param outcome The outcome of the dispute (e.g., 0 = unresolved, 1 = resolved in favor of plaintiff, 2 = resolved in favor of defendant).
+     */
+    function makeDisputeDecision(
+        uint256 disputeId,
+        string memory resolutionDetails,
+        uint8 outcome
+    ) public {
+        DisputeResolution.Dispute storage d = disputesData[disputeId];
+        require(d.openedTimestamp > 0, "Dispute: Dispute does not exist");
+        require(!d.decisionRecorded, "Dispute: Decision already recorded");
+        require(_isCandidate(disputeId, msg.sender), "Dispute: Caller is not an approved arbitrator");
+
+        d.resolutionDetails = resolutionDetails;
+        d.outcome = outcome;
+        d.decisionRecorded = true;
+        d.decisionTimestamp = block.timestamp;
+
+        emit DisputeDecisionMade(disputeId, msg.sender, resolutionDetails, outcome, block.timestamp);
+    }
+
+    event DisputeDecisionMade(
+        uint256 indexed disputeId,
+        address indexed arbitrator,
+        string resolutionDetails,
+        uint8 outcome,
+        uint256 timestamp
+    );
+
     function _isCandidate(uint256 disputeId, address candidateAddr) internal view returns (bool) {
         DisputeResolution.Dispute storage d = disputesData[disputeId];
         if (d.openedTimestamp == 0) return false; // Dispute doesn't exist

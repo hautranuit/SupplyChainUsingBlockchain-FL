@@ -31,6 +31,62 @@ const W3UP_PROOF = process.env.PROOF;
 
 let ipfsClient;
 
+// --- Rate Limiter Class ---
+class BlockchainRateLimiter {
+    constructor(requestsPerSecond = 8, requestsPerMinute = 150) { // Increased limits
+        this.requestsPerSecond = requestsPerSecond;
+        this.requestsPerMinute = requestsPerMinute;
+        this.secondWindow = [];
+        this.minuteWindow = [];
+    }
+
+    async waitIfNeeded() {
+        const now = Date.now();
+        
+        // Clean old entries
+        this.secondWindow = this.secondWindow.filter(time => now - time < 1000);
+        this.minuteWindow = this.minuteWindow.filter(time => now - time < 60000);
+        
+        // Check if we need to wait
+        const needsSecondWait = this.secondWindow.length >= this.requestsPerSecond;
+        const needsMinuteWait = this.minuteWindow.length >= this.requestsPerMinute;
+        
+        // Fast path: if no limits are hit, just record and return immediately
+        if (!needsSecondWait && !needsMinuteWait) {
+            const requestTime = Date.now();
+            this.secondWindow.push(requestTime);
+            this.minuteWindow.push(requestTime);
+            return;
+        }
+        
+        if (needsSecondWait) {
+            const oldestSecond = Math.min(...this.secondWindow);
+            const waitTime = 1000 - (now - oldestSecond) + 50; // Reduced buffer to 50ms
+            if (waitTime > 0) {
+                console.log(`   🚦 Rate limiter: Waiting ${waitTime}ms to respect per-second limit...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+        }
+        
+        if (needsMinuteWait) {
+            const oldestMinute = Math.min(...this.minuteWindow);
+            const waitTime = 60000 - (now - oldestMinute) + 200; // Reduced buffer to 200ms
+            if (waitTime > 0) {
+                console.log(`   🚦 Rate limiter: Waiting ${waitTime}ms to respect per-minute limit...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+        }
+        
+        // Record this request
+        const requestTime = Date.now();
+        this.secondWindow.push(requestTime);
+        this.minuteWindow.push(requestTime);
+    }
+}
+
+// Create rate limiter instance
+const rateLimiter = new BlockchainRateLimiter();
+
 // --- Helper Functions (initWeb3Storage, uploadToIPFS, downloadFromIPFS - unchanged) ---
 async function initWeb3Storage() {
     if (!W3UP_KEY || !W3UP_PROOF) {
@@ -167,7 +223,11 @@ async function main() {
         process.exit(1);
     }
 
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const provider = new ethers.JsonRpcProvider(RPC_URL, {
+        name: "polygon-amoy",
+        chainId: 80002
+    });
+    
     const wallet = new ethers.Wallet(BACKEND_PRIVATE_KEY, provider);
     // Use the correct ABI for the deployed contract
     const supplyChainContract = new ethers.Contract(CONTRACT_ADDRESS, SupplyChainNFT_ABI, wallet);
@@ -195,6 +255,10 @@ async function main() {
             try {
                 console.log(`   Processing ProductMinted for token ${tokenId} (from queue)...`);
                 console.log(`   Fetching full RFID data for token ${tokenId}...`);
+                
+                // Apply rate limiting before blockchain read
+                await rateLimiter.waitIfNeeded();
+                
                 // rfidDataMapping is in NFTCore, accessible via supplyChainContract
                 const rfidData = await supplyChainContract.rfidDataMapping(tokenId.toString());
 
@@ -251,15 +315,46 @@ async function main() {
                 console.log(`   Calling storeInitialCID(${tokenId}, ${initialCid}) on contract...`);
                 
                 const gasOptions = {
-                    maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), // Example, adjust as needed
-                    maxFeePerGas: ethers.parseUnits('80', 'gwei')          // Example, adjust as needed
+                    maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), 
+                    maxFeePerGas: ethers.parseUnits('80', 'gwei')          
                 };
 
-                // storeInitialCID is in NFTCore, accessible via supplyChainContract
-                const tx = await supplyChainContract.storeInitialCID(tokenId.toString(), initialCid, gasOptions);
-                console.log(`   Transaction sent for storeInitialCID (Token ${tokenId}): ${tx.hash}`);
-                const receipt = await tx.wait();
-                console.log(`   ✅ Transaction confirmed. Initial CID stored for token ${tokenId}. Gas used: ${receipt.gasUsed.toString()}`);
+                // Implement retry mechanism with exponential backoff
+                let retries = 5;  // Maximum 5 retries
+                let delay = 1000; // Start with 1 second delay (reduced from 2s)
+                let tx, receipt;
+                
+                for(let attempt = 0; attempt < retries; attempt++) {
+                    try {
+                        // Apply rate limiting before blockchain request
+                        await rateLimiter.waitIfNeeded();
+                        
+                        // storeInitialCID is in NFTCore, accessible via supplyChainContract
+                        tx = await supplyChainContract.storeInitialCID(tokenId.toString(), initialCid, gasOptions);
+                        console.log(`   Transaction sent for storeInitialCID (Token ${tokenId}): ${tx.hash}`);
+                        
+                        // Apply rate limiting before waiting for receipt
+                        await rateLimiter.waitIfNeeded();
+                        receipt = await tx.wait();
+                        console.log(`   ✅ Transaction confirmed. Initial CID stored for token ${tokenId}. Gas used: ${receipt.gasUsed.toString()}`);
+                        break; // Success! Break out of retry loop
+                    } catch (error) {
+                        if ((error.message && error.message.includes("Too Many Requests")) || 
+                            (error.code === 'BAD_DATA' && error.info && error.info.payload && error.info.payload.method)) {
+                            if (attempt < retries - 1) {
+                                console.log(`   ⚠️ Infura rate limit hit (attempt ${attempt + 1}/${retries}). Waiting ${delay/1000}s before retrying...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                delay *= 2; // Exponential backoff
+                            } else {
+                                console.error(`   ❌ Failed to store Initial CID after ${retries} attempts.`);
+                                throw error; // Rethrow the error on last attempt
+                            }
+                        } else {
+                            console.error(`   ❌ Non-rate limit error during storeInitialCID:`, error.message);
+                            throw error; // Rethrow other errors immediately
+                        }
+                    }
+                }
 
             } catch (error) {
                 console.error(`   ❌ Error processing ProductMinted for token ${tokenId} (from queue):`, error);
@@ -337,6 +432,10 @@ async function main() {
             updateHistoryCIDQueue = updateHistoryCIDQueue.then(async () => {
                 try {
                     console.log(`   Processing ${eventName} for token ${tokenId} (from updateHistoryCIDQueue)...`);
+                    
+                    // Apply rate limiting before blockchain read
+                    await rateLimiter.waitIfNeeded();
+                    
                     const currentCid = await supplyChainContract.cidMapping(tokenId);
                     if (!currentCid || currentCid.trim() === "") {
                         console.warn(`   ⚠️ No initial CID found for token ${tokenId} during ${eventName}. Cannot update history. This might be normal if ProductMinted hasn't completed yet or if it's an old token without prior CID.`);
@@ -367,18 +466,39 @@ async function main() {
                         maxFeePerGas: ethers.parseUnits('120', 'gwei')         // Increased
                     };
 
-                    let tx;
-                    try {
-                        tx = await supplyChainContract.updateProductHistoryCID(tokenId, newCid, gasOptionsUpdate);
-                        console.log(`   Transaction sent for ${eventName} (Token ${tokenId}): ${tx.hash}`);
-                        const receipt = await tx.wait(1); // Wait for 1 confirmation
-                        console.log(`   ✅ Transaction confirmed for ${eventName} (Token ${tokenId}). History CID updated. Gas used: ${receipt.gasUsed.toString()}`);
-                    } catch (txError) {
-                        console.error(`   ❌❌ Transaction Error during updateProductHistoryCID for ${eventName} (Token ${tokenId}, New CID ${newCid}):`, txError.message);
-                        if (txError.code) console.error(`       Error Code: ${txError.code}`);
-                        if (txError.reason) console.error(`       Reason: ${txError.reason}`);
-                        if (txError.transactionHash) console.error(`       Transaction Hash (if available): ${txError.transactionHash}`);
-                        // Optionally, re-throw or handle specific errors like nonce issues if needed
+                    // Implement retry mechanism for updateProductHistoryCID
+                    let retries = 5;  // Maximum 5 retries 
+                    let delay = 1000; // Start with 1 second delay (reduced from 2s)
+                    let tx, receipt;
+                    
+                    for(let attempt = 0; attempt < retries; attempt++) {
+                        try {
+                            // Apply rate limiting before blockchain request
+                            await rateLimiter.waitIfNeeded();
+                            
+                            tx = await supplyChainContract.updateProductHistoryCID(tokenId, newCid, gasOptionsUpdate);
+                            console.log(`   Transaction sent for ${eventName} (Token ${tokenId}): ${tx.hash}`);
+                            
+                            receipt = await tx.wait(1); // Wait for 1 confirmation
+                            console.log(`   ✅ Transaction confirmed for ${eventName} (Token ${tokenId}). History CID updated. Gas used: ${receipt.gasUsed.toString()}`);
+                            break; // Success! Break out of retry loop
+                        } catch (txError) {
+                            if (txError.message && txError.message.includes("Too Many Requests") && attempt < retries - 1) {
+                                console.log(`   ⚠️ Infura rate limit hit (attempt ${attempt + 1}/${retries}). Waiting ${delay/1000}s before retrying...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                delay *= 2; // Exponential backoff
+                            } else {
+                                console.error(`   ❌❌ Transaction Error during updateProductHistoryCID for ${eventName} (Token ${tokenId}, New CID ${newCid}):`, txError.message);
+                                if (txError.code) console.error(`       Error Code: ${txError.code}`);
+                                if (txError.reason) console.error(`       Reason: ${txError.reason}`);
+                                if (txError.transactionHash) console.error(`       Transaction Hash (if available): ${txError.transactionHash}`);
+                                
+                                if (attempt === retries - 1) {
+                                    console.error(`   ❌ Failed to update history CID after ${retries} attempts.`);
+                                }
+                                break; // Break on non-rate limit errors
+                            }
+                        }
                     }
 
                 } catch (error) {
@@ -441,10 +561,34 @@ async function main() {
                     
                     const gasOptionsDispute = { maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), maxFeePerGas: ethers.parseUnits('80', 'gwei') }; 
                     
-                    const tx = await supplyChainContract.updateDisputeEvidenceCID(disputeId.toString(), `ipfs://${actualEvidenceCID}`, gasOptionsDispute);
-                    console.log(`   Transaction sent for updateDisputeEvidenceCID (Dispute ${disputeId}): ${tx.hash}`);
-                    const receipt = await tx.wait();
-                    console.log(`   ✅ Transaction confirmed. Evidence CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                    // Implement retry mechanism for updateDisputeEvidenceCID
+                    let retries = 5;  // Maximum 5 retries
+                    let delay = 1000; // Start with 1 second delay (reduced from 2s)
+                    let tx, receipt;
+                    
+                    for(let attempt = 0; attempt < retries; attempt++) {
+                        try {
+                            // Apply rate limiting before blockchain request
+                            await rateLimiter.waitIfNeeded();
+                            
+                            tx = await supplyChainContract.updateDisputeEvidenceCID(disputeId.toString(), `ipfs://${actualEvidenceCID}`, gasOptionsDispute);
+                            console.log(`   Transaction sent for updateDisputeEvidenceCID (Dispute ${disputeId}): ${tx.hash}`);
+                            receipt = await tx.wait();
+                            console.log(`   ✅ Transaction confirmed. Evidence CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                            break; // Success! Break out of retry loop
+                        } catch (txError) {
+                            if (txError.message && txError.message.includes("Too Many Requests") && attempt < retries - 1) {
+                                console.log(`   ⚠️ Infura rate limit hit (attempt ${attempt + 1}/${retries}). Waiting ${delay/1000}s before retrying...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                delay *= 2; // Exponential backoff
+                            } else if (attempt === retries - 1) {
+                                console.error(`   ❌ Failed to update evidence CID after ${retries} attempts.`);
+                                throw txError; // Rethrow the error on last attempt
+                            } else {
+                                throw txError; // Rethrow other errors
+                            }
+                        }
+                    }
                 } else {
                     console.error(`   ❌ Failed to upload evidence for dispute ${disputeId} to IPFS.`);
                 }
@@ -500,10 +644,34 @@ async function main() {
 
                     const gasOptionsDispute = { maxPriorityFeePerGas: ethers.parseUnits('40', 'gwei'), maxFeePerGas: ethers.parseUnits('80', 'gwei') };
 
-                    const tx = await supplyChainContract.updateDisputeResolutionCID(disputeId.toString(), `ipfs://${actualResolutionCID}`, gasOptionsDispute);
-                    console.log(`   Transaction sent for updateDisputeResolutionCID (Dispute ${disputeId}): ${tx.hash}`);
-                    const receipt = await tx.wait();
-                    console.log(`   ✅ Transaction confirmed. Resolution CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                    // Implement retry mechanism for updateDisputeResolutionCID
+                    let retries = 5;  // Maximum 5 retries
+                    let delay = 1000; // Start with 1 second delay (reduced from 2s)
+                    let tx, receipt;
+                    
+                    for(let attempt = 0; attempt < retries; attempt++) {
+                        try {
+                            // Apply rate limiting before blockchain request
+                            await rateLimiter.waitIfNeeded();
+                            
+                            tx = await supplyChainContract.updateDisputeResolutionCID(disputeId.toString(), `ipfs://${actualResolutionCID}`, gasOptionsDispute);
+                            console.log(`   Transaction sent for updateDisputeResolutionCID (Dispute ${disputeId}): ${tx.hash}`);
+                            receipt = await tx.wait();
+                            console.log(`   ✅ Transaction confirmed. Resolution CID stored for dispute ${disputeId}. Gas used: ${receipt.gasUsed.toString()}`);
+                            break; // Success! Break out of retry loop
+                        } catch (txError) {
+                            if (txError.message && txError.message.includes("Too Many Requests") && attempt < retries - 1) {
+                                console.log(`   ⚠️ Infura rate limit hit (attempt ${attempt + 1}/${retries}). Waiting ${delay/1000}s before retrying...`);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                delay *= 2; // Exponential backoff
+                            } else if (attempt === retries - 1) {
+                                console.error(`   ❌ Failed to update resolution CID after ${retries} attempts.`);
+                                throw txError; // Rethrow the error on last attempt
+                            } else {
+                                throw txError; // Rethrow other errors
+                            }
+                        }
+                    }
                 } else {
                     console.error(`   ❌ Failed to upload resolution data for dispute ${disputeId} to IPFS.`);
                 }

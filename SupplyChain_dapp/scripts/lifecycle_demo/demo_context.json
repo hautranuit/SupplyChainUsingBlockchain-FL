@@ -1,69 +1,791 @@
 {
-  "contractAddress": "0x88b7eb798735ce65eb282df165e01e30de8786e3",
-  "manufacturerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-  "deployerAddress": "0x032041b4b356fEE1496805DD4749f181bC736FFA",
-  "tokenIds": [
-    "7",
-    "8",
-    "9"
-  ],
-  "productDetails": [
-    {
-      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+  "contractAddress": "0xa2abebbefa4c69027cf2735ef1f7a06fde0dd7d8",
+  "nodes": {
+    "0x04351e7df40d04b5e610c4aa033facf435b98711": {
+      "address": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "name": "Manufacturer",
+      "role": 0,
+      "roleName": "Manufacturer",
+      "nodeType": 0,
+      "nodeTypeName": "Primary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "MintProduct",
+          "tokenId": "1",
+          "timestamp": 1748058320,
+          "details": "Minted product DEMO_PROD_001"
+        },
+        {
+          "type": "MintProduct",
+          "tokenId": "2",
+          "timestamp": 1748058326,
+          "details": "Minted product DEMO_PROD_002"
+        },
+        {
+          "type": "MintProduct",
+          "tokenId": "3",
+          "timestamp": 1748058332,
+          "details": "Minted product DEMO_PROD_003"
+        },
+        {
+          "type": "ListProduct",
+          "tokenId": "1",
+          "price": "0.1 ETH",
+          "timestamp": 1748058514
+        },
+        {
+          "type": "ListProduct",
+          "tokenId": "2",
+          "price": "0.2 ETH",
+          "timestamp": 1748058532
+        },
+        {
+          "type": "ListProduct",
+          "tokenId": "3",
+          "price": "0.3 ETH",
+          "timestamp": 1748058550
+        },
+        {
+          "type": "StartTransport",
+          "tokenId": "1",
+          "timestamp": 1748058748,
+          "details": "Started transport for product 1."
+        },
+        {
+          "type": "TransferNFT",
+          "tokenId": "1",
+          "to": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748058754
+        },
+        {
+          "type": "VoteBatch",
+          "batchId": "3",
+          "vote": true,
+          "timestamp": 1748059234,
+          "details": "Voted Approve on batch 3."
+        },
+        {
+          "type": "VoteForArbitrator",
+          "disputeId": "1",
+          "votedFor": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+          "timestamp": 1748059426
+        }
+      ]
+    },
+    "0xc6a050a538a9e857b4dcb4a33436280c202f6941": {
+      "address": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+      "name": "Transporter 1",
+      "role": 1,
+      "roleName": "Transporter",
+      "nodeType": 1,
+      "nodeTypeName": "Secondary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "ReceiveNFT",
+          "tokenId": "1",
+          "from": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058754
+        },
+        {
+          "type": "TransferNFT",
+          "tokenId": "1",
+          "to": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "timestamp": 1748058760
+        },
+        {
+          "type": "MakeDisputeDecision",
+          "disputeId": "1",
+          "outcome": 1,
+          "timestamp": 1748059458
+        }
+      ]
+    },
+    "0x5503a5b847e98b621d97695edf1bd84242c5862e": {
+      "address": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+      "name": "Transporter 2",
+      "role": 1,
+      "roleName": "Transporter",
+      "nodeType": 1,
+      "nodeTypeName": "Secondary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "ReceiveNFT",
+          "tokenId": "1",
+          "from": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748058760
+        },
+        {
+          "type": "TransferNFT",
+          "tokenId": "1",
+          "to": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+          "timestamp": 1748058766
+        }
+      ]
+    },
+    "0x34fc023ee50781e0a007852eedc4a17fa353a8cd": {
+      "address": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+      "name": "Transporter 3 (Batch Proposer)",
+      "role": 1,
+      "roleName": "Transporter",
+      "nodeType": 1,
+      "nodeTypeName": "Secondary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "ReceiveNFT",
+          "tokenId": "1",
+          "from": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "timestamp": 1748058766
+        },
+        {
+          "type": "CompleteTransport",
+          "tokenId": "1",
+          "timestamp": 1748058772,
+          "details": "Completed final transport leg for product 1."
+        },
+        {
+          "type": "VoteForArbitrator",
+          "disputeId": "1",
+          "votedFor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748059432
+        }
+      ]
+    },
+    "0x724876f86fa52568abc51955bd3a68bfc1441097": {
+      "address": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+      "name": "Retailer",
+      "role": 3,
+      "roleName": "Retailer",
+      "nodeType": 0,
+      "nodeTypeName": "Primary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "InitiatePurchase",
+          "tokenId": "2",
+          "cidUsed": "bafkreigln3c62uiiuxjb2johbm2cpdmoqysyfatbohxzg6wkjdhf4j6y54",
+          "timestamp": 1748058538
+        },
+        {
+          "type": "DepositCollateral",
+          "tokenId": "2",
+          "amount": "0.2 ETH",
+          "timestamp": 1748058544
+        },
+        {
+          "type": "InitiatePurchase",
+          "tokenId": "3",
+          "cidUsed": "bafkreigx47cgpqlf2meobfhztv7mjk4epndueaar32mnvjrqcpwuaphdna",
+          "timestamp": 1748058556
+        },
+        {
+          "type": "DepositCollateral",
+          "tokenId": "3",
+          "amount": "0.3 ETH",
+          "timestamp": 1748058562
+        },
+        {
+          "type": "VoteBatch",
+          "batchId": "3",
+          "vote": false,
+          "timestamp": 1748059246,
+          "details": "Voted Deny on batch 3."
+        },
+        {
+          "type": "ReceiveNFTViaBatch",
+          "tokenId": "1",
+          "from": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "TransferNFTViaBatch",
+          "tokenId": "2",
+          "to": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "TransferNFTViaBatch",
+          "tokenId": "3",
+          "to": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "OpenDispute",
+          "disputeId": "1",
+          "tokenId": "1",
+          "timestamp": 1748059390,
+          "details": "Opened dispute for product 1. Reason: Product received in damaged condition during batch..."
+        },
+        {
+          "type": "VoteForArbitrator",
+          "disputeId": "1",
+          "votedFor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748059440
+        }
+      ]
+    },
+    "0x72eb9742d3b684eba40f11573b733ac9db499f23": {
+      "address": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+      "name": "Buyer/Customer",
+      "role": 2,
+      "roleName": "Customer",
+      "nodeType": 1,
+      "nodeTypeName": "Secondary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "InitiatePurchase",
+          "tokenId": "1",
+          "cidUsed": "bafkreiaetosjvv5ladoufplprnni6ug2xzvdmzigfudnj676gwh36oo7ka",
+          "timestamp": 1748058520
+        },
+        {
+          "type": "DepositCollateral",
+          "tokenId": "1",
+          "amount": "0.1 ETH",
+          "timestamp": 1748058526
+        },
+        {
+          "type": "FinalizePurchase",
+          "tokenId": "1",
+          "timestamp": 1748058778,
+          "details": "Confirmed delivery for product 1."
+        },
+        {
+          "type": "ReceiveNFT",
+          "tokenId": "1",
+          "from": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+          "timestamp": 1748058778
+        },
+        {
+          "type": "ProposeBatch",
+          "batchId": "3",
+          "timestamp": 1748059226,
+          "details": "Proposed exchange batch with 3 transactions."
+        },
+        {
+          "type": "CommitBatchAttempt",
+          "batchId": "3",
+          "status": "Committed",
+          "timestamp": 1748059252,
+          "details": "Attempted to commit batch 3. Result: Committed."
+        },
+        {
+          "type": "TransferNFTViaBatch",
+          "tokenId": "1",
+          "to": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "ReceiveNFTViaBatch",
+          "tokenId": "2",
+          "from": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "ReceiveNFTViaBatch",
+          "tokenId": "3",
+          "from": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "batchId": "3",
+          "timestamp": 1748059252
+        },
+        {
+          "type": "VoteForArbitrator",
+          "disputeId": "1",
+          "votedFor": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "timestamp": 1748059446
+        }
+      ]
+    },
+    "0x94081502540fd333075f3290d1d5c10a21ac5a5c": {
+      "address": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+      "name": "Arbitrator",
+      "role": 4,
+      "roleName": "Arbitrator",
+      "nodeType": 0,
+      "nodeTypeName": "Primary",
+      "initialReputation": 100,
+      "currentReputation": 100,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "VoteBatch",
+          "batchId": "3",
+          "vote": true,
+          "timestamp": 1748059240,
+          "details": "Voted Approve on batch 3."
+        }
+      ]
+    },
+    "0x032041b4b356fee1496805dd4749f181bc736ffa": {
+      "address": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+      "name": "Deployer/Admin",
+      "role": null,
+      "roleName": "Admin",
+      "nodeType": null,
+      "nodeTypeName": "Admin",
+      "initialReputation": 0,
+      "currentReputation": 0,
+      "isVerified": true,
+      "interactions": [
+        {
+          "type": "ProposeArbitratorCandidate",
+          "disputeId": "1",
+          "candidate": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748059396
+        },
+        {
+          "type": "ProposeArbitratorCandidate",
+          "disputeId": "1",
+          "candidate": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "timestamp": 1748059404
+        },
+        {
+          "type": "ProposeArbitratorCandidate",
+          "disputeId": "1",
+          "candidate": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+          "timestamp": 1748059412
+        },
+        {
+          "type": "VoteForArbitrator",
+          "disputeId": "1",
+          "votedFor": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+          "timestamp": 1748059420
+        },
+        {
+          "type": "SelectArbitrator",
+          "disputeId": "1",
+          "selected": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748059452
+        }
+      ]
+    }
+  },
+  "products": {
+    "1": {
+      "tokenId": "1",
       "uniqueProductID": "DEMO_PROD_001",
       "batchNumber": "B_ALPHA_001",
-      "manufacturingDate": "2025-05-10",
-      "expirationDate": "2027-05-10",
+      "manufacturingDate": 1746835200,
+      "expirationDate": 1809907200,
       "productType": "Electronics - HighEnd Laptop",
       "manufacturerID": "MANU_ACME_CORP",
+      "manufacturerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "currentOwnerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "status": "ReturnedToManufacturer_Dispute",
+      "nftReference": "bafkreiaetosjvv5ladoufplprnni6ug2xzvdmzigfudnj676gwh36oo7ka",
       "quickAccessURL": "http://example.com/products/laptop001_qa",
-      "nftReference": "http://example.com/products/DEMO_PROD_001",
-      "tokenId": "7",
-      "currentOwnerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+      "history": [
+        {
+          "event": "Minted",
+          "actor": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+          "recipient": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058320,
+          "details": "Product DEMO_PROD_001 minted."
+        },
+        {
+          "event": "TransportStarted",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058748,
+          "details": "Transport started. Legs: 0xc6A050a538a9E857B4DCb4A33436280c202F6941 -> 0x5503a5B847e98B621d97695edf1bD84242C5862E -> 0x34Fc023EE50781e0a007852eEDC4A17fa353a8cD. From: Manufacturer Site, To: Buyer 1 Location, Dist: 450km."
+        },
+        {
+          "event": "Transfer",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "from": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "to": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748058754,
+          "details": "NFT transferred to transporter 1."
+        },
+        {
+          "event": "Transfer",
+          "actor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "from": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "to": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "timestamp": 1748058760,
+          "details": "NFT transferred to transporter 2."
+        },
+        {
+          "event": "Transfer",
+          "actor": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "from": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "to": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+          "timestamp": 1748058766,
+          "details": "NFT transferred to transporter 3."
+        },
+        {
+          "event": "TransportCompleted",
+          "actor": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+          "timestamp": 1748058772,
+          "details": "Final transport leg completed."
+        },
+        {
+          "event": "PurchaseFinalized",
+          "actor": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "timestamp": 1748058778,
+          "details": "Buyer confirmed delivery. Meets Incentive: true. NFT transferred. Payment released."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "from": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "to": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "batchId": "3",
+          "timestamp": 1748059252,
+          "details": "Transferred via committed batch 3."
+        },
+        {
+          "event": "NFTReturned_Dispute",
+          "actor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "from": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "to": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "disputeId": "1",
+          "timestamp": 1748059484,
+          "details": "NFT returned to Manufacturer due to dispute 1 resolution.",
+          "txHash": "enforcement_tx"
+        }
+      ],
+      "lastUpdateTimestamp": 1748059484,
       "price": "100000000000000000",
-      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "ExchangedInBatch_ToRetailer",
-      "pendingBuyerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
-      "collateralAmount": "100000000000000000",
-      "currentOwner": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23"
+      "isListed": false,
+      "transportInfo": {
+        "legs": [
+          "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "0x34fc023ee50781e0a007852eedc4a17fa353a8cd"
+        ],
+        "startLocation": "Manufacturer Site",
+        "endLocation": "Buyer 1 Location",
+        "totalDistance": 450,
+        "currentLegIndex": 2,
+        "currentTransporter": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+        "updates": []
+      },
+      "batchProcessingInfo": null,
+      "disputeInfo": {
+        "disputeId": "1",
+        "status": "Enforced"
+      },
+      "sellerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "pendingBuyerAddress": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+      "collateralAmount": "100000000000000000"
     },
-    {
-      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+    "2": {
+      "tokenId": "2",
       "uniqueProductID": "DEMO_PROD_002",
       "batchNumber": "B_BETA_002",
-      "manufacturingDate": "2025-06-15",
-      "expirationDate": "2026-06-15",
+      "manufacturingDate": 1749945600,
+      "expirationDate": 1781481600,
       "productType": "Pharmaceuticals - Vaccine Batch",
       "manufacturerID": "MANU_HEALTHCARE_INC",
+      "manufacturerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "currentOwnerAddress": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+      "status": "ExchangedInBatch_3",
+      "nftReference": "bafkreigln3c62uiiuxjb2johbm2cpdmoqysyfatbohxzg6wkjdhf4j6y54",
       "quickAccessURL": "http://example.com/products/vaccine002_qa",
-      "nftReference": "http://example.com/products/DEMO_PROD_002",
-      "tokenId": "8",
-      "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+      "history": [
+        {
+          "event": "Minted",
+          "actor": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+          "recipient": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058326,
+          "details": "Product DEMO_PROD_002 minted."
+        },
+        {
+          "event": "TransportStarted",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058784,
+          "details": "Transport started. Legs: 0xc6A050a538a9E857B4DCb4A33436280c202F6941 -> 0x5503a5B847e98B621d97695edf1bD84242C5862E -> 0x724876f86fA52568aBc51955BD3A68bFc1441097."
+        },
+        {
+          "event": "Transfer",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "from": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "to": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748058800,
+          "details": "NFT transferred to transporter 1."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "from": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "to": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "details": "Batch transfer to transporter 2."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "from": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "to": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "details": "Batch transfer to retailer."
+        },
+        {
+          "event": "TransportCompleted",
+          "actor": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "timestamp": 1748058844,
+          "details": "Retailer completed final transport leg."
+        },
+        {
+          "event": "PurchaseFinalized",
+          "actor": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "timestamp": 1748058856,
+          "details": "Retailer confirmed delivery. NFT transferred. Payment released."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "from": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "to": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "batchId": "3",
+          "timestamp": 1748059252,
+          "details": "Transferred via committed batch 3."
+        }
+      ],
+      "lastUpdateTimestamp": 1748059252,
       "price": "200000000000000000",
-      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "ExchangedInBatch_ToBuyer1",
-      "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
-      "collateralAmount": "200000000000000000",
-      "currentOwner": "0x724876f86fA52568aBc51955BD3A68bFc1441097"
+      "isListed": false,
+      "transportInfo": {
+        "legs": [
+          "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "0x724876f86fa52568abc51955bd3a68bfc1441097"
+        ],
+        "startLocation": "Manufacturer's Bulk Warehouse",
+        "endLocation": "Retailer Central Warehouse",
+        "totalDistance": 700,
+        "currentLegIndex": 2,
+        "currentTransporter": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+        "updates": []
+      },
+      "batchProcessingInfo": null,
+      "disputeInfo": null,
+      "sellerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "pendingBuyerAddress": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+      "collateralAmount": "200000000000000000"
     },
-    {
-      "recipient": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
+    "3": {
+      "tokenId": "3",
       "uniqueProductID": "DEMO_PROD_003",
       "batchNumber": "B_GAMMA_003",
-      "manufacturingDate": "2025-07-20",
-      "expirationDate": "2025-12-20",
+      "manufacturingDate": 1752969600,
+      "expirationDate": 1766188800,
       "productType": "Luxury Goods - Designer Handbag",
       "manufacturerID": "MANU_FASHION_LUXE",
+      "manufacturerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "currentOwnerAddress": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+      "status": "ExchangedInBatch_3",
+      "nftReference": "bafkreigx47cgpqlf2meobfhztv7mjk4epndueaar32mnvjrqcpwuaphdna",
       "quickAccessURL": "http://example.com/products/handbag003_qa",
-      "nftReference": "http://example.com/products/DEMO_PROD_003",
-      "tokenId": "9",
-      "currentOwnerAddress": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+      "history": [
+        {
+          "event": "Minted",
+          "actor": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+          "recipient": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058332,
+          "details": "Product DEMO_PROD_003 minted."
+        },
+        {
+          "event": "TransportStarted",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "timestamp": 1748058792,
+          "details": "Transport started. Legs: 0xc6A050a538a9E857B4DCb4A33436280c202F6941 -> 0x5503a5B847e98B621d97695edf1bD84242C5862E -> 0x724876f86fA52568aBc51955BD3A68bFc1441097."
+        },
+        {
+          "event": "Transfer",
+          "actor": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "from": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+          "to": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "timestamp": 1748058806,
+          "details": "NFT transferred to transporter 1."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "from": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "to": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "details": "Batch transfer to transporter 2."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "from": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "to": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "details": "Batch transfer to retailer."
+        },
+        {
+          "event": "TransportCompleted",
+          "actor": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "timestamp": 1748058850,
+          "details": "Retailer completed final transport leg."
+        },
+        {
+          "event": "PurchaseFinalized",
+          "actor": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "timestamp": 1748058862,
+          "details": "Retailer confirmed delivery. NFT transferred. Payment released."
+        },
+        {
+          "event": "BatchTransfer",
+          "actor": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "from": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+          "to": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+          "batchId": "3",
+          "timestamp": 1748059252,
+          "details": "Transferred via committed batch 3."
+        }
+      ],
+      "lastUpdateTimestamp": 1748059252,
       "price": "300000000000000000",
-      "sellerAddress": "0x04351e7dF40d04B5E610c4aA033faCf435b98711",
-      "productStatus": "ExchangedInBatch_ToBuyer1",
-      "pendingBuyerAddress": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
-      "collateralAmount": "300000000000000000",
-      "currentOwner": "0x724876f86fA52568aBc51955BD3A68bFc1441097"
+      "isListed": false,
+      "transportInfo": {
+        "legs": [
+          "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "0x724876f86fa52568abc51955bd3a68bfc1441097"
+        ],
+        "startLocation": "Manufacturer's Bulk Warehouse",
+        "endLocation": "Retailer Central Warehouse",
+        "totalDistance": 720,
+        "currentLegIndex": 2,
+        "currentTransporter": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+        "updates": []
+      },
+      "batchProcessingInfo": null,
+      "disputeInfo": null,
+      "sellerAddress": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+      "pendingBuyerAddress": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+      "collateralAmount": "300000000000000000"
     }
-  ]
+  },
+  "batches": {
+    "3": {
+      "batchId": "3",
+      "proposer": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+      "transactions": [
+        {
+          "from": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+          "to": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+          "tokenId": "1"
+        },
+        {
+          "from": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+          "to": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+          "tokenId": "2"
+        },
+        {
+          "from": "0x724876f86fA52568aBc51955BD3A68bFc1441097",
+          "to": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+          "tokenId": "3"
+        }
+      ],
+      "selectedValidators": [
+        "0x04351e7df40d04b5e610c4aa033facf435b98711",
+        "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+        "0x724876f86fa52568abc51955bd3a68bfc1441097"
+      ],
+      "votes": {
+        "0x04351e7df40d04b5e610c4aa033facf435b98711": {
+          "vote": true,
+          "timestamp": 1748059234
+        },
+        "0x94081502540fd333075f3290d1d5c10a21ac5a5c": {
+          "vote": true,
+          "timestamp": 1748059240
+        },
+        "0x724876f86fa52568abc51955bd3a68bfc1441097": {
+          "vote": false,
+          "timestamp": 1748059246
+        }
+      },
+      "status": "Committed",
+      "proposeTimestamp": 1748059226,
+      "lastUpdateTimestamp": 1748059252,
+      "commitTimestamp": 1748059252
+    }
+  },
+  "disputes": {
+    "1": {
+      "disputeId": "1",
+      "tokenId": "1",
+      "disputer": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+      "reason": "Product received in damaged condition during batch exchange.",
+      "evidence": "{\"timestamp\":\"2025-05-24T04:03:06.793Z\",\"disputeReason\":\"Product received in damaged condition during batch exchange.\",\"productID\":\"DEMO_PROD_001\",\"tokenId\":\"1\",\"images\":[\"damage_proof1.jpg\",\"package_condition.jpg\"],\"description\":\"Product arrived with visible damage to packaging and internal components during batch exchange process.\"}",
+      "evidenceCID": null,
+      "status": "Enforced",
+      "proposedCandidates": [
+        {
+          "address": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+          "proposeTimestamp": 1748059396
+        },
+        {
+          "address": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+          "proposeTimestamp": 1748059404
+        },
+        {
+          "address": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+          "proposeTimestamp": 1748059412
+        }
+      ],
+      "votes": {
+        "0x94081502540fd333075f3290d1d5c10a21ac5a5c": [
+          {
+            "voter": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+            "timestamp": 1748059420
+          },
+          {
+            "voter": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+            "timestamp": 1748059426
+          }
+        ],
+        "0xc6a050a538a9e857b4dcb4a33436280c202f6941": [
+          {
+            "voter": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+            "timestamp": 1748059432
+          },
+          {
+            "voter": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+            "timestamp": 1748059440
+          }
+        ],
+        "0x5503a5b847e98b621d97695edf1bd84242c5862e": [
+          {
+            "voter": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+            "timestamp": 1748059446
+          }
+        ]
+      },
+      "selectedArbitrator": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+      "resolutionDetails": "Arbitrator decision: Full refund to disputer, product to be returned to Manufacturer.",
+      "resolutionDataString": "{\"timestamp\":\"2025-05-24T04:04:15.927Z\",\"disputeId\":\"1\",\"arbitrator\":\"0xc6a050a538a9e857b4dcb4a33436280c202f6941\",\"decision\":\"Arbitrator decision: Full refund to disputer, product to be returned to Manufacturer.\",\"outcome\":1,\"actionsRequired\":[\"Disputing Party (0x724876f86fA52568aBc51955BD3A68bFc1441097) to have product (Token ID: 1) returned to Manufacturer (0x04351e7dF40d04B5E610c4aA033faCf435b98711)\",\"Manufacturer (0x04351e7dF40d04B5E610c4aA033faCf435b98711) to fund, and contract to issue, full refund to Disputing Party (0x724876f86fA52568aBc51955BD3A68bFc1441097).\"],\"settlementTerms\":\"NFT return and full refund to be enforced on-chain.\"}",
+      "resolutionCID": null,
+      "resolutionOutcome": 1,
+      "nftReturnEnforced": true,
+      "refundEnforced": true,
+      "enforced": true,
+      "openTimestamp": 1748059390,
+      "decisionTimestamp": 1748059458,
+      "enforcedTimestamp": 1748059484,
+      "lastUpdateTimestamp": 1748059484
+    }
+  }
 }

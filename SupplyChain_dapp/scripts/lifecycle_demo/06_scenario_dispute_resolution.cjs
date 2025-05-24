@@ -1,623 +1,625 @@
-const fs =require("fs");
+const fs = require("fs");
 const path = require("path");
+const hre = require("hardhat");
 
-// Helper function to read demo_context.json
-function getDemoContext() {
-    const demoContextPath = path.join(__dirname, "demo_context.json");
-    if (!fs.existsSync(demoContextPath)) {
-        console.error(`Error: demo_context.json not found at ${demoContextPath}`);
-        console.error("Please run 03_scenario_marketplace_and_purchase.js (or later scripts) first.");
-        process.exit(1);
-    }
-    const contextContent = fs.readFileSync(demoContextPath, "utf8");
-    return JSON.parse(contextContent);
-}
+// --- Helper Function Definition ---
+const contextFilePath = path.join(__dirname, 'demo_context.json'); // Centralized data file for FL
 
-// Add a counter for unique file names if running multiple disputes in one script execution
-let disputeIdCounter = 1; 
-
-// Helper function for delays (still used by the queue processor)
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-// REMOVED: const INFURA_DELAY_MS = 500; // 0.5 second delay
-
-// --- Transaction Queue System ---
-const transactionQueue = [];
-let isProcessingQueue = false;
-const MIN_INTERVAL_MS = 750; // Minimum interval between finishing one tx and starting the next from queue
-
-async function processTransactionQueue() {
-    if (isProcessingQueue) return;
-    isProcessingQueue = true;
-
-    while (transactionQueue.length > 0) {
-        const task = transactionQueue.shift(); // Get the oldest task
-        console.log(`Executing from queue: ${task.description}`);
+function readAndUpdateContext(updateFn) {
+    let contextData = {};
+    if (fs.existsSync(contextFilePath)) {
         try {
-            const result = await task.action(); // Execute the async action
-            if (task.callback) {
-                task.callback(null, result); // Pass result to callback
-            }
+            const fileContent = fs.readFileSync(contextFilePath, 'utf8');
+            contextData = fileContent.trim() === "" ? {} : JSON.parse(fileContent);
         } catch (error) {
-            console.error(`Error executing task "${task.description}":`, error.message);
-            if (task.callback) {
-                task.callback(error, null); // Pass error to callback
-            }
-            // Stop processing on error to allow inspection and prevent cascading failures
-            isProcessingQueue = false; 
-            throw error; 
-        }
-        if (transactionQueue.length > 0) { // If there are more tasks, wait
-            await delay(MIN_INTERVAL_MS);
+            console.error(`Error reading or parsing ${contextFilePath}:`, error);
+            contextData = {}; // Start fresh on error
         }
     }
-    isProcessingQueue = false;
+
+    const updatedContext = updateFn(contextData);
+
+    try {
+        fs.writeFileSync(contextFilePath, JSON.stringify(updatedContext, null, 2));
+        console.log(`Context data updated successfully in ${contextFilePath}`);
+    } catch (error) {
+        console.error(`Error writing context data to ${contextFilePath}:`, error);
+    }
+    return updatedContext;
 }
 
-function addToTransactionQueue(actionDescription, actionFunction) {
-    return new Promise((resolve, reject) => {
-        transactionQueue.push({
-            description: actionDescription,
-            action: actionFunction, // Should be an async function that returns a promise (e.g., the transaction receipt)
-            callback: (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-            }
-        });
-        if (!isProcessingQueue) {
-            processTransactionQueue().catch(err => {
-                // This catches errors from processTransactionQueue itself if it re-throws,
-                // or if an unhandled promise rejection occurs within it.
-                // Individual task errors are primarily handled by the promise returned by addToTransactionQueue.
-                console.error("Critical error in queue processing supervisor:", err);
-                // Ensure isProcessingQueue is reset if processTransactionQueue fails critically
-                isProcessingQueue = false; 
-            });
-        }
-    });
-}
-// --- End Transaction Queue System ---
+// Helper function for delays
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+// --- End Helper Function ---
 
 async function main() {
-    const hre = require("hardhat"); // Get Hardhat Runtime Environment
     const ethers = hre.ethers; // Explicitly get ethers from HRE
 
-    console.log("--- Starting 06: Dispute Resolution Scenario ---");
+    console.log("--- Starting 06: Dispute Resolution Scenario (Fixed Token ID Lookup) ---");
 
-    // Define gas options to be used for transactions
-    // Adjust these values based on current Amoy testnet conditions if needed
-    const gasOptions = { 
-        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
-        maxFeePerGas: ethers.parseUnits('100', 'gwei') 
+    // Static gas options
+    const gasOptions = {
+        maxPriorityFeePerGas: ethers.parseUnits('25', 'gwei'),
+        maxFeePerGas: ethers.parseUnits('40', 'gwei')
     };
-    console.log("Using gas options:", gasOptions);
 
-    const context = getDemoContext();
-    const contractAddress = context.contractAddress;
-    const productDetails = context.productDetails;
+    // Load context
+    let currentContext = {};
+    if (fs.existsSync(contextFilePath)) {
+        try {
+            currentContext = JSON.parse(fs.readFileSync(contextFilePath, 'utf8'));
+        } catch (error) {
+            console.error(`Error reading initial context from ${contextFilePath}:`, error);
+            process.exit(1);
+        }
+    }
 
-    if (!contractAddress || !productDetails) {
-        console.error("Error: Invalid context. Ensure contractAddress and productDetails are present.");
+    const contractAddress = currentContext.contractAddress;
+    const nodes = currentContext.nodes;
+    const products = currentContext.products; // Assuming products is an object keyed by tokenId
+
+    if (!contractAddress) {
+        console.error("Error: Contract address not found in context.");
+        process.exit(1);
+    }
+     if (!nodes) {
+        console.error("Error: Nodes information not found in context.");
+        process.exit(1);
+    }
+     if (!products || Object.keys(products).length === 0) {
+        console.error("Error: Products information not found or empty in context.");
         process.exit(1);
     }
     console.log(`Using SupplyChainNFT contract at: ${contractAddress}`);
 
     const signers = await ethers.getSigners();
-    if (signers.length < 8) {
-        console.error("This script requires at least 8 signers as configured in 01_deploy_and_configure.js.");
+
+    // Find accounts based on context
+    const deployer = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Deployer/Admin"));
+    const manufacturer = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Manufacturer"));
+    const retailer = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Retailer"));
+    const designatedArbitrator = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Arbitrator"));
+    const arbitratorCandidate1 = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Transporter 1"));
+    const arbitratorCandidate2 = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Transporter 2"));
+    const buyer1 = signers.find(s => s.address.toLowerCase() === Object.keys(nodes).find(k => nodes[k].name === "Buyer/Customer")); // Should own Product 2 after exchange in script 05
+
+    if (!deployer || !manufacturer || !retailer || !designatedArbitrator || !arbitratorCandidate1 || !arbitratorCandidate2 || !buyer1) {
+        console.error("Error: Could not find one or more required accounts based on context.");
         process.exit(1);
     }
-
-    const deployer = signers[0];
-    const manufacturer = signers[1];
-    const buyer1 = signers[6]; 
-    const designatedArbitrator = signers[7];
-    const arbitratorCandidate1 = signers[2];
-    const arbitratorCandidate2 = signers[3];
 
     const supplyChainNFT = await ethers.getContractAt("SupplyChainNFT", contractAddress, deployer);
     console.log("Connected to contract.");
 
-    // MODIFIED: Target DEMO_PROD_002 for dispute
-    const productInfo = productDetails.find(p => p.uniqueProductID === "DEMO_PROD_002"); 
-    if (!productInfo || !productInfo.tokenId || !productInfo.currentOwnerAddress) {
-        // MODIFIED: Updated error message for DEMO_PROD_002
-        console.error("Product 2 (DEMO_PROD_002) details or owner not found in context. Run previous scripts, including those that might assign ownership of Product 2.");
+    // --- Find Product and Token ID Dynamically ---
+    const uniqueIdToDispute = "DEMO_PROD_001";
+    console.log(`\nLooking up Token ID for product with uniqueProductID: ${uniqueIdToDispute}...`);
+    const productToDispute = Object.values(products).find(p => p.uniqueProductID === uniqueIdToDispute);
+
+    if (!productToDispute || !productToDispute.tokenId) {
+        console.error(`Error: Product with uniqueID ${uniqueIdToDispute} or its tokenId not found in context. Run previous scripts.`);
         process.exit(1);
     }
-    const tokenIdToDispute = productInfo.tokenId;
-    // MODIFIED: Use productInfo consistently
-    const disputingPartySigner = signers.find(s => s.address.toLowerCase() === productInfo.currentOwnerAddress.toLowerCase());
+    const tokenIdToDispute = productToDispute.tokenId;
+    console.log(`  Found ${uniqueIdToDispute} -> Token ID: ${tokenIdToDispute}`);
 
-    if (!disputingPartySigner) {
-        // MODIFIED: Use productInfo consistently
-        console.error(`Could not find signer for disputing party ${productInfo.currentOwnerAddress}`);
-        process.exit(1);
+    // Disputing party is Retailer (current owner of Product01)
+    const disputingPartySigner = retailer;
+    console.log(`Disputing Party (Retailer): ${disputingPartySigner.address}`);
+
+    // Verify ownership from context
+    if (productToDispute.currentOwnerAddress.toLowerCase() !== disputingPartySigner.address.toLowerCase()) {
+         console.error(`Error: Owner mismatch for Product ${uniqueIdToDispute} (Token ID: ${tokenIdToDispute}). Expected ${disputingPartySigner.address} (Retailer), found ${productToDispute.currentOwnerAddress}. Check context after script 05.`);
+         process.exit(1);
     }
 
-    // MODIFIED: Use productInfo consistently
-    console.log(`\n--- Disputing Product ${productInfo.uniqueProductID} (Token ID: ${tokenIdToDispute}) ---`);
-    console.log(`Disputing Party (Current Owner): ${disputingPartySigner.address}`);
-    const disputeReason = "Product received damaged, quality not as expected.";
-    
+    console.log(`\n--- Disputing Product ${productToDispute.uniqueProductID} (Token ID: ${tokenIdToDispute}) ---`);
+    const disputeReason = "Product received in damaged condition during batch exchange.";
     const evidenceData = {
         timestamp: new Date().toISOString(),
         disputeReason: disputeReason,
-        // MODIFIED: Use productInfo consistently
-        productID: productInfo.uniqueProductID,
+        productID: productToDispute.uniqueProductID,
         tokenId: tokenIdToDispute.toString(),
-        images: ["image_proof1.jpg", "video_proof.mp4"], // These are now just references for backend
-        description: "Detailed description of the damage and discrepancy."
+        images: ["damage_proof1.jpg", "package_condition.jpg"],
+        description: "Product arrived with visible damage to packaging and internal components during batch exchange process."
     };
-    // REMOVED: const evidenceCID = await uploadToIPFS(evidenceData, `evidence_dispute_${disputeIdCounter}_${tokenIdToDispute}.json`);
-    // console.log(`  Generated Evidence CID: ${evidenceCID}`);
     const evidenceDataString = JSON.stringify(evidenceData);
-    console.log(`  Prepared Evidence Data (to be processed by backend): ${evidenceDataString.substring(0,100)}...`);
-    disputeIdCounter++;
+    console.log(`  Prepared Evidence Data: ${evidenceDataString.substring(0, 100)}...`);
 
-    // console.log(`  Opening dispute for Token ID ${tokenIdToDispute} by ${disputingPartySigner.address}...`);
-    // MODIFIED: Pass evidenceDataString instead of evidenceCID
-    // let tx = await supplyChainNFT.connect(disputingPartySigner).openDispute(tokenIdToDispute, disputeReason, evidenceDataString);
-    // let receipt = await tx.wait(1);
-    // console.log(`    Transaction to open dispute sent. Gas Used: ${receipt.gasUsed.toString()}`);
-    // await delay(INFURA_DELAY_MS); // REMOVED delay
+    // 1. Open Dispute
+    console.log(`\n1. Opening dispute for Token ID ${tokenIdToDispute} by ${disputingPartySigner.address}...`);
+    let openTx, openReceipt, openBlock, openDisputeEvent, disputeId;
+    try {
+        openTx = await supplyChainNFT.connect(disputingPartySigner).openDispute(tokenIdToDispute, disputeReason, evidenceDataString, gasOptions);
+        openReceipt = await openTx.wait(1);
+        openBlock = await ethers.provider.getBlock(openReceipt.blockNumber);
+        console.log(`    Dispute opened. Gas Used: ${openReceipt.gasUsed.toString()}`);
 
-    let receipt = await addToTransactionQueue(
-        `Opening dispute for Token ID ${tokenIdToDispute} by ${disputingPartySigner.address}`,
-        async () => {
-            const tx = await supplyChainNFT.connect(disputingPartySigner).openDispute(tokenIdToDispute, disputeReason, evidenceDataString);
-            const awaitedReceipt = await tx.wait(1);
-            console.log(`    Transaction to open dispute sent. Gas Used: ${awaitedReceipt.gasUsed.toString()}`);
-            return awaitedReceipt;
-        }
-    );
+        openDisputeEvent = openReceipt.logs?.map(log => {
+            try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+        }).find(event => event?.name === "DisputeOpened");
 
-    let openDisputeEvent = receipt.events?.find(event => event.event === "DisputeOpened");
-    if (!openDisputeEvent) {
-         // Fallback for environments where logs need explicit parsing (less common with ethers v5+ and wait())
-        // Ensure 'logs' are available on receipt; Hardhat's receipt usually has them.
-        const rawLogs = receipt.logs || [];
-        for (const log of rawLogs) {
-            try {
-                const parsedLog = supplyChainNFT.interface.parseLog(log);
-                if (parsedLog && parsedLog.name === "DisputeOpened") {
-                    openDisputeEvent = parsedLog;
-                    break;
-                }
-            } catch (e) { /* Ignore if log is not from this contract's ABI */ }
-        }
-    }
-    
-    if (!openDisputeEvent) {
-        console.error("    ERROR: DisputeOpened event not found in transaction receipt.");
-        throw new Error("DisputeOpened event not found and could not determine disputeId.");
-    }
-    
-    const disputeId = openDisputeEvent.args.disputeId;
-    // MODIFIED: Add a check for openDisputeEvent.args.disputer before logging
-    const disputerAddress = openDisputeEvent.args.disputer;
-    console.log(`    DisputeOpened event processed. Dispute ID: ${disputeId.toString()}, Token ID: ${openDisputeEvent.args.tokenId.toString()}, Disputer: ${disputerAddress ? disputerAddress.toString() : 'undefined (from event)'}`);
-
-    // console.log(`\\\\n  Proposing arbitrator candidates for Dispute ID ${disputeId.toString()}...`);
-    // await (await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, arbitratorCandidate1.address)).wait();
-    // console.log(`    Proposed Candidate 1: ${arbitratorCandidate1.address}`);
-    // await delay(INFURA_DELAY_MS); // REMOVED delay
-    await addToTransactionQueue(
-        `Proposing arbitrator candidate 1: ${arbitratorCandidate1.address} for Dispute ID ${disputeId.toString()}`,
-        async () => {
-            // MODIFIED: Added gasOptions
-            const tx = await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, arbitratorCandidate1.address, gasOptions);
-            await tx.wait(1);
-            console.log(`    Proposed Candidate 1: ${arbitratorCandidate1.address}`);
-        }
-    );
-
-    // await (await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, arbitratorCandidate2.address)).wait();
-    // console.log(`    Proposed Candidate 2: ${arbitratorCandidate2.address}`);
-    // await delay(INFURA_DELAY_MS); // REMOVED delay
-    await addToTransactionQueue(
-        `Proposing arbitrator candidate 2: ${arbitratorCandidate2.address} for Dispute ID ${disputeId.toString()}`,
-        async () => {
-            // MODIFIED: Added gasOptions
-            const tx = await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, arbitratorCandidate2.address, gasOptions);
-            await tx.wait(1);
-            console.log(`    Proposed Candidate 2: ${arbitratorCandidate2.address}`);
-        }
-    );
-
-    // await (await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, designatedArbitrator.address)).wait();
-    // console.log(`    Proposed Candidate 3 (Designated): ${designatedArbitrator.address}`);
-    // await delay(INFURA_DELAY_MS); // REMOVED delay
-    await addToTransactionQueue(
-        `Proposing arbitrator candidate 3 (Designated): ${designatedArbitrator.address} for Dispute ID ${disputeId.toString()}`,
-        async () => {
-            // MODIFIED: Added gasOptions
-            const tx = await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, designatedArbitrator.address, gasOptions);
-            await tx.wait(1);
-            console.log(`    Proposed Candidate 3 (Designated): ${designatedArbitrator.address}`);
-        }
-    );
-    
-    console.log("\\n  Voting for arbitrator candidates...");
-    const voters = [buyer1, manufacturer, signers[2], signers[3]]; 
-    for (const voter of voters) {
-        // console.log(`    Voter ${voter.address} voting for ${designatedArbitrator.address}...`);
-        try {
-            // tx = await supplyChainNFT.connect(voter).voteForArbitrator(disputeId, designatedArbitrator.address);
-            // receipt = await tx.wait(1);
-            // console.log(`      Vote cast. Gas Used: ${receipt.gasUsed.toString()}`);
-            // await delay(INFURA_DELAY_MS); // REMOVED delay
-            await addToTransactionQueue(
-                `Voter ${voter.address} voting for ${designatedArbitrator.address} in Dispute ID ${disputeId.toString()}`,
-                async () => {
-                    // MODIFIED: Added gasOptions
-                    const tx = await supplyChainNFT.connect(voter).voteForArbitrator(disputeId, designatedArbitrator.address, gasOptions);
-                    const voteReceipt = await tx.wait(1);
-                    console.log(`      Vote cast by ${voter.address}. Gas Used: ${voteReceipt.gasUsed.toString()}`);
-                    return voteReceipt;
-                }
-            );
-        } catch (e) {
-            console.warn(`      WARN: Voter ${voter.address} could not vote: ${e.message}`);
-        }
+        if (!openDisputeEvent) throw new Error("DisputeOpened event not found.");
+        disputeId = openDisputeEvent.args.disputeId.toString();
+        console.log(`    Dispute ID: ${disputeId}`);
+    } catch (error) {
+        console.error("  ERROR opening dispute:", error);
+        process.exit(1);
     }
 
-    // console.log(`\\\\n  Selecting arbitrator for Dispute ID ${disputeId.toString()}...`);
-    // tx = await supplyChainNFT.connect(deployer).selectArbitrator(disputeId);
-    // receipt = await tx.wait(1);
-    // console.log(`    Transaction to select arbitrator sent. Gas Used: ${receipt.gasUsed.toString()}`);
-    // await delay(INFURA_DELAY_MS); // REMOVED delay
-    receipt = await addToTransactionQueue(
-        `Selecting arbitrator for Dispute ID ${disputeId.toString()}`,
-        async () => {
-            // MODIFIED: Added gasOptions
-            const tx = await supplyChainNFT.connect(deployer).selectArbitrator(disputeId, gasOptions);
-            const awaitedReceipt = await tx.wait(1);
-            console.log(`    Transaction to select arbitrator sent. Gas Used: ${awaitedReceipt.gasUsed.toString()}`);
-            return awaitedReceipt;
-        }
-    );
-
-    let arbitratorSelectedEvent = receipt.events?.find(event => event.event === "ArbitratorSelected");
-    if (!arbitratorSelectedEvent) {
-        const rawLogs = receipt.logs || [];
-        for (const log of rawLogs) {
-            try {
-                const parsedLog = supplyChainNFT.interface.parseLog(log);
-                if (parsedLog && parsedLog.name === "ArbitratorSelected") {
-                    arbitratorSelectedEvent = parsedLog;
-                    break;
-                }
-            } catch (e) { /* Ignore */ }
-        }
-    }
-
-    let selectedArbitrator;
-    if (!arbitratorSelectedEvent) {
-        console.warn("    WARN: ArbitratorSelected event not found in receipt. Fetching from contract state...");
-        const disputeData = await supplyChainNFT.disputesData(disputeId);
-        if (disputeData.selectedArbitrator !== ethers.ZeroAddress) { // MODIFIED: ethers.constants.AddressZero to ethers.ZeroAddress
-            selectedArbitrator = disputeData.selectedArbitrator;
-            console.log(`    Fallback: Directly fetched selected arbitrator: ${selectedArbitrator}`);
-            if (selectedArbitrator.toLowerCase() !== designatedArbitrator.address.toLowerCase()) {
-                console.warn("    WARN (Fallback): Designated arbitrator was NOT selected. The demo might not proceed as planned.");
-            }
-        } else {
-            throw new Error("ArbitratorSelected event not found and could not determine selected arbitrator from contract state.");
-        }
-    } else {
-        selectedArbitrator = arbitratorSelectedEvent.args.selectedArbitrator;
-        console.log(`    ArbitratorSelected event processed. Selected: ${selectedArbitrator}, Dispute ID: ${arbitratorSelectedEvent.args.disputeId.toString()}, Token ID: ${arbitratorSelectedEvent.args.tokenId.toString()}`);
-        if (selectedArbitrator.toLowerCase() !== designatedArbitrator.address.toLowerCase()) {
-            console.warn("    WARN: Designated arbitrator was NOT selected. The demo might not proceed as planned.");
-        }
-    }
-
-    if (selectedArbitrator.toLowerCase() === designatedArbitrator.address.toLowerCase()) {
-        console.log(`\n--- Dispute Resolution Process for Dispute ID ${disputeId.toString()} by Arbitrator ${designatedArbitrator.address} ---`);
-        
-        const resolutionDetailsText = "Arbitrator decision: Full refund to buyer, product to be returned to Manufacturer.";
-        const resolutionOutcome = 1; // 1 = Favor Plaintiff (Buyer)
-
-        const resolutionData = {
-            timestamp: new Date().toISOString(),
-            disputeId: disputeId.toString(),
-            arbitrator: designatedArbitrator.address,
-            decision: resolutionDetailsText,
-            outcome: resolutionOutcome,
-            actionsRequired: [
-                // MODIFIED: Refer to disputingPartySigner
-                `Disputing Party (${disputingPartySigner.address}) to have product (Token ID: ${tokenIdToDispute}) returned to Manufacturer (${manufacturer.address})`,
-                // MODIFIED: Refer to disputingPartySigner
-                `Manufacturer (${manufacturer.address}) to fund, and contract to issue, full refund to Disputing Party (${disputingPartySigner.address}).`
-            ],
-            settlementTerms: "NFT return and full refund to be enforced on-chain."
+    // Update context after opening dispute
+    currentContext = readAndUpdateContext(ctx => {
+        if (!ctx.disputes) ctx.disputes = {};
+        ctx.disputes[disputeId] = {
+            disputeId: disputeId,
+            tokenId: tokenIdToDispute,
+            disputer: disputingPartySigner.address.toLowerCase(),
+            reason: disputeReason,
+            evidence: evidenceDataString,
+            evidenceCID: null,
+            status: "Opened",
+            proposedCandidates: [],
+            votes: {},
+            selectedArbitrator: null,
+            resolutionDetails: null,
+            resolutionDataString: null,
+            resolutionCID: null,
+            resolutionOutcome: null,
+            nftReturnEnforced: false,
+            refundEnforced: false,
+            enforced: false,
+            openTimestamp: openBlock.timestamp,
+            openTxHash: openReceipt.transactionHash,
+            decisionTimestamp: null,
+            enforcedTimestamp: null,
+            lastUpdateTimestamp: openBlock.timestamp
         };
-        // REMOVED: const resolutionCID = await uploadToIPFS(resolutionData, `resolution_dispute_${disputeId.toString()}.json`);
-        // console.log(`  Generated Resolution CID for IPFS: ${resolutionCID}`);
-        const resolutionDataString = JSON.stringify(resolutionData);
-        console.log(`  Prepared Resolution Data (to be processed by backend): ${resolutionDataString.substring(0,100)}...`);
-
-        // 1. Record Decision
-        // console.log(`\\\\n  1. Arbitrator (${designatedArbitrator.address}) recording decision for Dispute ID ${disputeId.toString()}...`);
-        // MODIFIED: Pass resolutionDataString as the third argument (previously resolutionCID)
-        // tx = await supplyChainNFT.connect(designatedArbitrator).recordDecision(disputeId, resolutionDetailsText, resolutionDataString, resolutionOutcome);
-        // receipt = await tx.wait(1);
-        // console.log(`    Transaction to record decision sent. Gas Used: ${receipt.gasUsed.toString()}`);
-        // await delay(INFURA_DELAY_MS); // REMOVED delay
-        receipt = await addToTransactionQueue(
-            `Arbitrator (${designatedArbitrator.address}) recording decision for Dispute ID ${disputeId.toString()}`,
-            async () => {
-                const tx = await supplyChainNFT.connect(designatedArbitrator).recordDecision(disputeId, resolutionDetailsText, resolutionDataString, resolutionOutcome, gasOptions);
-                const awaitedReceipt = await tx.wait(1);
-                console.log(`    Transaction to record decision sent. Gas Used: ${awaitedReceipt.gasUsed.toString()}`);
-                return awaitedReceipt;
-            }
-        );
-        
-        let decisionRecordedEvent = receipt.events?.find(e => e.event === "DisputeDecisionRecorded");
-        if (!decisionRecordedEvent) {
-            const rawLogs = receipt.logs || [];
-            for (const log of rawLogs) {
-                try {
-                    const parsedLog = supplyChainNFT.interface.parseLog(log);
-                    if (parsedLog && parsedLog.name === "DisputeDecisionRecorded") {
-                        decisionRecordedEvent = parsedLog;
-                        break;
-                    }
-                } catch (e) { /* Ignore */ }
-            }
+        if (ctx.products && ctx.products[tokenIdToDispute]) {
+            ctx.products[tokenIdToDispute].disputeInfo = { disputeId: disputeId, status: "Opened" };
+            ctx.products[tokenIdToDispute].lastUpdateTimestamp = openBlock.timestamp;
         }
-
-        if (decisionRecordedEvent) {
-            // MODIFIED: Use event.args.resolutionDetails to match contract event
-            console.log(`      DisputeDecisionRecorded: DisputeID=${decisionRecordedEvent.args.disputeId}, Arbitrator=${decisionRecordedEvent.args.arbitrator}, Outcome=${decisionRecordedEvent.args.outcome}, ResolutionDetails=${decisionRecordedEvent.args.resolutionDetails}, ResolutionDataString (first 100 chars)=${(decisionRecordedEvent.args.resolutionDataString || '').substring(0,100)}...`);
-        } else {
-            console.warn("      WARN: Could not find DisputeDecisionRecorded event in receipt (or event signature mismatch).");
+        if (ctx.nodes && ctx.nodes[disputingPartySigner.address.toLowerCase()]) {
+            if (!ctx.nodes[disputingPartySigner.address.toLowerCase()].interactions) ctx.nodes[disputingPartySigner.address.toLowerCase()].interactions = [];
+            ctx.nodes[disputingPartySigner.address.toLowerCase()].interactions.push({
+                type: "OpenDispute", disputeId: disputeId, tokenId: tokenIdToDispute, timestamp: openBlock.timestamp,
+                details: `Opened dispute for product ${tokenIdToDispute}. Reason: ${disputeReason.substring(0, 50)}...`, txHash: openReceipt.transactionHash
+            });
         }
+        return ctx;
+    });
 
-        // 2. Enforce NFT Return
-        const returnToAddress = manufacturer.address; 
-        console.log(`\n  2. Arbitrator enforcing NFT (Token ID: ${tokenIdToDispute}) return to Manufacturer (${returnToAddress}) for Dispute ID ${disputeId.toString()}...`);
-        
-        const ownerBeforeReturn = await supplyChainNFT.ownerOf(tokenIdToDispute);
-        console.log(`     Current owner of Token ID ${tokenIdToDispute}: ${ownerBeforeReturn}`);
-        // MODIFIED: Check against disputingPartySigner.address instead of buyer1.address
-        if (ownerBeforeReturn.toLowerCase() !== disputingPartySigner.address.toLowerCase()) {
-            // This warning will now only appear if the owner fetched by ownerOf is not the disputing party.
-            console.warn(`     WARN: Current owner ${ownerBeforeReturn} does not match the disputing party ${disputingPartySigner.address}. This might be unexpected. Proceeding with enforcement.`);
+    // 2. Propose Arbitrator Candidates
+    console.log(`\n2. Proposing arbitrator candidates for Dispute ID ${disputeId}...`);
+    const candidates = [arbitratorCandidate1, arbitratorCandidate2, designatedArbitrator];
+    const candidateReceipts = {};
+    try {
+        for (const candidate of candidates) {
+            console.log(`    Proposing Candidate: ${candidate.address}`);
+            let proposeTx = await supplyChainNFT.connect(deployer).proposeArbitratorCandidate(disputeId, candidate.address, gasOptions);
+            let proposeReceipt = await proposeTx.wait(1);
+            let proposeBlock = await ethers.provider.getBlock(proposeReceipt.blockNumber);
+            console.log(`      Proposed. Gas Used: ${proposeReceipt.gasUsed.toString()}`);
+            candidateReceipts[candidate.address.toLowerCase()] = { receipt: proposeReceipt, block: proposeBlock };
+            await delay(200); // Small delay between proposals
         }
+    } catch (error) {
+        console.error("  ERROR proposing candidates:", error);
+        // Continue to context update, but state might be incomplete
+    }
 
-        tx = await supplyChainNFT.connect(designatedArbitrator).enforceNFTReturn(disputeId, returnToAddress, gasOptions);
-        receipt = await tx.wait(1);
-        console.log(`    Transaction to enforce NFT return sent. Gas Used: ${receipt.gasUsed.toString()}`);
-        // await delay(INFURA_DELAY_MS); // REMOVED delay
-
-        let nftReturnEnforcedEvent = receipt.events?.find(e => e.event === "NFTReturnEnforced");
-        if (!nftReturnEnforcedEvent) {
-            const rawLogs = receipt.logs || [];
-            for (const log of rawLogs) {
-                try {
-                    const parsedLog = supplyChainNFT.interface.parseLog(log);
-                    if (parsedLog && parsedLog.name === "NFTReturnEnforced") {
-                        nftReturnEnforcedEvent = parsedLog;
-                        break;
-                    }
-                } catch (e) { /* Ignore */ }
+    // Update context with proposed candidates
+    currentContext = readAndUpdateContext(ctx => {
+        const dispute = ctx.disputes[disputeId];
+        if (!dispute) return ctx;
+        let maxTimestamp = dispute.lastUpdateTimestamp;
+        for (const candidateAddr in candidateReceipts) {
+            dispute.proposedCandidates.push({
+                address: candidateAddr,
+                proposeTimestamp: candidateReceipts[candidateAddr].block.timestamp,
+                proposeTxHash: candidateReceipts[candidateAddr].receipt.transactionHash
+            });
+            maxTimestamp = Math.max(maxTimestamp, candidateReceipts[candidateAddr].block.timestamp);
+            if (ctx.nodes && ctx.nodes[deployer.address.toLowerCase()]) {
+                if (!ctx.nodes[deployer.address.toLowerCase()].interactions) ctx.nodes[deployer.address.toLowerCase()].interactions = [];
+                 ctx.nodes[deployer.address.toLowerCase()].interactions.push({
+                    type: "ProposeArbitratorCandidate", disputeId: disputeId, candidate: candidateAddr,
+                    timestamp: candidateReceipts[candidateAddr].block.timestamp, txHash: candidateReceipts[candidateAddr].receipt.transactionHash
+                 });
             }
         }
+        dispute.status = "ProposingCandidates";
+        dispute.lastUpdateTimestamp = maxTimestamp;
+        return ctx;
+    });
 
-        if (nftReturnEnforcedEvent) {
-            console.log(`      NFTReturnEnforced: DisputeID=${nftReturnEnforcedEvent.args.disputeId}, TokenID=${nftReturnEnforcedEvent.args.tokenId}, From=${nftReturnEnforcedEvent.args.from}, To=${nftReturnEnforcedEvent.args.to}`);
-        } else {
-            console.warn("      WARN: Could not find NFTReturnEnforced event in receipt.");
-        }
-
-        const ownerAfterReturn = await supplyChainNFT.ownerOf(tokenIdToDispute);
-        console.log(`     New owner of Token ID ${tokenIdToDispute}: ${ownerAfterReturn} (Expected: ${returnToAddress})`);
-        if (ownerAfterReturn.toLowerCase() !== returnToAddress.toLowerCase()) {
-            console.error(`       ERROR: NFT ownership verification failed after enforcement! Owner is ${ownerAfterReturn}.`);
-        } else {
-            console.log("       NFT ownership successfully transferred to Manufacturer.");
-        }
-        
-        // 3. Enforce Refund
-        let calculatedRefundAmountInPOL;
-
-        // In this specific scenario (06_scenario_dispute_resolution.cjs):
-        // - The dispute is initiated by Buyer1 for Product1.
-        // - The arbitrator's decision (resolutionOutcome) is hardcoded to 1 (Favor Plaintiff/Buyer).
-        // Therefore, the refund should be the original purchase price of Product1 plus a 0.01 POL compensation fee.
-        // We must ensure productInfo and its purchasePrice (or price) are valid from demo_context.json.
-
-        // Try 'purchasePrice' first, then fall back to 'price' for compatibility
-        // MODIFIED: Use productInfo consistently
-        let priceToUseString = productInfo ? (productInfo.purchasePrice || productInfo.price) : undefined;
-        let originalPriceInWei;
-        let originalPriceForLog; // For logging
-
-        // MODIFIED: Use productInfo consistently
-        if (productInfo && typeof priceToUseString === 'string' && priceToUseString.trim() !== "") {
+    // 3. Vote for Arbitrator Candidates
+    console.log("\n3. Voting for arbitrator candidates...");
+    
+    // Define voters: Only signers[0] to signer[7], excluding the arbitrator candidates themselves
+    const candidateAddresses = [arbitratorCandidate1.address.toLowerCase(), arbitratorCandidate2.address.toLowerCase(), designatedArbitrator.address.toLowerCase()];
+    const availableVoters = signers.slice(0, 8).filter(signer => 
+        !candidateAddresses.includes(signer.address.toLowerCase())
+    );
+    
+    console.log(`    Available voters (excluding candidates): ${availableVoters.length} accounts`);
+    
+    // Create realistic voting distribution instead of everyone voting for the same candidate
+    const voteDistribution = {};
+    const voteReceipts = {};
+    
+    try {
+        for (let i = 0; i < availableVoters.length; i++) {
+            const voter = availableVoters[i];
+            let voteTarget;
+            
+            // Create realistic voting pattern:
+            // - First 40% vote for designatedArbitrator
+            // - Next 30% vote for arbitratorCandidate1  
+            // - Remaining 30% vote for arbitratorCandidate2
+            const voterIndex = i / availableVoters.length;
+            if (voterIndex < 0.4) {
+                voteTarget = designatedArbitrator.address;
+            } else if (voterIndex < 0.7) {
+                voteTarget = arbitratorCandidate1.address;
+            } else {
+                voteTarget = arbitratorCandidate2.address;
+            }
+            
+            console.log(`    Voter ${voter.address} (${nodes[voter.address.toLowerCase()]?.name || 'Unknown'}) voting for ${voteTarget}...`);
+            
             try {
-                // priceToUseString is in GWEI as per user's information.
-                // compensationFeePOL is 0.01 Ether.
-
-                if (productInfo.uniqueProductID === "DEMO_PROD_002") {
-                    console.log(`    INFO: For product ${productInfo.uniqueProductID}, using a fixed price of 0.2 POL (parsed as ETH) for refund calculation, overriding demo_context.json value ('${priceToUseString}' Gwei).`);
-                    originalPriceInWei = ethers.parseUnits("0.2", "ether"); // 0.2 POL, assuming 18 decimals like ETH
-                    originalPriceForLog = "0.2 POL";
-                } else {
-                    // priceToUseString from demo_context.json is a string representing the value in Wei.
-                    // Example: "100000000000000000" for 0.1 POL/ETH.
-                    // Convert this string directly to a BigInt to get the Wei value.
-                    originalPriceInWei = BigInt(priceToUseString);
-                    // For logging, format the Wei BigInt to a human-readable POL/ETH string.
-                    originalPriceForLog = `${ethers.formatEther(originalPriceInWei)} POL`;
-                    console.log(`    INFO: For product ${productInfo.uniqueProductID}, using price from demo_context.json: ${priceToUseString} Wei (which is ${originalPriceForLog}).`);
-                }
+                let voteTx = await supplyChainNFT.connect(voter).voteForArbitrator(disputeId, voteTarget, gasOptions);
+                let voteReceipt = await voteTx.wait(1);
+                let voteBlock = await ethers.provider.getBlock(voteReceipt.blockNumber);
+                console.log(`      Vote cast. Gas Used: ${voteReceipt.gasUsed.toString()}`);
                 
-                const compensationFeeInWei = ethers.parseEther("0.01"); // 0.01 ETH/POL in Wei
-
-                refundAmount = originalPriceInWei + compensationFeeInWei; // MODIFIED: Changed .add() to + for bigint arithmetic
-
-                // For logging:
-                // const originalPriceInGweiForLog = priceToUseString; // The value from context file // No longer always GWEI
-                const compensationFeeInEthForLog = "0.01";
-                calculatedRefundAmountForLog = ethers.formatEther(refundAmount); // MODIFIED: ethers.utils.formatEther to ethers.formatEther // Total refund in Ether string
-
-                console.log(`  Refund calculation for Disputing Party (${disputingPartySigner.address}) (dispute favored): Original Price (${originalPriceForLog}) + Compensation (${compensationFeeInEthForLog} ETH) = ${calculatedRefundAmountForLog} ETH.`);
-
+                voteReceipts[voter.address.toLowerCase()] = { 
+                    receipt: voteReceipt, 
+                    block: voteBlock, 
+                    voteTarget: voteTarget 
+                };
+                
+                // Track vote distribution for logging
+                if (!voteDistribution[voteTarget.toLowerCase()]) {
+                    voteDistribution[voteTarget.toLowerCase()] = 0;
+                }
+                voteDistribution[voteTarget.toLowerCase()]++;
+                
             } catch (e) {
-                // Catch errors from parseUnits, parseEther, or add.
-                console.error(`  CRITICAL ERROR: Failed to calculate refund amount. Error: ${e.message}`);
-                // Re-throw to halt further execution of the refund process, as the amount is undetermined.
-                throw e;
+                console.warn(`      WARN: Voter ${voter.address} could not vote: ${e.message}`);
             }
+            await delay(200);
+        }
+        
+        // Log vote distribution
+        console.log("\n    Vote Distribution Summary:");
+        for (const [candidateAddr, voteCount] of Object.entries(voteDistribution)) {
+            const candidateName = candidateAddr === designatedArbitrator.address.toLowerCase() ? "Designated Arbitrator" :
+                                 candidateAddr === arbitratorCandidate1.address.toLowerCase() ? "Arbitrator Candidate 1" :
+                                 candidateAddr === arbitratorCandidate2.address.toLowerCase() ? "Arbitrator Candidate 2" : "Unknown";
+            console.log(`      ${candidateName} (${candidateAddr}): ${voteCount} votes`);
+        }
+        
+    } catch (error) {
+        console.error("  ERROR during voting process:", error);
+    }
+
+    // Update context with votes
+    currentContext = readAndUpdateContext(ctx => {
+        const dispute = ctx.disputes[disputeId];
+        if (!dispute) return ctx;
+        let maxTimestamp = dispute.lastUpdateTimestamp;
+        for (const voterAddr in voteReceipts) {
+            const voteData = voteReceipts[voterAddr];
+            if (!dispute.votes[voteData.voteTarget.toLowerCase()]) {
+                dispute.votes[voteData.voteTarget.toLowerCase()] = [];
+            }
+            dispute.votes[voteData.voteTarget.toLowerCase()].push({
+                voter: voterAddr,
+                timestamp: voteData.block.timestamp,
+                txHash: voteData.receipt.transactionHash
+            });
+            maxTimestamp = Math.max(maxTimestamp, voteData.block.timestamp);
+            if (ctx.nodes && ctx.nodes[voterAddr]) {
+                if (!ctx.nodes[voterAddr].interactions) ctx.nodes[voterAddr].interactions = [];
+                ctx.nodes[voterAddr].interactions.push({
+                    type: "VoteForArbitrator", disputeId: disputeId, votedFor: voteData.voteTarget.toLowerCase(),
+                    timestamp: voteData.block.timestamp, txHash: voteData.receipt.transactionHash
+                });
+            }
+        }
+        dispute.status = "VotingCompleted";
+        dispute.lastUpdateTimestamp = maxTimestamp;
+        return ctx;
+    });
+
+    // 4. Select Arbitrator
+    console.log(`\n4. Selecting arbitrator for Dispute ID ${disputeId}...`);
+    let selectTx, selectReceipt, selectBlock, arbitratorSelectedEvent, selectedArbitratorAddress;
+    let selectedArbitratorSigner = null;
+    try {
+        selectTx = await supplyChainNFT.connect(deployer).selectArbitrator(disputeId, gasOptions);
+        selectReceipt = await selectTx.wait(1);
+        selectBlock = await ethers.provider.getBlock(selectReceipt.blockNumber);
+        console.log(`    Arbitrator selection process triggered. Gas Used: ${selectReceipt.gasUsed.toString()}`);
+
+        arbitratorSelectedEvent = selectReceipt.logs?.map(log => {
+            try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+        }).find(event => event?.name === "ArbitratorSelected");
+
+        if (arbitratorSelectedEvent) {
+            selectedArbitratorAddress = arbitratorSelectedEvent.args.selectedArbitrator.toLowerCase();
+            console.log(`    ArbitratorSelected event processed. Selected: ${selectedArbitratorAddress}`);
         } else {
-            // This case should ideally not be reached if script 03 ran correctly and demo_context.json is populated with purchasePrice or price.
-            // MODIFIED: Use productInfo consistently for logging
-            const priceValForLog = productInfo ? (productInfo.purchasePrice !== undefined ? productInfo.purchasePrice : (productInfo.price !== undefined ? productInfo.price : "undefined field")) : "productInfo missing";
-            // MODIFIED: Update default product ID in error message if productInfo is missing
-            const prodId = productInfo ? productInfo.uniqueProductID : "DEMO_PROD_002 (productInfo missing)";
-            const errorMessage = `  CRITICAL ERROR: Purchase price (checked 'purchasePrice' then 'price') for product ${prodId} is missing or invalid in demo_context.json (value found: '${priceValForLog}', expected Gwei string). Cannot determine refund amount.`;
-            console.error(errorMessage);
-            throw new Error(errorMessage.trim());
+            console.warn("    WARN: ArbitratorSelected event not found. Fetching from contract state...");
+            const disputeData = await supplyChainNFT.disputesData(disputeId);
+            if (disputeData.selectedArbitrator !== ethers.ZeroAddress) {
+                selectedArbitratorAddress = disputeData.selectedArbitrator.toLowerCase();
+                console.log(`    Fallback: Directly fetched selected arbitrator: ${selectedArbitratorAddress}`);
+            } else {
+                throw new Error("Could not determine selected arbitrator from event or state.");
+            }
         }
 
-        // refundAmount is now already calculated as a BigNumber in Wei.
-        // The previous debug logs related to parseEther are removed.
+        if (selectedArbitratorAddress !== designatedArbitrator.address.toLowerCase()) {
+             console.warn(`    WARN: Designated arbitrator ${designatedArbitrator.address} was NOT selected. Actual: ${selectedArbitratorAddress}.`);
+        }
+        selectedArbitratorSigner = signers.find(s => s.address.toLowerCase() === selectedArbitratorAddress);
+        if (!selectedArbitratorSigner) {
+            throw new Error(`Could not find signer for selected arbitrator ${selectedArbitratorAddress}`);
+        }
+
+    } catch (error) {
+        console.error("  ERROR selecting arbitrator:", error);
+        process.exit(1); // Exit if arbitrator cannot be selected
+    }
+
+    // Update context with selected arbitrator
+    currentContext = readAndUpdateContext(ctx => {
+        const dispute = ctx.disputes[disputeId];
+        if (!dispute) return ctx;
+        dispute.selectedArbitrator = selectedArbitratorAddress;
+        dispute.status = "ArbitratorSelected";
+        dispute.lastUpdateTimestamp = selectBlock.timestamp;
+        if (ctx.nodes && ctx.nodes[deployer.address.toLowerCase()]) {
+            if (!ctx.nodes[deployer.address.toLowerCase()].interactions) ctx.nodes[deployer.address.toLowerCase()].interactions = [];
+            ctx.nodes[deployer.address.toLowerCase()].interactions.push({
+                type: "SelectArbitrator", disputeId: disputeId, selected: selectedArbitratorAddress,
+                timestamp: selectBlock.timestamp, txHash: selectReceipt.transactionHash
+            });
+        }
+        return ctx;
+    });
+
+    // 5. Arbitrator Makes Decision
+    console.log(`\n5. Selected Arbitrator (${selectedArbitratorAddress}) making decision for Dispute ID ${disputeId}...`);
+    const resolutionOutcome = 1; // 1: Favor Disputer (Retailer), meaning full refund and product return
+    const resolutionDetails = "Arbitrator decision: Full refund to disputer, product to be returned to Manufacturer.";
+    const resolutionData = {
+        timestamp: new Date().toISOString(),
+        disputeId: disputeId,
+        arbitrator: selectedArbitratorAddress,
+        decision: resolutionDetails,
+        outcome: resolutionOutcome,
+        actionsRequired: [
+            `Disputing Party (${disputingPartySigner.address}) to have product (Token ID: ${tokenIdToDispute}) returned to Manufacturer (${manufacturer.address})`,
+            `Manufacturer (${manufacturer.address}) to fund, and contract to issue, full refund to Disputing Party (${disputingPartySigner.address}).`
+        ],
+        settlementTerms: "NFT return and full refund to be enforced on-chain."
+    };
+    const resolutionDataString = JSON.stringify(resolutionData);
+    console.log(`    Decision: ${resolutionDetails}`);
+
+    let decideTx, decideReceipt, decideBlock;
+    try {
+        decideTx = await supplyChainNFT.connect(selectedArbitratorSigner).recordDecision(disputeId, resolutionDetails, resolutionDataString, resolutionOutcome, gasOptions);
+        decideReceipt = await decideTx.wait(1);
+        decideBlock = await ethers.provider.getBlock(decideReceipt.blockNumber);
+        console.log(`    Dispute decision made. Gas Used: ${decideReceipt.gasUsed.toString()}`);
+    } catch (error) {
+        console.error("  ERROR making dispute decision:", error);
+        process.exit(1);
+    }
+
+    // Update context with decision
+    currentContext = readAndUpdateContext(ctx => {
+        const dispute = ctx.disputes[disputeId];
+        if (!dispute) return ctx;
+        dispute.status = "DecisionMade";
+        dispute.resolutionOutcome = resolutionOutcome;
+        dispute.resolutionDetails = resolutionDetails;
+        dispute.resolutionDataString = resolutionDataString;
+        dispute.decisionTimestamp = decideBlock.timestamp;
+        dispute.lastUpdateTimestamp = decideBlock.timestamp;
+        if (ctx.products && ctx.products[tokenIdToDispute]) {
+            ctx.products[tokenIdToDispute].disputeInfo.status = "DecisionMade";
+            ctx.products[tokenIdToDispute].lastUpdateTimestamp = decideBlock.timestamp;
+        }
+        if (ctx.nodes && ctx.nodes[selectedArbitratorAddress]) {
+            if (!ctx.nodes[selectedArbitratorAddress].interactions) ctx.nodes[selectedArbitratorAddress].interactions = [];
+            ctx.nodes[selectedArbitratorAddress].interactions.push({
+                type: "MakeDisputeDecision", disputeId: disputeId, outcome: resolutionOutcome,
+                timestamp: decideBlock.timestamp, txHash: decideReceipt.transactionHash
+            });
+        }
+        return ctx;
+    });
+
+    // 6. Enforce Decision (NFT Return and Refund)
+    console.log(`\n6. Enforcing decision for Dispute ID ${disputeId}...`);
+    
+    if (resolutionOutcome === 1) { // Favor Disputer - requires NFT return to Manufacturer and refund to Disputer
+        console.log(`    Outcome favors Disputer (Retailer). Processing NFT return to Manufacturer and refund enforcement...`);
         
-        // MODIFIED: refundTo is the disputingPartySigner
-        const refundTo = disputingPartySigner.address;
-        const refundFrom = manufacturer.address; // Conceptual source, contract balance is used.
-
-        // Log the amount to be deposited in ETH for readability
-        console.log(`\n  Preparing for refund: Manufacturer (${manufacturer.address}) depositing ${ethers.formatEther(refundAmount)} ETH into the contract...`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther
+        // 6.1 Enforce NFT Return to Manufacturer
+        console.log(`\n  6.1. Enforcing NFT return to Manufacturer for Dispute ID ${disputeId}...`);
+        const returnToAddress = manufacturer.address;
+        let nftReturnEnforced = false;
+        
         try {
-            // Use refundAmount (BigNumber in Wei) directly in the transaction value
-            // const depositTx = await supplyChainNFT.connect(manufacturer).depositDisputeFunds({ value: refundAmount });
-            // const depositReceipt = await depositTx.wait(1);
-            // console.log(`    Manufacturer deposited funds successfully. Gas Used: ${depositReceipt.gasUsed.toString()}`);
-            // await delay(INFURA_DELAY_MS); // REMOVED delay
-            const depositReceipt = await addToTransactionQueue(
-                `Manufacturer (${manufacturer.address}) depositing ${ethers.formatEther(refundAmount)} ETH for refund`, // MODIFIED: ethers.utils.formatEther to ethers.formatEther
-                async () => {
-                    // MODIFIED: Added gasOptions
-                    const tx = await supplyChainNFT.connect(manufacturer).depositDisputeFunds({ ...gasOptions, value: refundAmount });
-                    const awaitedReceipt = await tx.wait(1);
-                    console.log(`    Manufacturer deposited funds successfully. Gas Used: ${awaitedReceipt.gasUsed.toString()}`);
-                    return awaitedReceipt;
-                }
-            );
+            const returnTx = await supplyChainNFT.connect(selectedArbitratorSigner).enforceNFTReturn(disputeId, returnToAddress, gasOptions);
+            const returnReceipt = await returnTx.wait(1);
+            console.log(`    Transaction to enforce NFT return sent. Gas Used: ${returnReceipt.gasUsed.toString()}`);
+            
+            // Check for NFTReturnEnforced event
+            let nftReturnEnforcedEvent = returnReceipt.logs?.map(log => {
+                try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+            }).find(event => event?.name === "NFTReturnEnforced");
 
-            let fundsDepositedEvent = depositReceipt.events?.find(e => e.event === "FundsDeposited");
-            if(fundsDepositedEvent) {
-                console.log(`      FundsDeposited: Depositor=${fundsDepositedEvent.args.depositor}, Amount=${ethers.formatEther(fundsDepositedEvent.args.amount)} ETH`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther
+            if (nftReturnEnforcedEvent) {
+                console.log(`      NFTReturnEnforced: DisputeID=${nftReturnEnforcedEvent.args.disputeId}, TokenID=${nftReturnEnforcedEvent.args.tokenId}, From=${nftReturnEnforcedEvent.args.from}, To=${nftReturnEnforcedEvent.args.to}`);
+            } else {
+                console.warn("      WARN: Could not find NFTReturnEnforced event in receipt.");
             }
 
+            const ownerAfterReturn = await supplyChainNFT.ownerOf(tokenIdToDispute);
+            console.log(`     New owner of Token ID ${tokenIdToDispute}: ${ownerAfterReturn} (Expected: ${returnToAddress})`);
+            if (ownerAfterReturn.toLowerCase() !== returnToAddress.toLowerCase()) {
+                console.error(`       ERROR: NFT ownership verification failed after enforcement! Owner is ${ownerAfterReturn}.`);
+            } else {
+                console.log("       NFT ownership successfully transferred to Manufacturer.");
+                nftReturnEnforced = true;
+            }
+        } catch (error) {
+            console.error("  ERROR enforcing NFT return:", error);
+        }
+
+        // 6.2 Enforce Refund
+        console.log(`\n  6.2. Enforcing refund for Dispute ID ${disputeId}...`);
+        let refundEnforced = false;
+        
+        // Calculate refund amount - using fixed price for Product01 similar to old logic
+        const originalPriceInWei = ethers.parseUnits("0.1", "ether"); // 0.1 POL for Product01
+        const compensationFeePOL = ethers.parseUnits("0.01", "ether"); // 0.01 POL compensation
+        const refundAmount = originalPriceInWei + compensationFeePOL;
+        const refundTo = disputingPartySigner.address; // Retailer gets refund
+        const refundFrom = manufacturer.address; // Manufacturer funds the refund
+        
+        console.log(`    Calculated refund amount: ${ethers.formatEther(refundAmount)} POL (${ethers.formatEther(originalPriceInWei)} original + ${ethers.formatEther(compensationFeePOL)} compensation)`);
+        
+        // Manufacturer deposits funds for refund
+        try {
+            console.log(`    Manufacturer (${manufacturer.address}) depositing ${ethers.formatEther(refundAmount)} POL for refund...`);
+            const depositTx = await supplyChainNFT.connect(manufacturer).depositDisputeFunds({ ...gasOptions, value: refundAmount });
+            const depositReceipt = await depositTx.wait(1);
+            console.log(`    Manufacturer deposited funds successfully. Gas Used: ${depositReceipt.gasUsed.toString()}`);
+
+            let fundsDepositedEvent = depositReceipt.logs?.map(log => {
+                try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+            }).find(event => event?.name === "FundsDeposited");
+            
+            if(fundsDepositedEvent) {
+                console.log(`      FundsDeposited: Depositor=${fundsDepositedEvent.args.depositor}, Amount=${ethers.formatEther(fundsDepositedEvent.args.amount)} POL`);
+            }
         } catch (e) {
             console.error(`    ERROR: Manufacturer failed to deposit funds: ${e.message}`);
-            console.log("    Skipping refund enforcement due to deposit failure. Ensure contract can receive funds and manufacturer has ETH balance.");
+            console.log("    Skipping refund enforcement due to deposit failure.");
         }
 
-        const contractBalanceBeforeRefund = await ethers.provider.getBalance(contractAddress); // MODIFIED: Use contractAddress string directly
-        console.log(`    Contract balance before attempting refund: ${ethers.formatEther(contractBalanceBeforeRefund)} ETH`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther
+        // Check contract balance and enforce refund
+        const contractBalanceBeforeRefund = await ethers.provider.getBalance(contractAddress);
+        console.log(`    Contract balance before attempting refund: ${ethers.formatEther(contractBalanceBeforeRefund)} POL`);
 
-        if (contractBalanceBeforeRefund >= refundAmount) { // MODIFIED: Use >= for bigint comparison
-            // MODIFIED: Log refers to disputingPartySigner
-            // Log the refund amount in ETH for readability
-            console.log(`\n  3. Arbitrator enforcing Refund of ${ethers.formatEther(refundAmount)} ETH to Disputing Party (${refundTo}) for Dispute ID ${disputeId.toString()}...`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther
-            console.log(`     Refund will be sourced from contract balance (notionally from Manufacturer: ${refundFrom}).`);
-            
-            const buyerBalanceBeforeRefund = await ethers.provider.getBalance(refundTo);
+        if (contractBalanceBeforeRefund >= refundAmount) {
+            try {
+                console.log(`    Arbitrator enforcing Refund of ${ethers.formatEther(refundAmount)} POL to Disputing Party (${refundTo})...`);
+                console.log(`     Refund will be sourced from contract balance (notionally from Manufacturer: ${refundFrom}).`);
+                
+                const buyerBalanceBeforeRefund = await ethers.provider.getBalance(refundTo);
 
-            // Use refundAmount (BigNumber in Wei) directly in the transaction
-            // MODIFIED: Corrected argument order for enforceRefund
-            tx = await supplyChainNFT.connect(designatedArbitrator).enforceRefund(disputeId, refundTo, refundFrom, refundAmount, gasOptions);
-            receipt = await tx.wait(1);
-            console.log(`    Transaction to enforce refund sent. Gas Used: ${receipt.gasUsed.toString()}`);
-            // await delay(INFURA_DELAY_MS); // REMOVED delay as INFURA_DELAY_MS is not defined and queue handles delays
+                const refundTx = await supplyChainNFT.connect(selectedArbitratorSigner).enforceRefund(disputeId, refundTo, refundFrom, refundAmount, gasOptions);
+                const refundReceipt = await refundTx.wait(1);
+                console.log(`    Transaction to enforce refund sent. Gas Used: ${refundReceipt.gasUsed.toString()}`);
 
-            let refundEnforcedEvent = receipt.events?.find(e => e.event === "RefundEnforced");
-            if (!refundEnforcedEvent) {
-                const rawLogs = receipt.logs || [];
-                for (const log of rawLogs) {
-                    try {
-                        const parsedLog = supplyChainNFT.interface.parseLog(log);
-                        if (parsedLog && parsedLog.name === "RefundEnforced") {
-                            refundEnforcedEvent = parsedLog;
-                            break;
-                        }
-                    } catch (e) { /* Ignore if log is not from this contract's ABI */ }
+                let refundEnforcedEvent = refundReceipt.logs?.map(log => {
+                    try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+                }).find(event => event?.name === "RefundEnforced");
+
+                if (refundEnforcedEvent) {
+                    console.log(`      RefundEnforced: DisputeID=${refundEnforcedEvent.args.disputeId}, To=${refundEnforcedEvent.args.to}, From=${refundEnforcedEvent.args.from}, Amount=${ethers.formatEther(refundEnforcedEvent.args.amount)} POL`);
+                } else {
+                    console.warn("      WARN: Could not find RefundEnforced event in receipt.");
                 }
-            }
 
-            if (refundEnforcedEvent) {
-                console.log(`      RefundEnforced: DisputeID=${refundEnforcedEvent.args.disputeId}, To=${refundEnforcedEvent.args.refundTo}, From=${refundEnforcedEvent.args.refundFrom}, Amount=${ethers.formatEther(refundEnforcedEvent.args.amount)} ETH`);
+                const buyerBalanceAfterRefund = await ethers.provider.getBalance(refundTo);
+                const balanceDifference = buyerBalanceAfterRefund - buyerBalanceBeforeRefund;
+                console.log(`      Balance difference for disputer: ${ethers.formatEther(balanceDifference)} POL (Expected: ~${ethers.formatEther(refundAmount)} POL)`);
+                refundEnforced = true;
+            } catch (error) {
+                console.error("  ERROR enforcing refund:", error);
+            }
+        } else {
+            console.error(`    ERROR: Insufficient contract balance ${ethers.formatEther(contractBalanceBeforeRefund)} POL for refund ${ethers.formatEther(refundAmount)} POL.`);
+        }
+
+        // 6.3 Conclude Dispute
+        console.log(`\n  6.3. Concluding Dispute ID ${disputeId}...`);
+        try {
+            const concludeTx = await supplyChainNFT.connect(selectedArbitratorSigner).concludeDispute(disputeId, gasOptions);
+            const concludeReceipt = await concludeTx.wait(1);
+            console.log(`    Transaction to conclude dispute sent. Gas Used: ${concludeReceipt.gasUsed.toString()}`);
+            
+            let disputeConcludedEvent = concludeReceipt.logs?.map(log => {
+                try { return supplyChainNFT.interface.parseLog(log); } catch { return null; }
+            }).find(event => event?.name === "DisputeConcluded");
+
+            if (disputeConcludedEvent) {
+                console.log(`      DisputeConcluded: DisputeID=${disputeConcludedEvent.args.disputeId}, WasEnforced=${disputeConcludedEvent.args.wasEnforced}, ConcludedBy=${disputeConcludedEvent.args.concludedBy}, Timestamp=${new Date(Number(disputeConcludedEvent.args.timestamp) * 1000).toISOString()}`);
             } else {
-                console.warn("      WARN: Could not find RefundEnforced event in receipt.");
+                console.warn("      WARN: Could not find DisputeConcluded event in receipt.");
             }
-
-            const buyerBalanceAfterRefund = await ethers.provider.getBalance(refundTo);
-            const contractBalanceAfterRefund = await ethers.provider.getBalance(contractAddress); // MODIFIED: Use contractAddress string directly
-            // MODIFIED: Log refers to disputingPartySigner
-            console.log(`     Disputing Party's balance after refund: ${ethers.formatEther(buyerBalanceAfterRefund)} ETH (Change: ${ethers.formatEther(buyerBalanceAfterRefund - buyerBalanceBeforeRefund)} ETH)`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther, .sub to -
-        } else {
-            // MODIFIED: Log refers to disputingPartySigner
-            // Log the refund amount in ETH for readability
-            console.error(`    ERROR: Contract balance (${ethers.formatEther(contractBalanceBeforeRefund)} ETH) is insufficient for refund amount (${ethers.formatEther(refundAmount)} ETH).`); // MODIFIED: ethers.utils.formatEther to ethers.formatEther
-            console.log(`    Skipping refund enforcement for Disputing Party (${refundTo}).`);
+        } catch (error) {
+            console.error("  ERROR concluding dispute:", error);
         }
 
-        // 4. Conclude Dispute
-        // console.log(`\\\\n  4. Arbitrator concluding Dispute ID ${disputeId.toString()}...`);
-        // tx = await supplyChainNFT.connect(designatedArbitrator).concludeDispute(disputeId);
-        // receipt = await tx.wait(1);
-        // console.log(`    Transaction to conclude dispute sent. Gas Used: ${receipt.gasUsed.toString()}`);
-        // await delay(INFURA_DELAY_MS); // REMOVED delay
-        receipt = await addToTransactionQueue(
-            `Arbitrator concluding Dispute ID ${disputeId.toString()}`,
-            async () => {
-                // MODIFIED: Added gasOptions
-                const tx = await supplyChainNFT.connect(designatedArbitrator).concludeDispute(disputeId, gasOptions);
-                const awaitedReceipt = await tx.wait(1);
-                console.log(`    Transaction to conclude dispute sent. Gas Used: ${awaitedReceipt.gasUsed.toString()}`);
-                return awaitedReceipt;
-            }
-        );
+        // Update enforcement status
+        const enforced = nftReturnEnforced && refundEnforced;
+        const enforceBlock = await ethers.provider.getBlock('latest');
         
-        let disputeConcludedEvent = receipt.events?.find(e => e.event === "DisputeConcluded");
-        if (!disputeConcludedEvent) {
-            const rawLogs = receipt.logs || [];
-            for (const log of rawLogs) {
-                try {
-                    const parsedLog = supplyChainNFT.interface.parseLog(log);
-                    if (parsedLog && parsedLog.name === "DisputeConcluded") {
-                        disputeConcludedEvent = parsedLog;
-                        break;
-                    }
-                } catch (e) { /* Ignore */ }
+        // Update context with enforcement status
+        currentContext = readAndUpdateContext(ctx => {
+            const dispute = ctx.disputes[disputeId];
+            if (!dispute) return ctx;
+            dispute.status = enforced ? "Enforced" : "PartiallyEnforced";
+            dispute.nftReturnEnforced = nftReturnEnforced;
+            dispute.refundEnforced = refundEnforced;
+            dispute.enforced = enforced;
+            dispute.enforcedTimestamp = enforceBlock.timestamp;
+            dispute.lastUpdateTimestamp = enforceBlock.timestamp;
+            if (ctx.products && ctx.products[tokenIdToDispute]) {
+                ctx.products[tokenIdToDispute].disputeInfo.status = dispute.status;
+                if (nftReturnEnforced) {
+                    ctx.products[tokenIdToDispute].currentOwnerAddress = manufacturer.address.toLowerCase();
+                    ctx.products[tokenIdToDispute].status = "ReturnedToManufacturer_Dispute";
+                    // Add history entry for return
+                    if (!ctx.products[tokenIdToDispute].history) ctx.products[tokenIdToDispute].history = [];
+                    ctx.products[tokenIdToDispute].history.push({
+                        event: "NFTReturned_Dispute", actor: selectedArbitratorSigner.address.toLowerCase(),
+                        from: retailer.address.toLowerCase(), 
+                        to: manufacturer.address.toLowerCase(),
+                        disputeId: disputeId,
+                        timestamp: enforceBlock.timestamp,
+                        details: `NFT returned to Manufacturer due to dispute ${disputeId} resolution.`,
+                        txHash: "enforcement_tx"
+                    });
+                }
+                ctx.products[tokenIdToDispute].lastUpdateTimestamp = enforceBlock.timestamp;
             }
-        }
+            return ctx;
+        });
 
-        if (disputeConcludedEvent) {
-            // MODIFIED: Convert BigInt timestamp to Number for Date constructor
-            console.log(`      DisputeConcluded: DisputeID=${disputeConcludedEvent.args.disputeId}, WasEnforced=${disputeConcludedEvent.args.wasEnforced}, ConcludedBy=${disputeConcludedEvent.args.concludedBy}, Timestamp=${new Date(Number(disputeConcludedEvent.args.timestamp) * 1000).toISOString()}`);
-        } else {
-            console.warn("      WARN: Could not find DisputeConcluded event in receipt.");
-        }
-
-        console.log(`\n--- Dispute ID ${disputeId.toString()} fully processed and concluded. ---`);
-
+        console.log(`\n--- Dispute ID ${disputeId} fully processed and concluded. ---`);
     } else {
-        console.log(`\n  Skipping dispute resolution steps as the designated arbitrator (${designatedArbitrator.address}) was not selected. Actual selected: ${selectedArbitrator}`);
+        console.log("    Outcome does not require automated enforcement via this script.");
     }
-    console.log("\n--- 06: Dispute Resolution Scenario Complete ---");
+
+    console.log("\n--- 06: Dispute Resolution Scenario for Product01 Complete ---");
 }
 
 main()
     .then(() => process.exit(0))
     .catch((error) => {
-        console.error(error);
+        console.error("Script execution failed:", error);
         process.exit(1);
     });
 

@@ -1,0 +1,292 @@
+2025-05-22 18:09:48,316 - __main__ - WARNING - Potential .env file for connector not found at e:\NAM3\DO_AN_CHUYEN_NGANH\Federated Learning\FL_Model\connectors\..\..\w3storage-upload-script\ifps_qr.env. Creating a dummy one if needed by connector logic.
+2025-05-22 18:09:48,317 - __main__ - INFO - Starting Amoy testnet event retrieval test...
+2025-05-22 18:09:48,317 - __main__ - INFO - Using ABI path: e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:09:48,317 - __main__ - INFO - Using Contract Address: 0x88b7eb798735ce65eb282df165e01e30de8786e3
+2025-05-22 18:09:48,317 - __main__ - INFO - Explicitly using Amoy RPC URL: https://rpc-amoy.polygon.technology/
+2025-05-22 18:09:48,319 - __main__ - INFO - Test Node Address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:09:48,319 - blockchain_connector - INFO - Defaulting env_file_path to: e:\NAM3\DO_AN_CHUYEN_NGANH\w3storage-upload-script\ifps_qr.env
+2025-05-22 18:09:49,744 - blockchain_connector - INFO - Connected to blockchain at https://rpc-amoy.polygon.technology/
+2025-05-22 18:09:50,896 - blockchain_connector - INFO - Current block number: 21976848
+2025-05-22 18:09:50,898 - blockchain_connector - INFO - Loaded ABI from e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:09:50,913 - blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:09:50,913 - __main__ - INFO - BlockchainConnector instantiated. use_mock_data: False
+2025-05-22 18:09:51,280 - __main__ - INFO - Successfully connected to: https://rpc-amoy.polygon.technology/
+2025-05-22 18:09:51,280 - __main__ - INFO - Contract 'SupplyChainNFT' loaded at address: 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:09:51,280 - __main__ - INFO - Calling get_all_events_for_node for address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:09:52,019 - blockchain_connector - ERROR - Error using create_filter for Approval: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:09:56,243 - blockchain_connector - INFO - Retrieved 0 Approval events using eth_getLogs
+2025-05-22 18:09:57,755 - blockchain_connector - ERROR - Error using create_filter for Approval: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:00,771 - blockchain_connector - INFO - Retrieved 0 Approval events using eth_getLogs
+2025-05-22 18:10:01,506 - blockchain_connector - ERROR - Error using create_filter for Approval: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:05,118 - blockchain_connector - INFO - Retrieved 0 Approval events using eth_getLogs
+2025-05-22 18:10:06,976 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter
+2025-05-22 18:10:07,704 - blockchain_connector - ERROR - Error using create_filter for ApprovalForAll: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:12,573 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using eth_getLogs
+2025-05-22 18:10:13,309 - blockchain_connector - ERROR - Error using create_filter for ApprovalForAll: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:16,462 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using eth_getLogs
+2025-05-22 18:10:17,193 - blockchain_connector - ERROR - Error using create_filter for ArbitratorCandidateProposed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:19,253 - blockchain_connector - INFO - Retrieved 23 ArbitratorCandidateProposed events using eth_getLogs
+2025-05-22 18:10:19,991 - blockchain_connector - ERROR - Error using create_filter for ArbitratorCandidateProposed: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:23,853 - blockchain_connector - INFO - Retrieved 23 ArbitratorCandidateProposed events using eth_getLogs
+2025-05-22 18:10:23,853 - blockchain_connector - INFO - Found 23 unique 'ArbitratorCandidateProposed' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:10:24,580 - blockchain_connector - ERROR - Error using create_filter for ArbitratorSelected: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:27,595 - blockchain_connector - INFO - Retrieved 7 ArbitratorSelected events using eth_getLogs
+2025-05-22 18:10:27,595 - blockchain_connector - INFO - Found 7 unique 'ArbitratorSelected' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:10:30,608 - blockchain_connector - INFO - Retrieved 7 ArbitratorVoted events using create_filter
+2025-05-22 18:10:32,539 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter
+2025-05-22 18:10:32,539 - blockchain_connector - INFO - Found 7 unique 'ArbitratorVoted' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:10:33,264 - blockchain_connector - ERROR - Error using create_filter for BatchCommitted: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:35,131 - blockchain_connector - INFO - Retrieved 9 BatchCommitted events using eth_getLogs
+2025-05-22 18:10:35,860 - blockchain_connector - ERROR - Error using create_filter for BatchMetadataUpdate: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:38,023 - blockchain_connector - INFO - Retrieved 0 BatchMetadataUpdate events using eth_getLogs
+2025-05-22 18:10:40,305 - blockchain_connector - INFO - Retrieved 9 BatchProposed events using create_filter
+2025-05-22 18:10:41,031 - blockchain_connector - ERROR - Error using create_filter for BatchValidated: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:45,714 - blockchain_connector - INFO - Retrieved 21 BatchValidated events using eth_getLogs
+2025-05-22 18:10:46,442 - blockchain_connector - ERROR - Error using create_filter for CIDStored: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:49,129 - blockchain_connector - INFO - Retrieved 0 CIDStored events using eth_getLogs
+2025-05-22 18:10:49,862 - blockchain_connector - ERROR - Error using create_filter for CIDStored: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:53,952 - blockchain_connector - INFO - Retrieved 0 CIDStored events using eth_getLogs
+2025-05-22 18:10:54,675 - blockchain_connector - ERROR - Error using create_filter for CIDToHistoryStored: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:10:57,377 - blockchain_connector - INFO - Retrieved 78 CIDToHistoryStored events using eth_getLogs
+2025-05-22 18:10:57,377 - blockchain_connector - INFO - Found 78 unique 'CIDToHistoryStored' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:10:58,110 - blockchain_connector - ERROR - Error using create_filter for CollateralDepositedForPurchase: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:01,475 - blockchain_connector - INFO - Retrieved 9 CollateralDepositedForPurchase events using eth_getLogs
+2025-05-22 18:11:01,476 - blockchain_connector - INFO - Found 9 unique 'CollateralDepositedForPurchase' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:11:02,200 - blockchain_connector - ERROR - Error using create_filter for DirectSaleAndTransferCompleted: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:04,346 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using eth_getLogs
+2025-05-22 18:11:05,068 - blockchain_connector - ERROR - Error using create_filter for DirectSaleAndTransferCompleted: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:07,291 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using eth_getLogs
+2025-05-22 18:11:08,021 - blockchain_connector - ERROR - Error using create_filter for DirectSaleAndTransferCompleted: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:11,013 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using eth_getLogs
+2025-05-22 18:11:11,750 - blockchain_connector - ERROR - Error using create_filter for DisputeConcluded: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:13,751 - blockchain_connector - INFO - Retrieved 2 DisputeConcluded events using eth_getLogs
+2025-05-22 18:11:14,490 - blockchain_connector - ERROR - Error using create_filter for DisputeDecisionRecorded: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:21,377 - blockchain_connector - INFO - Retrieved 7 DisputeDecisionRecorded events using eth_getLogs
+2025-05-22 18:11:21,377 - blockchain_connector - INFO - Found 7 unique 'DisputeDecisionRecorded' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:11:22,121 - blockchain_connector - ERROR - Error using create_filter for DisputeInitiated: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:26,232 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using eth_getLogs
+2025-05-22 18:11:26,953 - blockchain_connector - ERROR - Error using create_filter for DisputeInitiated: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:30,276 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using eth_getLogs
+2025-05-22 18:11:31,004 - blockchain_connector - ERROR - Error using create_filter for DisputeOpened: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:34,554 - blockchain_connector - INFO - Retrieved 8 DisputeOpened events using eth_getLogs
+2025-05-22 18:11:34,555 - blockchain_connector - INFO - Found 8 unique 'DisputeOpened' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:11:35,283 - blockchain_connector - ERROR - Error using create_filter for FundsDeposited: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:38,004 - blockchain_connector - INFO - Retrieved 3 FundsDeposited events using eth_getLogs
+2025-05-22 18:11:38,004 - blockchain_connector - INFO - Found 3 unique 'FundsDeposited' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:11:38,739 - blockchain_connector - ERROR - Error using create_filter for InitialCIDStored: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:41,692 - blockchain_connector - INFO - Retrieved 9 InitialCIDStored events using eth_getLogs
+2025-05-22 18:11:41,692 - blockchain_connector - INFO - Found 9 unique 'InitialCIDStored' events relevant to node 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:11:42,425 - blockchain_connector - ERROR - Error using create_filter for MetadataUpdate: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:11:45,366 - blockchain_connector - INFO - Retrieved 0 MetadataUpdate events using eth_getLogs
+2025-05-22 18:11:46,105 - blockchain_connector - ERROR - Error using create_filter for NFTReturnEnforced: {'code': -32000, 'message': 'filter not found'}
+2025-05-22 18:32:34,874 - __main__ - WARNING - Potential .env file for connector not found at e:\NAM3\DO_AN_CHUYEN_NGANH\Federated Learning\FL_Model\connectors\..\..\w3storage-upload-script\ifps_qr.env. Creating a dummy one if needed by connector logic.
+2025-05-22 18:32:34,874 - __main__ - INFO - Starting Amoy testnet event retrieval test...
+2025-05-22 18:32:34,874 - __main__ - INFO - Using ABI path: e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:32:34,874 - __main__ - INFO - Using Contract Address: 0x88b7eb798735ce65eb282df165e01e30de8786e3
+2025-05-22 18:32:34,874 - __main__ - INFO - Explicitly using Amoy RPC URL: https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:32:34,874 - __main__ - INFO - Test Node Address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:32:34,874 - blockchain_connector - INFO - Defaulting env_file_path to: e:\NAM3\DO_AN_CHUYEN_NGANH\w3storage-upload-script\ifps_qr.env
+2025-05-22 18:32:36,094 - blockchain_connector - INFO - Connected to blockchain at https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:32:36,398 - blockchain_connector - INFO - Current block number: 21977491
+2025-05-22 18:32:36,398 - blockchain_connector - INFO - Loaded ABI from e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:32:36,403 - blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:32:36,403 - __main__ - INFO - BlockchainConnector instantiated. use_mock_data: False
+2025-05-22 18:32:36,998 - __main__ - INFO - Latest block number: 21977491
+2025-05-22 18:32:36,998 - __main__ - INFO - Successfully connected to: https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:32:36,998 - __main__ - INFO - Contract 'SupplyChainNFT' loaded at address: 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:32:36,998 - __main__ - INFO - Calling get_all_events_for_node for address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:32:36,998 - __main__ - INFO - Fetching events from block 21976491 to 21977491
+2025-05-22 18:32:37,605 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:38,208 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:38,799 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:39,395 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:39,987 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:40,571 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:41,152 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:41,743 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:42,334 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:42,923 - blockchain_connector - INFO - Retrieved 0 ArbitratorSelected events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:43,507 - blockchain_connector - INFO - Retrieved 0 ArbitratorSelected events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:44,093 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:44,673 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:45,256 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:45,846 - blockchain_connector - INFO - Retrieved 0 BatchCommitted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:46,430 - blockchain_connector - INFO - Retrieved 0 BatchMetadataUpdate events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:47,015 - blockchain_connector - INFO - Retrieved 0 BatchProposed events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:47,604 - blockchain_connector - INFO - Retrieved 0 BatchValidated events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:48,195 - blockchain_connector - INFO - Retrieved 0 CIDStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:48,778 - blockchain_connector - INFO - Retrieved 0 CIDStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:49,358 - blockchain_connector - INFO - Retrieved 0 CIDToHistoryStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:49,944 - blockchain_connector - INFO - Retrieved 0 CIDToHistoryStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:50,528 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:51,104 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:51,708 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:52,298 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:52,875 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:53,465 - blockchain_connector - INFO - Retrieved 0 DisputeConcluded events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:54,050 - blockchain_connector - INFO - Retrieved 0 DisputeDecisionRecorded events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:54,624 - blockchain_connector - INFO - Retrieved 0 DisputeDecisionRecorded events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:55,212 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:55,791 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:56,378 - blockchain_connector - INFO - Retrieved 0 DisputeOpened events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:56,957 - blockchain_connector - INFO - Retrieved 0 DisputeOpened events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:57,544 - blockchain_connector - INFO - Retrieved 0 FundsDeposited events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:58,134 - blockchain_connector - INFO - Retrieved 0 FundsDeposited events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:58,718 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:59,297 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events using create_filter (range 21976491-21977491)
+2025-05-22 18:32:59,887 - blockchain_connector - INFO - Retrieved 0 MetadataUpdate events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:00,474 - blockchain_connector - INFO - Retrieved 0 NFTReturnEnforced events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:01,061 - blockchain_connector - INFO - Retrieved 0 NFTReturnEnforced events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:01,647 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:02,229 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:02,812 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:03,410 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:04,000 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:04,579 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:05,159 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:05,749 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:06,327 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:06,916 - blockchain_connector - INFO - Retrieved 0 NodeVerified events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:07,504 - blockchain_connector - INFO - Retrieved 0 NodeVerified events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:08,094 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:08,688 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:09,270 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:09,853 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:10,438 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:11,023 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:11,608 - blockchain_connector - INFO - Retrieved 0 PaymentReleased events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:12,190 - blockchain_connector - INFO - Retrieved 0 PaymentReleased events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:12,776 - blockchain_connector - INFO - Retrieved 0 PaymentSuspended events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:13,359 - blockchain_connector - INFO - Retrieved 0 ProductDelisted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:13,940 - blockchain_connector - INFO - Retrieved 0 ProductDelisted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:14,525 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:15,110 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:15,694 - blockchain_connector - INFO - Retrieved 0 ProductMinted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:16,276 - blockchain_connector - INFO - Retrieved 0 ProductMinted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:16,861 - blockchain_connector - INFO - Retrieved 0 ProductPriceChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:17,445 - blockchain_connector - INFO - Retrieved 0 ProductPriceChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:18,029 - blockchain_connector - INFO - Retrieved 0 ProductTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:18,618 - blockchain_connector - INFO - Retrieved 0 ProductTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:19,201 - blockchain_connector - INFO - Retrieved 0 ProductTransferred events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:19,783 - blockchain_connector - INFO - Retrieved 0 PurchaseCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:20,364 - blockchain_connector - INFO - Retrieved 0 PurchaseCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:20,949 - blockchain_connector - INFO - Retrieved 0 PurchaseCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:21,537 - blockchain_connector - INFO - Retrieved 0 PurchaseInitiated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:22,123 - blockchain_connector - INFO - Retrieved 0 PurchaseInitiated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:22,705 - blockchain_connector - INFO - Retrieved 0 PurchaseInitiated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:23,295 - blockchain_connector - INFO - Retrieved 0 PurchaseStatusUpdated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:23,879 - blockchain_connector - INFO - Retrieved 0 PurchaseStatusUpdated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:24,462 - blockchain_connector - INFO - Retrieved 0 ReceiptConfirmed events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:25,065 - blockchain_connector - INFO - Retrieved 0 ReceiptConfirmed events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:25,663 - blockchain_connector - INFO - Retrieved 0 ReconciliationComplete events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:26,282 - blockchain_connector - INFO - Retrieved 0 RefundEnforced events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:26,872 - blockchain_connector - INFO - Retrieved 0 RefundEnforced events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:27,489 - blockchain_connector - INFO - Retrieved 0 RefundEnforced events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:28,073 - blockchain_connector - INFO - Retrieved 0 ReputationUpdated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:29,381 - blockchain_connector - INFO - Retrieved 0 ReputationUpdated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:29,969 - blockchain_connector - INFO - Retrieved 0 ReputationUpdated events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:31,282 - blockchain_connector - INFO - Retrieved 0 RoleAdminChanged events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:31,870 - blockchain_connector - INFO - Retrieved 0 RoleGranted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:32,462 - blockchain_connector - INFO - Retrieved 0 RoleGranted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:33,052 - blockchain_connector - INFO - Retrieved 0 RoleGranted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:33,641 - blockchain_connector - INFO - Retrieved 0 RoleRevoked events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:34,653 - blockchain_connector - INFO - Retrieved 0 RoleRevoked events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:35,240 - blockchain_connector - INFO - Retrieved 0 RoleRevoked events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:35,828 - blockchain_connector - INFO - Retrieved 0 Transfer events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:36,412 - blockchain_connector - INFO - Retrieved 0 Transfer events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:37,001 - blockchain_connector - INFO - Retrieved 0 Transfer events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:38,305 - blockchain_connector - INFO - Retrieved 0 TransportCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:38,897 - blockchain_connector - INFO - Retrieved 0 TransportCompleted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:39,494 - blockchain_connector - INFO - Retrieved 0 TransportStarted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:40,094 - blockchain_connector - INFO - Retrieved 0 TransportStarted events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:40,682 - blockchain_connector - INFO - Retrieved 0 TransporterIncentivePaid events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:41,266 - blockchain_connector - INFO - Retrieved 0 TransporterIncentivePaid events using create_filter (range 21976491-21977491)
+2025-05-22 18:33:41,266 - __main__ - INFO - Events retrieved for node 0x04351e7dF40d04B5E610c4aA033faCf435b98711:
+2025-05-22 18:33:41,271 - __main__ - INFO -   No events found for this node in the specified range.
+2025-05-22 18:33:41,271 - __main__ - INFO - Test script finished.
+2025-05-22 18:33:45,252 - __main__ - WARNING - Potential .env file for connector not found at e:\NAM3\DO_AN_CHUYEN_NGANH\Federated Learning\FL_Model\connectors\..\..\w3storage-upload-script\ifps_qr.env. Creating a dummy one if needed by connector logic.
+2025-05-22 18:33:45,252 - __main__ - INFO - Starting Amoy testnet event retrieval test...
+2025-05-22 18:33:45,252 - __main__ - INFO - Using ABI path: e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:33:45,252 - __main__ - INFO - Using Contract Address: 0x88b7eb798735ce65eb282df165e01e30de8786e3
+2025-05-22 18:33:45,252 - __main__ - INFO - Explicitly using Amoy RPC URL: https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:33:45,252 - __main__ - INFO - Test Node Address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:33:45,252 - blockchain_connector - INFO - Defaulting env_file_path to: e:\NAM3\DO_AN_CHUYEN_NGANH\w3storage-upload-script\ifps_qr.env
+2025-05-22 18:33:46,550 - blockchain_connector - INFO - Connected to blockchain at https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:33:46,849 - blockchain_connector - INFO - Current block number: 21977524
+2025-05-22 18:33:46,855 - blockchain_connector - INFO - Loaded ABI from e:\NAM3\DO_AN_CHUYEN_NGANH\SupplyChain_dapp\artifacts\contracts\SupplyChainNFT.sol\SupplyChainNFT.json
+2025-05-22 18:33:46,870 - blockchain_connector - INFO - Successfully loaded contract SupplyChainNFT at 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:33:46,870 - __main__ - INFO - BlockchainConnector instantiated. use_mock_data: False
+2025-05-22 18:33:47,897 - __main__ - INFO - Latest block number: 21977525
+2025-05-22 18:33:47,897 - __main__ - INFO - Successfully connected to: https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94
+2025-05-22 18:33:47,897 - __main__ - INFO - Contract 'SupplyChainNFT' loaded at address: 0x88B7EB798735cE65EB282Df165e01E30dE8786E3
+2025-05-22 18:33:47,899 - __main__ - INFO - Calling get_all_events_for_node for address: 0x04351e7dF40d04B5E610c4aA033faCf435b98711
+2025-05-22 18:33:47,899 - __main__ - INFO - Fetching events from block 21976525 to 21977525
+2025-05-22 18:33:49,473 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:50,084 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:50,696 - blockchain_connector - INFO - Retrieved 0 Approval events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:51,897 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:53,098 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:53,710 - blockchain_connector - INFO - Retrieved 0 ApprovalForAll events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:54,313 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:54,924 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:55,531 - blockchain_connector - INFO - Retrieved 0 ArbitratorCandidateProposed events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:56,132 - blockchain_connector - INFO - Retrieved 0 ArbitratorSelected events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:56,750 - blockchain_connector - INFO - Retrieved 0 ArbitratorSelected events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:57,366 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:57,968 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:58,583 - blockchain_connector - INFO - Retrieved 0 ArbitratorVoted events using create_filter (range 21976525-21977525)
+2025-05-22 18:33:59,770 - blockchain_connector - INFO - Retrieved 0 BatchCommitted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:00,375 - blockchain_connector - INFO - Retrieved 0 BatchMetadataUpdate events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:00,981 - blockchain_connector - INFO - Retrieved 0 BatchProposed events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:01,587 - blockchain_connector - INFO - Retrieved 0 BatchValidated events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:02,548 - blockchain_connector - INFO - Retrieved 0 CIDStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:03,194 - blockchain_connector - INFO - Retrieved 0 CIDStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:03,825 - blockchain_connector - INFO - Retrieved 0 CIDToHistoryStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:04,449 - blockchain_connector - INFO - Retrieved 0 CIDToHistoryStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:05,068 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:05,673 - blockchain_connector - INFO - Retrieved 0 CollateralDepositedForPurchase events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:07,006 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:11,582 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:12,186 - blockchain_connector - INFO - Retrieved 0 DirectSaleAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:12,800 - blockchain_connector - INFO - Retrieved 0 DisputeConcluded events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:13,405 - blockchain_connector - INFO - Retrieved 0 DisputeDecisionRecorded events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:14,755 - blockchain_connector - INFO - Retrieved 0 DisputeDecisionRecorded events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:15,361 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:16,559 - blockchain_connector - INFO - Retrieved 0 DisputeInitiated events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:17,164 - blockchain_connector - INFO - Retrieved 0 DisputeOpened events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:17,768 - blockchain_connector - INFO - Retrieved 0 DisputeOpened events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:18,374 - blockchain_connector - INFO - Retrieved 0 FundsDeposited events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:18,978 - blockchain_connector - INFO - Retrieved 0 FundsDeposited events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:19,585 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:20,189 - blockchain_connector - INFO - Retrieved 0 InitialCIDStored events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:20,795 - blockchain_connector - INFO - Retrieved 0 MetadataUpdate events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:21,400 - blockchain_connector - INFO - Retrieved 0 NFTReturnEnforced events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:22,948 - blockchain_connector - INFO - Retrieved 0 NFTReturnEnforced events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:23,552 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:24,170 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:24,770 - blockchain_connector - INFO - Retrieved 0 NodePenalized events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:25,371 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:25,977 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:26,575 - blockchain_connector - INFO - Retrieved 0 NodeRoleChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:27,176 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:27,786 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:28,385 - blockchain_connector - INFO - Retrieved 0 NodeTypeChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:28,982 - blockchain_connector - INFO - Retrieved 0 NodeVerified events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:29,586 - blockchain_connector - INFO - Retrieved 0 NodeVerified events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:30,187 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:30,787 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:31,385 - blockchain_connector - INFO - Retrieved 0 OwnershipTransferred events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:31,989 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:32,585 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:33,182 - blockchain_connector - INFO - Retrieved 0 PaymentAndTransferCompleted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:33,787 - blockchain_connector - INFO - Retrieved 0 PaymentReleased events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:34,392 - blockchain_connector - INFO - Retrieved 0 PaymentReleased events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:34,988 - blockchain_connector - INFO - Retrieved 0 PaymentSuspended events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:35,592 - blockchain_connector - INFO - Retrieved 0 ProductDelisted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:36,217 - blockchain_connector - INFO - Retrieved 0 ProductDelisted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:36,821 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:37,419 - blockchain_connector - INFO - Retrieved 0 ProductListedForSale events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:38,018 - blockchain_connector - INFO - Retrieved 0 ProductMinted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:38,619 - blockchain_connector - INFO - Retrieved 0 ProductMinted events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:39,224 - blockchain_connector - INFO - Retrieved 0 ProductPriceChanged events using create_filter (range 21976525-21977525)
+2025-05-22 18:34:39,828 - blockchain_connector - INFO - Retrieved 0 ProductPriceChanged events using create_filter (range 21976525-21977525)
