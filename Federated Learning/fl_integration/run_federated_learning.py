@@ -74,30 +74,7 @@ logger = logging.getLogger(__name__)
 tf.get_logger().setLevel('ERROR')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# Set TFF execution context for local simulation
-try:
-    # Try the new way for TFF 0.60.0+
-    context = tff.framework.get_context_stack().current
-    if not isinstance(context, tff.backends.native.ExecutionContext):
-        tff.framework.set_default_context(tff.backends.native.create_local_execution_context())
-    logger.info("TFF execution context (new method) configured or already set.")
-except AttributeError:
-    # Fallback for older TFF versions (pre-0.60.0)
-    try:
-        tff.backends.native.set_local_python_execution_context()
-        logger.info("TFF execution context (old method) set successfully.")
-    except Exception as e_old:
-        logger.warning(f"Could not set TFF execution context using old method: {e_old}")
-        # Fallback to a more generic context setting if available or log a warning
-        try:
-            if tff.framework.get_context_stack().current is None: # Check if a context is already set
-                 tff.framework.set_default_context(tff.backends.native.create_local_execution_context())
-                 logger.info("TFF default context set as a fallback.")
-            else:
-                 logger.info("TFF context was already set by other means.")
-        except Exception as e_fallback:
-            logger.error(f"Failed to set any TFF execution context: {e_fallback}")
-            logger.error("TFF functionality might be impaired. Please check your TFF installation and version.")
+print("[DEBUG] Script started.")
 
 def parse_args():
     """Parse command line arguments."""
@@ -123,7 +100,12 @@ def parse_args():
     parser.add_argument('--verbose', action='store_true',
                        help='Enable verbose logging')
     
-    return parser.parse_args()
+    args = parser.parse_args()
+    # Force input_data_file to demo_context.json if not set
+    if not args.input_data_file:
+        args.input_data_file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json'))
+    
+    return args
 
 def load_config(config_file: str = None) -> Dict[str, Any]:
     """Load configuration from file or use defaults."""
@@ -657,71 +639,61 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
         model_training_input_data = {}
         # Define all models that the system might handle
         all_system_models = { 
-            'sybil_detection': {'synthetic_func': generate_synthetic_sybil_data, 'min_normal': 50, 'min_full': 100},
-            'bribery_detection': {'synthetic_func': generate_synthetic_bribery_data, 'min_normal': 50, 'min_full': 100},
-            'node_behavior': {'synthetic_func': generate_synthetic_node_data, 'min_normal': 50, 'min_full': 100},
-            'batch_monitoring': {'synthetic_func': generate_synthetic_batch_data, 'min_normal': 50, 'min_full': 100},
-            'arbitrator_bias': {'synthetic_func': generate_synthetic_arbitrator_data, 'min_normal': 0, 'min_full': 100}, # Only in full mode
-            'dispute_risk': {'synthetic_func': generate_synthetic_dispute_data, 'min_normal': 0, 'min_full': 100}  # Only in full mode
+            'sybil_detection': {'min_normal': 30, 'min_full': 30},
+            'bribery_detection': {'min_normal': 30, 'min_full': 30},
+            'node_behavior': {'min_normal': 30, 'min_full': 30},
+            'batch_monitoring': {'min_normal': 30, 'min_full': 30},
+            'arbitrator_bias': {'min_normal': 0, 'min_full': 30}, # Only in full mode
+            'dispute_risk': {'min_normal': 0, 'min_full': 30}  # Only in full mode
         }
 
         for model_name, model_props in all_system_models.items():
             current_data_dict = {'features': [], 'labels': [], 'ids': []}
             df_from_processed = processed_data.get(model_name)
 
-            if df_from_processed is not None and not df_from_processed.empty:
-                logger.info(f"Processing real data for {model_name}...")
-                # Use a display name or mapping if model_name is different from what extract_features expects
-                # For now, assume model_name is directly usable.
-                extraction_result = extract_features_for_anomaly_detection(df_from_processed, model_name)
-                if extraction_result:
-                    features_df, ids_df = extraction_result
-                    current_data_dict['features'] = features_df.values.tolist()
-                    current_data_dict['ids'] = ids_df.to_dict(orient='records')
-                    
-                    # Handle labels carefully
-                    if 'label' in df_from_processed.columns:
-                        # Ensure labels align with features_df if rows were dropped/reordered.
-                        # This assumes extract_features_for_anomaly_detection preserves original index or order for alignment.
-                        # A safer way is to include labels in the features_df then split, or pass original df to get labels from.
-                        try:
-                            # If features_df retains original index from df_from_processed
-                            aligned_labels = df_from_processed.loc[features_df.index, 'label'].tolist()
-                            current_data_dict['labels'] = aligned_labels
-                        except KeyError: # If index alignment fails
-                             if len(df_from_processed['label']) == len(features_df):
-                                current_data_dict['labels'] = df_from_processed['label'].tolist()
-                             else:
-                                logger.warning(f"Label count mismatch for {model_name} after feature extraction. Using default labels (all 0s).")
-                                current_data_dict['labels'] = [0] * len(features_df)
+            # Chỉ sử dụng dữ liệu thực, không sinh synthetic data
+            if isinstance(df_from_processed, pd.DataFrame):
+                if not df_from_processed.empty:
+                    logger.info(f"Processing real data for {model_name}...")
+                    extraction_result = extract_features_for_anomaly_detection(df_from_processed, model_name)
+                    if extraction_result:
+                        features_df, ids_df = extraction_result
+                        current_data_dict['features'] = features_df.values.tolist()
+                        current_data_dict['ids'] = ids_df.to_dict(orient='records')
+                        if 'label' in df_from_processed.columns:
+                            try:
+                                aligned_labels = df_from_processed.loc[features_df.index, 'label'].tolist()
+                                current_data_dict['labels'] = aligned_labels
+                            except KeyError:
+                                if len(df_from_processed['label']) == len(features_df):
+                                    current_data_dict['labels'] = df_from_processed['label'].tolist()
+                                else:
+                                    logger.warning(f"Label count mismatch for {model_name} after feature extraction. Using default labels (all 0s).")
+                                    current_data_dict['labels'] = [0] * len(features_df)
+                        else:
+                            logger.warning(f"No 'label' column in processed data for {model_name}. Using default labels (all 0s).")
+                            current_data_dict['labels'] = [0] * len(features_df)
                     else:
-                        logger.warning(f"No 'label' column in processed data for {model_name}. Using default labels (all 0s).")
-                        current_data_dict['labels'] = [0] * len(features_df)
+                        logger.warning(f"Feature extraction failed for {model_name} from processed_data. Skipping model.")
+                        current_data_dict = {'features': [], 'labels': [], 'ids': []}
                 else:
-                    logger.warning(f"Feature extraction failed for {model_name} from processed_data. Will attempt synthetic data generation if applicable.")
-            
-            # Determine minimum samples required based on mode
-            min_samples = model_props['min_full'] if args.mode == 'full' else model_props['min_normal']
-            
-            # Generate synthetic data if real data is insufficient or model is full-mode only and no real data
-            if min_samples > 0 and (not current_data_dict['features'] or len(current_data_dict['features']) < min_samples):
-                if not current_data_dict['features']:
-                    logger.info(f"No real data for {model_name}. Generating synthetic data...")
-                else:
-                    logger.info(f"Insufficient real data for {model_name} ({len(current_data_dict['features'])} samples). Generating synthetic data to reach {min_samples} samples...")
-                
-                synthetic_data = model_props['synthetic_func'](min_samples) # This now returns ids
-                current_data_dict = synthetic_data # Replace with synthetic if generated
-            elif min_samples == 0 and args.mode != 'full': # Model not applicable in this mode without real data
-                 logger.info(f"Model {model_name} is not applicable in '{args.mode}' mode without real data and no minimum samples defined. Skipping.")
-                 current_data_dict = {'features': [], 'labels': [], 'ids': []}
+                    logger.warning(f"DataFrame for {model_name} is empty. Skipping model.")
+                    current_data_dict = {'features': [], 'labels': [], 'ids': []}
+            else:
+                logger.warning(f"Processed data for {model_name} is not a valid DataFrame. Skipping model.")
+                current_data_dict = {'features': [], 'labels': [], 'ids': []}
 
+            # Kiểm tra số lượng mẫu tối thiểu, nếu không đủ thì bỏ qua model
+            min_samples = model_props['min_full'] if args.mode == 'full' else model_props['min_normal']
+            if len(current_data_dict['features']) < min_samples:
+                logger.warning(f"Not enough real data for {model_name} (has {len(current_data_dict['features'])}, needs {min_samples}). Skipping model.")
+                current_data_dict = {'features': [], 'labels': [], 'ids': []}
 
             model_training_input_data[model_name] = current_data_dict
             if current_data_dict['features']:
-                 logger.info(f"Data prepared for {model_name}: {len(current_data_dict['features'])} samples.")
+                logger.info(f"Data prepared for {model_name}: {len(current_data_dict['features'])} samples.")
             else:
-                 logger.info(f"No data available for {model_name} after preparation.")
+                logger.info(f"No data available for {model_name} after preparation.")
 
         # Create client data splits for all model types based on models_config
         client_data = {'client_1': {}}
@@ -781,21 +753,17 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                 
                 # Create TFF model function
                 sample_batch = federated_datasets[0]
-                model_fn = create_tff_model_fn(model_name, input_shape, sample_batch)                # Define optimizer functions (corrected for TFF)
-                def client_optimizer_fn():
-                    return tff.learning.optimizers.build_sgdm(learning_rate=args.learning_rate)
-                
-                def server_optimizer_fn():
-                    return tff.learning.optimizers.build_sgdm(learning_rate=1.0)
-                
+                model_fn = create_tff_model_fn(model_name, input_shape, sample_batch)
+                client_optimizer_builder = tff.learning.optimizers.build_sgdm(learning_rate=args.learning_rate)
+                server_optimizer_builder = tff.learning.optimizers.build_sgdm(learning_rate=1.0)
                 # Train federated model
                 logger.info(f"Starting federated training for {model_name}...")
                 server_state, history = fl_orchestrator.train_federated_model(
                     federated_data=federated_datasets,
                     model_fn=model_fn,
                     num_rounds=args.num_rounds,
-                    client_optimizer_fn=client_optimizer_fn,
-                    server_optimizer_fn=server_optimizer_fn
+                    client_optimizer_fn=client_optimizer_builder,
+                    server_optimizer_fn=server_optimizer_builder
                 )
                 
                 if server_state is not None:
@@ -814,20 +782,32 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                         trained_model = create_dispute_risk_model(input_shape, compile_model=True)
                     
                     try:
-                        model_weights = server_state.model
-                        # Ensure model_weights is not None and has trainable attribute
-                        if model_weights and hasattr(model_weights, 'trainable'):
-                            trained_model.set_weights([w.numpy() for w in model_weights.trainable])
-                            logger.info(f"Successfully transferred weights to {model_name} model")
+                        # Sửa: lấy đúng trọng số đã huấn luyện từ server_state
+                        model_weights = None
+                        if hasattr(server_state, 'global_model_weights'):
+                            model_weights = server_state.global_model_weights
+                        elif hasattr(server_state, 'get_model_weights'):
+                            model_weights = server_state.get_model_weights()
+                        elif hasattr(server_state, 'model'):
+                            model_weights = server_state.model
+                        if model_weights is not None:
+                            # Tùy thuộc vào kiểu model_weights, chuyển đổi về list numpy
+                            if hasattr(model_weights, 'trainable'):
+                                trained_model.set_weights([w.numpy() for w in model_weights.trainable])
+                            elif hasattr(model_weights, 'numpy'):
+                                trained_model.set_weights([w.numpy() for w in model_weights])
+                            elif isinstance(model_weights, list):
+                                trained_model.set_weights([np.array(w) for w in model_weights])
+                            else:
+                                logger.warning(f"Unknown model_weights type for {model_name}, cannot set weights.")
+                            logger.info(f"Successfully transferred trained weights to {model_name} model")
                         else:
-                            logger.warning(f"Could not extract weights for {model_name} from server_state. Model weights or trainable attribute missing.")
-                            # Fallback: model is compiled but uses initial weights.
+                            logger.warning(f"Could not extract trained weights for {model_name} from server_state.")
                     except Exception as e:
                         logger.warning(f"Could not set weights for {model_name}: {str(e)}. Using compiled model with initial weights.")
                     
                     global_models[model_name] = trained_model
                     training_history[model_name] = history # history is a list of dicts
-
                     # Log training metrics
                     logger.info(f"Training metrics for {model_name}:")
                     if isinstance(history, list) and history:
@@ -837,54 +817,25 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                                 for metric_name, metric_value in metrics.items():
                                     log_line += f" {metric_name}: {metric_value:.4f} " if isinstance(metric_value, float) else f" {metric_name}: {metric_value} "
                             else:
+                                logger.info(f"  Round {round_num + 1}: {metrics}")
                                 log_line += f" Metrics: {str(metrics)}" # Fallback if metrics is not a dict
                             logger.info(log_line.strip())
                     elif history: # If history is not a list but has content (e.g. a single dict)
                         logger.info(f"  History: {str(history)}")
                     else:
                         logger.info("  No detailed training history available or history is empty.")
-                    
                     # Save model
                     model_repository.save_model(trained_model, model_name, 'latest')
                     logger.info(f"Saved {model_name} model")
-                    
                 else:
                     logger.error(f"Training failed for {model_name}")
-                    # Create fallback model
-                    if model_name == 'sybil_detection':
-                        fallback_model = create_sybil_detection_model(input_shape, compile_model=True)
-                    elif model_name == 'bribery_detection':
-                        fallback_model = create_bribery_detection_model(input_shape, compile_model=True)
-                    elif model_name == 'batch_monitoring':
-                        fallback_model = create_batch_monitoring_model(input_shape, compile_model=True)
-                    elif model_name == 'node_behavior':
-                        fallback_model = create_node_behavior_model(input_shape, compile_model=True)
-                    elif model_name == 'arbitrator_bias':
-                        fallback_model = create_arbitrator_bias_model(input_shape, compile_model=True)
-                    elif model_name == 'dispute_risk':
-                        fallback_model = create_dispute_risk_model(input_shape, compile_model=True)
-                    
-                    global_models[model_name] = fallback_model
+                    # Không tạo fallback model nữa, chỉ lưu lại trạng thái lỗi.
+                    global_models[model_name] = None
                     training_history[model_name] = {}
-            
             except Exception as e:
                 logger.error(f"Error training {model_name}: {str(e)}")
                 logger.error(traceback.format_exc())
-                # Create fallback model
-                if model_name == 'sybil_detection':
-                    fallback_model = create_sybil_detection_model(input_shape, compile_model=True)
-                elif model_name == 'bribery_detection':
-                    fallback_model = create_bribery_detection_model(input_shape, compile_model=True)
-                elif model_name == 'batch_monitoring':
-                    fallback_model = create_batch_monitoring_model(input_shape, compile_model=True)
-                elif model_name == 'node_behavior':
-                    fallback_model = create_node_behavior_model(input_shape, compile_model=True)
-                elif model_name == 'arbitrator_bias':
-                    fallback_model = create_arbitrator_bias_model(input_shape, compile_model=True)
-                elif model_name == 'dispute_risk':
-                    fallback_model = create_dispute_risk_model(input_shape, compile_model=True)
-                
-                global_models[model_name] = fallback_model
+                global_models[model_name] = None
                 training_history[model_name] = {}
 
         monitoring.stop_timer(training_timer)
@@ -929,32 +880,23 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                     logger.info(f"Saved {model_name} model results to {results_path}")
                 except Exception as e:
                     logger.warning(f"Could not save {model_name} model results: {str(e)}")
-                
                 # Create anomaly list based on predictions threshold
                 anomalies = []
                 threshold = 0.7  # Anomaly threshold (can be configured)
                 for i, pred in enumerate(predictions):
                     if pred[0] > threshold:
-                        anomaly_record = {
-                            "index": i,
-                            "prediction_score": float(pred[0]),
-                            "model_type": model_name,
-                            "timestamp": datetime.now().isoformat(),
-                            "severity": "high" if pred[0] > 0.9 else "medium"
+                        anomaly = {
+                            'model': model_name,
+                            'index': i,
+                            'score': float(pred[0]),
+                            'id_info': ids_for_correlation[i] if i < len(ids_for_correlation) else {},
                         }
-                        # Add ID information for correlation
-                        if i < len(ids_for_correlation) and isinstance(ids_for_correlation[i], dict):
-                            anomaly_record.update(ids_for_correlation[i])
-                        else:
-                            logger.warning(f"Missing or invalid ID data for anomaly index {i} in model {model_name}.")
-                        
-                        anomalies.append(anomaly_record)
-                
+                        anomalies.append(anomaly)
                 all_anomalies[model_name] = anomalies
-                logger.info(f"Detected {len(anomalies)} anomalies using {model_name} model")
-                
+
+                logger.info(f"Detected {len(anomalies)} anomalies for {model_name}.")
             except Exception as e:
-                logger.error(f"Error in anomaly detection for {model_name}: {str(e)}")
+                logger.error(f"Error during anomaly detection for {model_name}: {str(e)}")
                 logger.error(traceback.format_exc())
                 all_anomalies[model_name] = []
 
@@ -979,19 +921,19 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                     response = response_engine.respond_to_detection(anomaly)
                     responses.append(response)
                 except Exception as e:
-                    logger.error(f"Error generating response for anomaly: {str(e)}")
+                    logger.warning(f"Error generating response for anomaly: {str(e)}")
         elif hasattr(response_engine, 'generate_response'):
             for anomaly in total_anomalies:
                 try:
                     response = response_engine.generate_response(anomaly)
                     responses.append(response)
                 except Exception as e:
-                    logger.error(f"Error generating response for anomaly: {str(e)}")
+                    logger.warning(f"Error generating response for anomaly: {str(e)}")
         elif hasattr(response_engine, 'generate_responses'):
             try:
                 responses = response_engine.generate_responses(total_anomalies)
             except Exception as e:
-                logger.error(f"Error generating responses: {str(e)}")
+                logger.warning(f"Error generating responses: {str(e)}")
         else:
             logger.warning("ResponseEngine does not have respond_to_detection, generate_response or generate_responses method")
             responses = [{"message": "Default response - anomaly detected", "severity": "medium"} for _ in total_anomalies]
@@ -1026,190 +968,58 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
             }
         }
         
+        # Save results
+        # Save anomalies
+        anomalies_path = os.path.join(dirs['results_dir'], 'anomalies_detected.json')
+        try:
+            with open(anomalies_path, 'w') as f:
+                json.dump(to_serializable(all_anomalies), f, indent=2)
+            logger.info(f"Anomalies saved to {anomalies_path}")
+        except Exception as e:
+            print(f"[DEBUG][ERROR] Failed to save anomalies: {e}")
+            logger.error(f"Failed to save anomalies: {e}")
+        # Save responses
+        responses_path = os.path.join(dirs['results_dir'], 'responses.json')
+        try:
+            with open(responses_path, 'w') as f:
+                json.dump(to_serializable(responses), f, indent=2)
+            logger.info(f"Responses saved to {responses_path}")
+        except Exception as e:
+            print(f"[DEBUG][ERROR] Failed to save responses: {e}")
+            logger.error(f"Failed to save responses: {e}")
         # Save summary
         summary_path = os.path.join(dirs['results_dir'], 'execution_summary.json')
         try:
-            # Convert non-serializable items in training_history (e.g., TFF objects)
-            serializable_training_history = {}
-            for model_name, history_list in training_history.items():
-                serializable_training_history[model_name] = []
-                if isinstance(history_list, list):
-                    for round_metrics in history_list:
-                        if isinstance(round_metrics, dict):
-                             # Convert TFF/TF tensors to native Python types if they exist
-                            serializable_metrics = {k: (v.numpy().tolist() if hasattr(v, 'numpy') else v) for k, v in round_metrics.items()}
-                            serializable_training_history[model_name].append(serializable_metrics)
-                        else: # if metrics is not a dict (e.g. a string or other type)
-                            serializable_training_history[model_name].append(str(round_metrics)) 
-                else: # if history is not a list (e.g. a single dict or other type)
-                     serializable_training_history[model_name] = str(history_list)
-
-
-            summary["training_summary"]["training_history"] = serializable_training_history
-
             with open(summary_path, 'w') as f:
-                json.dump(summary, f, indent=2)
+                json.dump(to_serializable(summary), f, indent=2)
             logger.info(f"Execution summary saved to {summary_path}")
+            # Also save a human-readable summary
+            summary_txt_path = os.path.join(dirs['results_dir'], 'summary.txt')
+            with open(summary_txt_path, 'w') as f:
+                f.write(f"Federated Learning Execution Summary\n")
+                f.write(f"Timestamp: {summary['timestamp']}\n")
+                f.write(f"Mode: {summary['mode']}\n\n")
+                f.write(f"Models Trained: {', '.join(summary['training_summary']['models_trained'])}\n")
+                f.write(f"Total Anomalies Detected: {summary['detection_summary']['total_anomalies']}\n")
+                f.write(f"Anomalies by Model: {summary['detection_summary']['anomalies_by_model']}\n")
+                f.write(f"Total Responses: {summary['response_summary']['total_responses']}\n")
+                f.write(f"Blockchain Blocks Fetched: {summary['blockchain_monitoring_summary']['blocks_fetched']}\n")
+                f.write(f"Total Transactions Monitored: {summary['blockchain_monitoring_summary']['total_transactions_monitored']}\n")
+                f.write(f"Blockchain Data File: {summary['blockchain_monitoring_summary']['data_file']}\n")
+            logger.info(f"Human-readable summary saved to {summary_txt_path}")
         except Exception as e:
-            logger.error(f"Failed to save summary: {str(e)}")
-            logger.error(traceback.format_exc()) # Log full traceback for summary saving error
-
-        
-        # Save detailed results
-        detailed_results = {
-            "anomalies": all_anomalies,
-            "responses": responses,
-            "blockchain_events_from_input": fl_input_data.get('blockchain_events', [])
-        }
-        
-        results_path = os.path.join(dirs['results_dir'], 'detailed_results.json')
-        try:
-            with open(results_path, 'w') as f:
-                json.dump(detailed_results, f, indent=2)
-            logger.info(f"Detailed results saved to {results_path}")
-        except Exception as e:
-            logger.error(f"Failed to save detailed results: {str(e)}")
-        
-        # Save blockchain events table (from input data)
-        blockchain_events_input = fl_input_data.get('blockchain_events', [])
-        if blockchain_events_input:
-            events_table_path = os.path.join(dirs['results_dir'], 'blockchain_events_table_from_input.txt')
-            format_blockchain_events_table(blockchain_events_input, events_table_path) # Assuming format_blockchain_events_table exists
-        
-        # Log final status
-        monitoring.log_event(
-            component="main",
-            event_type="system_complete",
-            message="Federated Learning system completed successfully",
-            details={
-                "models_trained": len(global_models),
-                "anomalies_detected": len(total_anomalies),
-                "responses_generated": len(responses)
-            }
-        )
-        
-        logger.info("="*60)
-        logger.info("FL INTEGRATION SYSTEM - EXECUTION COMPLETED")
-        logger.info("="*60)
-        logger.info(f"Mode: {args.mode}")
-        logger.info(f"Models trained: {len(global_models)}")
-        logger.info(f"Total anomalies detected: {len(total_anomalies)}")
-        logger.info(f"Responses generated: {len(responses)}")
-        logger.info(f"Results saved to: {dirs['results_dir']}")
-        logger.info("="*60)
-        
-        # --- Overall System Assessment ---
-        print_section_header("Overall System Assessment")
-        
-        final_report_data = {
-            "assessment_timestamp": datetime.now().isoformat(),
-            "execution_mode": args.mode,
-            "models_assessed": list(all_anomalies.keys()),
-            "summary_by_model": [],
-            "correlated_entities": [],
-            "detailed_anomalies": all_anomalies # Includes all original anomaly details
-        }
-        
-        any_anomalies_found_overall = False
-        assessment_summary_points = []
-
-        for model_name, anomalies_list in all_anomalies.items():
-            count = len(anomalies_list)
-            if count > 0:
-                any_anomalies_found_overall = True
-                status = f"Detected {count} anomalies."
-                final_report_data["summary_by_model"].append({
-                    "model": model_name, "status": "anomalies_detected", "count": count
-                })
-            else:
-                status = "No anomalies detected."
-                final_report_data["summary_by_model"].append({
-                    "model": model_name, "status": "no_anomalies", "count": 0
-                })
-            assessment_summary_points.append(f"- {model_name}: {status}")
-
-        if any_anomalies_found_overall:
-            print_highlight("Potential security threats detected in the system. Review individual model anomaly reports and the 'fl_anomaly_report.json'.", "CRITICAL")
-            print("Summary of findings:")
-            for summary_line in assessment_summary_points:
-                print(summary_line)
-            
-            print_section_header("Cross-Model Anomaly Correlation")
-            anomalous_entities = {}  # Structure: {entity_type: {entity_id: [model_names]}}
-            
-            id_preference_order = ['dispute_id', 'arbitrator_id', 'batch_id', 'transaction_id', 'validator_id', 'node_id', 'actor_id', 'item_id']
-
-            for model_name, anomalies_list in all_anomalies.items():
-                if anomalies_list:
-                    for anomaly_record in anomalies_list:
-                        if not isinstance(anomaly_record, dict):
-                            continue
-
-                        correlated_entity_type = None
-                        correlated_entity_id = None
-
-                        for id_key in id_preference_order:
-                            if id_key in anomaly_record and anomaly_record[id_key] is not None:
-                                correlated_entity_type = id_key
-                                correlated_entity_id = str(anomaly_record[id_key]) # Ensure ID is string for consistency
-                                break 
-                        
-                        if correlated_entity_type and correlated_entity_id:
-                            if correlated_entity_type not in anomalous_entities:
-                                anomalous_entities[correlated_entity_type] = {}
-                            if correlated_entity_id not in anomalous_entities[correlated_entity_type]:
-                                anomalous_entities[correlated_entity_type][correlated_entity_id] = []
-                            
-                            if model_name not in anomalous_entities[correlated_entity_type][correlated_entity_id]:
-                                anomalous_entities[correlated_entity_type][correlated_entity_id].append(model_name)
-
-            correlated_findings_count = 0
-            if anomalous_entities:
-                for entity_type, entities in anomalous_entities.items():
-                    for entity_id, models_flagged in entities.items():
-                        if len(models_flagged) > 1:
-                            correlation_info = {
-                                "entity_type": entity_type,
-                                "entity_id": entity_id,
-                                "flagged_by_models": models_flagged,
-                                "correlation_count": len(models_flagged)
-                            }
-                            final_report_data["correlated_entities"].append(correlation_info)
-                            print_highlight(f"Entity {entity_type} '{entity_id}' flagged by multiple models: {', '.join(models_flagged)}", "WARNING")
-                            correlated_findings_count += 1
-                
-                if correlated_findings_count == 0:
-                    print("No single entity flagged by more than one model based on common IDs.")
-            else:
-                print("Could not perform cross-model correlation (no common IDs found in anomaly details or no anomalies with parsable details).")
-            
-            if correlated_findings_count > 0:
-                 print_highlight(f"Found {correlated_findings_count} instances of cross-model correlated anomalies.", "INFO")
-
-
-        else:
-            print_highlight("No anomalies detected by any active model. System appears normal based on current analysis.", "SUCCESS")
-
-        # Save the final anomaly report
-        report_path = os.path.join(dirs['results_dir'], 'fl_anomaly_report.json')
-        try:
-            with open(report_path, 'w') as f:
-                json.dump(final_report_data, f, indent=4)
-            logger.info(f"Comprehensive anomaly report saved to {report_path}")
-            print_highlight(f"Comprehensive anomaly report saved to {report_path}", "SUCCESS")
-        except Exception as e:
-            logger.error(f"Failed to save comprehensive anomaly report: {str(e)}")
-            print_highlight(f"Failed to save comprehensive anomaly report: {str(e)}", "ERROR")
-
+            print(f"[DEBUG][ERROR] Failed to save summary: {e}")
+            logger.error(f"Failed to save summary: {e}")
     except FileNotFoundError as fnf_error:
-        logger.error(f"File not found: {fnf_error}")
+        print(f"[DEBUG][FileNotFoundError] {fnf_error}")
+        logger.error(f"FileNotFoundError: {fnf_error}")
     except Exception as e:
-        logger.error(f"An error occurred during the FL process: {e}")
-        logger.error(traceback.format_exc())
+        print(f"[DEBUG][Exception] {e}")
+        import traceback
+        traceback.print_exc()
+        logger.error(f"Exception: {e}")
     finally:
-        # Final cleanup or saving of state if needed
-        logger.info("FL process completed with final state.")
-        print_highlight("FL process completed. Check logs for details.", "SUCCESS")
+        print("[DEBUG] run_federated_learning finished.")
 
 def connect_and_fetch_blockchain_data(rpc_url: str, num_blocks_to_fetch: int, output_dir: str) -> List[Dict[str, Any]]:
     """
@@ -1266,4 +1076,28 @@ def connect_and_fetch_blockchain_data(rpc_url: str, num_blocks_to_fetch: int, ou
 # The if __name__ == \"__main__\": block should be outside this function.
 
 def run_individual_fl_script(script_name, data_path, output_path):
-# ...existing code...
+    # TODO: Implement the function logic here
+    pass
+
+def to_serializable(obj):
+    """Recursively convert numpy types to native Python types for JSON serialization."""
+    if isinstance(obj, dict):
+        return {to_serializable(k): to_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [to_serializable(i) for i in obj]
+    elif isinstance(obj, tuple):
+        return tuple(to_serializable(i) for i in obj)
+    elif isinstance(obj, np.generic):
+        return obj.item()
+    elif isinstance(obj, (np.ndarray,)):
+        return obj.tolist()
+    else:
+        return obj
+
+if __name__ == "__main__":
+    print("[DEBUG] Main started.")
+    args = parse_args()
+    config = load_config(args.config_file)
+    dirs = setup_directories(args)
+    run_federated_learning(args, dirs, config)
+    print("[DEBUG] Main finished.")

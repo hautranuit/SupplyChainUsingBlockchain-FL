@@ -55,253 +55,180 @@ class DataProcessor:
     def preprocess_data(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Preprocess real data from demo_context.json for federated learning models.
-        
-        Args:
-            input_data: Data from demo_context.json containing nodes, products, batches, disputes
-            
-        Returns:
-            Preprocessed data ready for FL training with format:
-            {
-                'sybil_detection': {'features': [...], 'labels': [...]},
-                'batch_monitoring': {'features': [...], 'labels': [...]},
-                'node_behavior': {'features': [...], 'labels': [...]}
-            }
+        Strictly validate all records, drop malformed or suspicious ones, and do not use synthetic data.
+        Enforce min_samples=30 only on real, validated data. Log dropped records for review.
         """
-        logger.info("Starting data preprocessing for FL models using real demo_context.json data")
-        
+        logger.info("Starting data preprocessing for FL models using real demo_context.json data (strict mode)")
+
         def safe_float(value, default=0.0):
-            """Safely convert value to float, handling None values"""
             if value is None:
                 return default
             try:
                 return float(value)
             except (ValueError, TypeError):
                 return default
-        
+
         def safe_int(value, default=0):
-            """Safely convert value to int, handling None values"""
             if value is None:
                 return default
             try:
                 return int(value)
             except (ValueError, TypeError):
                 return default
-        
+
+        def is_valid_interaction(inter):
+            # Must have type and timestamp, and timestamp must be int
+            if not isinstance(inter, dict):
+                return False
+            if 'type' not in inter or 'timestamp' not in inter:
+                return False
+            if not isinstance(inter['type'], str) or not isinstance(inter['timestamp'], int):
+                return False
+            # Optionally, add more checks for known types/fields
+            return True
+
         try:
-            # Extract real data from demo_context.json structure
             nodes_data = input_data.get("nodes", {})
             products_data = input_data.get("products", {})
             batches_data = input_data.get("batches", {})
             disputes_data = input_data.get("disputes", {})
-            
+
             logger.info(f"Real data summary: {len(nodes_data)} nodes, {len(products_data)} products, {len(batches_data)} batches, {len(disputes_data)} disputes")
-            
-            # Prepare data for each FL model
+
             processed_data = {
                 'sybil_detection': {'features': [], 'labels': []},
                 'batch_monitoring': {'features': [], 'labels': []},
                 'node_behavior': {'features': [], 'labels': []}
             }
-            
-            # Process Sybil Detection data from real node interactions
+            dropped_interactions = 0
+            dropped_nodes = 0
+            # --- Sybil Detection ---
             if nodes_data:
-                logger.info("Extracting features for Sybil detection from real node data")
+                logger.info("Extracting features for Sybil detection from real node data (strict)")
                 for node_address, node_info in nodes_data.items():
                     interactions = node_info.get('interactions', [])
-                    
-                    # Count different types of interactions
+                    # Strictly filter interactions
+                    valid_interactions = [i for i in interactions if is_valid_interaction(i)]
+                    if len(valid_interactions) < 2:
+                        dropped_nodes += 1
+                        continue
+                    # Count types
                     interaction_types = {}
-                    for interaction in interactions:
-                        interaction_type = interaction.get('type', 'Unknown')
-                        interaction_types[interaction_type] = interaction_types.get(interaction_type, 0) + 1
-                    
-                    # Calculate suspicious behavior indicators
+                    for interaction in valid_interactions:
+                        t = interaction.get('type', 'Unknown')
+                        interaction_types[t] = interaction_types.get(t, 0) + 1
                     vote_actions = interaction_types.get('VoteBatch', 0) + interaction_types.get('VoteForArbitrator', 0)
                     transfer_actions = interaction_types.get('TransferNFT', 0) + interaction_types.get('TransferNFTViaBatch', 0)
                     receive_actions = interaction_types.get('ReceiveNFT', 0) + interaction_types.get('ReceiveNFTViaBatch', 0)
-                    
-                    # Features for sybil detection
                     features = [
-                        safe_float(node_info.get('currentReputation', 0)) / 100.0,  # Normalized
-                        safe_float(node_info.get('initialReputation', 0)) / 100.0,  # Normalized
+                        safe_float(node_info.get('currentReputation', 0)) / 100.0,
+                        safe_float(node_info.get('initialReputation', 0)) / 100.0,
                         1.0 if node_info.get('isVerified', False) else 0.0,
-                        safe_float(len(interactions)) / 20.0,  # Normalized interaction count
-                        safe_float(vote_actions) / 5.0,  # Normalized vote count
-                        safe_float(transfer_actions + receive_actions) / 10.0,  # Normalized transfer activity
+                        safe_float(len(valid_interactions)) / 20.0,
+                        safe_float(vote_actions) / 5.0,
+                        safe_float(transfer_actions + receive_actions) / 10.0,
                     ]
-                    
-                    # Sybil detection: Mark nodes with suspicious patterns
-                    # Very low reputation + high activity could indicate sybil
                     current_rep = node_info.get('currentReputation', 100)
-                    is_sybil = 1.0 if (current_rep < 50 and len(interactions) > 5) else 0.0
-                    
+                    is_sybil = 1.0 if (current_rep < 50 and len(valid_interactions) > 5) else 0.0
                     processed_data['sybil_detection']['features'].append(features)
                     processed_data['sybil_detection']['labels'].append(is_sybil)
-            
-            # Process Batch Monitoring data from real batch information
+            # --- Batch Monitoring ---
             if batches_data:
-                logger.info("Extracting features for Batch monitoring from real batch data")
+                logger.info("Extracting features for Batch monitoring from real batch data (strict)")
                 for batch_id, batch_info in batches_data.items():
                     transactions = batch_info.get('transactions', [])
                     votes = batch_info.get('votes', {})
-                    
-                    # Calculate batch health metrics
                     total_votes = len(votes)
                     positive_votes = sum(1 for vote_info in votes.values() if vote_info.get('vote', False))
                     approval_rate = positive_votes / total_votes if total_votes > 0 else 0.0
-                    
-                    # Time analysis
                     propose_time = safe_int(batch_info.get('proposeTimestamp', 0))
                     commit_time = safe_int(batch_info.get('commitTimestamp', propose_time))
                     processing_duration = commit_time - propose_time if commit_time > propose_time else 0
-                    
-                    # Features for batch monitoring
                     features = [
-                        safe_float(len(transactions)) / 5.0,  # Normalized transaction count
-                        safe_float(total_votes) / 5.0,  # Normalized vote count
-                        safe_float(approval_rate),  # Vote approval rate
-                        safe_float(processing_duration) / 3600.0,  # Processing time in hours
-                        1.0 if batch_info.get('status') == 'Committed' else 0.0,  # Commitment status
-                        safe_float(len(batch_info.get('selectedValidators', []))) / 5.0,  # Validator count
+                        safe_float(len(transactions)) / 5.0,
+                        safe_float(total_votes) / 5.0,
+                        safe_float(approval_rate),
+                        safe_float(processing_duration) / 3600.0,
+                        1.0 if batch_info.get('status') == 'Committed' else 0.0,
+                        safe_float(len(batch_info.get('selectedValidators', []))) / 5.0,
                     ]
-                    
-                    # Anomaly detection: batches with low approval or long processing time
                     has_anomaly = 1.0 if (approval_rate < 0.6 or processing_duration > 1800) else 0.0
-                    
                     processed_data['batch_monitoring']['features'].append(features)
                     processed_data['batch_monitoring']['labels'].append(has_anomaly)
-            
-            # Process Node Behavior data from interaction patterns
+            # --- Node Behavior ---
             if nodes_data:
-                logger.info("Extracting features for Node behavior analysis from real interaction patterns")
+                logger.info("Extracting features for Node behavior analysis from real interaction patterns (strict)")
                 for node_address, node_info in nodes_data.items():
                     interactions = node_info.get('interactions', [])
-                    if len(interactions) >= 2:  # Need at least 2 interactions for pattern analysis
-                        
-                        # Analyze interaction timing patterns
-                        timestamps = [safe_int(inter.get('timestamp', 0)) for inter in interactions]
-                        timestamps.sort()
-                        
-                        # Calculate timing metrics
-                        time_intervals = []
-                        for i in range(1, len(timestamps)):
-                            interval = timestamps[i] - timestamps[i-1]
-                            time_intervals.append(interval)
-                        
-                        avg_interval = sum(time_intervals) / len(time_intervals) if time_intervals else 0
-                        min_interval = min(time_intervals) if time_intervals else 0
-                        
-                        # Count interaction types
-                        interaction_types = set(inter.get('type', '') for inter in interactions)
-                        dispute_actions = sum(1 for inter in interactions if 'Dispute' in inter.get('type', ''))
-                        
-                        # Features for behavior analysis
-                        features = [
-                            safe_float(len(interactions)) / 20.0,  # Normalized interaction count
-                            safe_float(len(interaction_types)) / 10.0,  # Interaction diversity
-                            safe_float(avg_interval) / 3600.0,  # Average time between actions (hours)
-                            safe_float(min_interval) / 60.0,  # Minimum time between actions (minutes)
-                            safe_float(dispute_actions) / 3.0,  # Normalized dispute involvement
-                            safe_float(node_info.get('currentReputation', 0)) / 100.0,  # Reputation
-                        ]
-                        
-                        # Suspicious behavior: too frequent actions or too many disputes
-                        is_suspicious = 1.0 if (min_interval < 30 or dispute_actions > 1) else 0.0
-                        
-                        processed_data['node_behavior']['features'].append(features)
-                        processed_data['node_behavior']['labels'].append(is_suspicious)
-            
-            # Process disputes for additional anomaly detection data
+                    valid_interactions = [i for i in interactions if is_valid_interaction(i)]
+                    if len(valid_interactions) < 2:
+                        dropped_nodes += 1
+                        continue
+                    timestamps = [safe_int(inter.get('timestamp', 0)) for inter in valid_interactions]
+                    timestamps.sort()
+                    time_intervals = [timestamps[i] - timestamps[i-1] for i in range(1, len(timestamps))]
+                    avg_interval = sum(time_intervals) / len(time_intervals) if time_intervals else 0
+                    min_interval = min(time_intervals) if time_intervals else 0
+                    interaction_types = set(inter.get('type', '') for inter in valid_interactions)
+                    dispute_actions = sum(1 for inter in valid_interactions if 'Dispute' in inter.get('type', ''))
+                    features = [
+                        safe_float(len(valid_interactions)) / 20.0,
+                        safe_float(len(interaction_types)) / 10.0,
+                        safe_float(avg_interval) / 3600.0,
+                        safe_float(min_interval) / 60.0,
+                        safe_float(dispute_actions) / 3.0,
+                        safe_float(node_info.get('currentReputation', 0)) / 100.0,
+                    ]
+                    is_suspicious = 1.0 if (min_interval < 30 or dispute_actions > 1) else 0.0
+                    processed_data['node_behavior']['features'].append(features)
+                    processed_data['node_behavior']['labels'].append(is_suspicious)
+            # --- Dispute-based features for node_behavior ---
             if disputes_data:
-                logger.info("Processing dispute data for additional insights")
+                logger.info("Processing dispute data for additional insights (strict)")
                 for dispute_id, dispute_info in disputes_data.items():
-                    # Extract dispute features for node behavior analysis
                     disputer = dispute_info.get('disputer', '')
-                    
-                    # Add dispute-based features to relevant nodes
                     if disputer in nodes_data:
                         dispute_features = [
-                            1.0,  # Has dispute flag
-                            1.0 if dispute_info.get('status') == 'Enforced' else 0.0,  # Dispute enforced
-                            safe_float(len(dispute_info.get('proposedCandidates', []))) / 5.0,  # Arbitrator candidates
-                            safe_float(len(dispute_info.get('votes', {}))) / 5.0,  # Vote count in dispute
-                            safe_float(dispute_info.get('resolutionOutcome', 0)),  # Resolution outcome
-                            0.5  # Base reputation impact
+                            1.0,
+                            1.0 if dispute_info.get('status') == 'Enforced' else 0.0,
+                            safe_float(len(dispute_info.get('proposedCandidates', []))) / 5.0,
+                            safe_float(len(dispute_info.get('votes', {}))) / 5.0,
+                            safe_float(dispute_info.get('resolutionOutcome', 0)),
+                            0.5
                         ]
-                        
-                        # Mark as having dispute-related behavior
                         processed_data['node_behavior']['features'].append(dispute_features)
-                        processed_data['node_behavior']['labels'].append(1.0)  # Dispute involvement is noteworthy
-            
-            # Ensure minimum data for training
-            min_samples = 10
+                        processed_data['node_behavior']['labels'].append(1.0)
+            # --- Anti-Sybil/Bribery Heuristics ---
+            # Drop nodes with too many identical interactions (potential Sybil)
+            for model_name in processed_data:
+                feats = processed_data[model_name]['features']
+                labels = processed_data[model_name]['labels']
+                unique_feats = []
+                unique_labels = []
+                seen = set()
+                for f, l in zip(feats, labels):
+                    f_tuple = tuple(f)
+                    if f_tuple in seen:
+                        dropped_interactions += 1
+                        continue
+                    seen.add(f_tuple)
+                    unique_feats.append(f)
+                    unique_labels.append(l)
+                processed_data[model_name]['features'] = unique_feats
+                processed_data[model_name]['labels'] = unique_labels
+            # --- Enforce min_samples=30 ---
+            min_samples = 30
             for model_name, model_data in processed_data.items():
                 current_samples = len(model_data['features'])
-                logger.info(f"{model_name}: {current_samples} real samples extracted")
-                
                 if current_samples < min_samples:
-                    logger.info(f"Augmenting {model_name} with synthetic data ({min_samples - current_samples} samples)")
-                    
-                    # Get feature dimension from existing data or set default
-                    feature_dim = len(model_data['features'][0]) if model_data['features'] else 6
-                    
-                    # Generate synthetic data with realistic distributions
-                    np.random.seed(42 + hash(model_name) % 1000)  # Different seed per model
-                    num_synthetic = min_samples - current_samples
-                    
-                    for _ in range(num_synthetic):
-                        # Generate features with realistic ranges based on the model type
-                        if model_name == 'sybil_detection':
-                            synthetic_features = [
-                                np.random.beta(4, 2),  # Reputation tends to be higher
-                                np.random.beta(4, 2),  # Initial reputation
-                                np.random.choice([0.0, 1.0], p=[0.1, 0.9]),  # Most nodes verified
-                                np.random.exponential(0.3),  # Interaction count
-                                np.random.exponential(0.2),  # Vote actions
-                                np.random.exponential(0.4),  # Transfer actions
-                            ]
-                        elif model_name == 'batch_monitoring':
-                            synthetic_features = [
-                                np.random.poisson(2) / 5.0,  # Transaction count
-                                np.random.poisson(3) / 5.0,  # Vote count
-                                np.random.beta(8, 2),  # Approval rate (tends high)
-                                np.random.exponential(0.5),  # Processing duration
-                                np.random.choice([0.0, 1.0], p=[0.2, 0.8]),  # Most batches committed
-                                np.random.poisson(3) / 5.0,  # Validator count
-                            ]
-                        else:  # node_behavior
-                            synthetic_features = [
-                                np.random.exponential(0.4),  # Interaction count
-                                np.random.exponential(0.3),  # Interaction diversity
-                                np.random.exponential(2.0),  # Avg interval
-                                np.random.exponential(0.5),  # Min interval
-                                np.random.poisson(0.1) / 3.0,  # Dispute actions (rare)
-                                np.random.beta(4, 2),  # Reputation
-                            ]
-                        
-                        # Clip features to reasonable ranges
-                        synthetic_features = [max(0.0, min(1.0, f)) for f in synthetic_features]
-                        
-                        # Generate labels with model-appropriate distributions
-                        if model_name == 'sybil_detection':
-                            synthetic_label = float(np.random.choice([0, 1], p=[0.9, 0.1]))  # 10% sybil
-                        elif model_name == 'batch_monitoring':
-                            synthetic_label = float(np.random.choice([0, 1], p=[0.85, 0.15]))  # 15% anomalies
-                        else:  # node_behavior
-                            synthetic_label = float(np.random.choice([0, 1], p=[0.8, 0.2]))  # 20% suspicious
-                        
-                        model_data['features'].append(synthetic_features)
-                        model_data['labels'].append(synthetic_label)
-            
-            # Log final data summary
-            for model_name, model_data in processed_data.items():
-                logger.info(f"{model_name}: {len(model_data['features'])} samples, {sum(model_data['labels'])} positive labels")
-            
-            logger.info("Data preprocessing completed successfully")
+                    logger.warning(f"{model_name}: Only {current_samples} valid real samples after cleaning. Skipping model training.")
+                    model_data['features'] = []
+                    model_data['labels'] = []
+            logger.info(f"Dropped {dropped_nodes} nodes and {dropped_interactions} duplicate/suspicious interactions during cleaning.")
+            logger.info("Strict data preprocessing completed successfully.")
             return processed_data
-            
         except Exception as e:
-            logger.error(f"Error in data preprocessing: {str(e)}")
+            logger.error(f"Error in data preprocessing (strict): {str(e)}")
             raise
     
     def process_node_data(self, 

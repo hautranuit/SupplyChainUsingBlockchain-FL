@@ -1,0 +1,11 @@
+Federated Learning Execution Summary
+Timestamp: 2025-05-25T16:21:47.034920
+Mode: full
+
+Models Trained: 
+Total Anomalies Detected: 0
+Anomalies by Model: {}
+Total Responses: 0
+Blockchain Blocks Fetched: 10
+Total Transactions Monitored: 4
+Blockchain Data File: ./output/normal/results/blockchain_monitoring_raw.json

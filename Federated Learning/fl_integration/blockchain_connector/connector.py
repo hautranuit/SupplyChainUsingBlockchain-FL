@@ -76,6 +76,10 @@ class BlockchainConnector:
             contract_abi_path: Path to the contract ABI file
             cache_dir: Directory to store cache files
         """
+        # Always set cache_dir at the very top
+        self.cache_dir = cache_dir
+        os.makedirs(self.cache_dir, exist_ok=True)
+        
         # Use environment variables if parameters are not provided
         self.rpc_url = rpc_url or os.getenv("POLYGON_AMOY_RPC", "https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94")
         self.contract_address = contract_address or os.getenv("CONTRACT_ADDRESS", "0x88b7eb798735ce65eb282df165e01e30de8786e3")
@@ -135,8 +139,8 @@ class BlockchainConnector:
                     self.contract_abi_path = potential_paths[0]
         
         # Create cache directory if it doesn't exist
-        self.cache_dir = cache_dir
-        os.makedirs(self.cache_dir, exist_ok=True)
+        # self.cache_dir = cache_dir
+        # os.makedirs(self.cache_dir, exist_ok=True)
         
         # Initialize Web3 connection
         self.w3 = None

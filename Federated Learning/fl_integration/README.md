@@ -1,5 +1,42 @@
 # Federated Learning Integration for ChainFLIP
 
+## 🚀 Main Federated Learning Pipeline (`run_federated_learning.py`)
+
+This is the main entry point for running the full Federated Learning (FL) pipeline, including blockchain integration, anomaly detection, and response generation.
+
+### How to Run
+
+```bash
+cd /path/to/project/root/Federated\ Learning
+python fl_integration/run_federated_learning.py --mode normal
+```
+
+- Use `--mode normal` for standard operation, `--mode attack` for attack scenario, or `--mode full` for advanced/auto analysis.
+- You can specify `--input-data-file` to use a custom input (e.g., a context JSON from the DApp).
+- All other options can be listed with `-h`.
+
+### Output Structure
+
+- All results, logs, and metrics are saved under the output directory (default: `fl_integration/output/normal/` or `fl_integration/output/attack/`).
+- Key subfolders:
+  - `data/` – Processed input and feature data
+  - `models/` – Saved model weights and artifacts
+  - `results/` – Main results, including:
+    - `anomalies_detected.json` – All detected anomalies by model
+    - `responses.json` – All generated responses
+    - `execution_summary.json` – Machine-readable summary of the run
+    - `summary.txt` – Human-readable summary of the run
+    - `blockchain_monitoring_raw.json` – Raw blockchain data fetched
+  - `logs/` – System and pipeline logs
+  - `metrics/` – Training and evaluation metrics
+
+### What Gets Logged & Saved
+- All training metrics, anomalies, responses, and summaries are logged and saved.
+- Both a detailed JSON summary (`execution_summary.json`) and a readable text summary (`summary.txt`) are created for each run.
+- All exceptions and errors are logged for troubleshooting.
+
+---
+
 This directory contains the Federated Learning (FL) integration components for the ChainFLIP supply chain blockchain system. The integration enables running FL models alongside blockchain lifecycle events to analyze real-world data and provide valuable predictions.
 
 ## Directory Structure

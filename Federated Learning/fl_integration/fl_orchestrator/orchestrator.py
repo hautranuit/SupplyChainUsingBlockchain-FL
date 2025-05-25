@@ -120,8 +120,8 @@ class FLOrchestrator:
                             federated_data: List,
                             model_fn: Callable,
                             num_rounds: int = 10,
-                            client_optimizer_fn: Optional[Callable] = None,
-                            server_optimizer_fn: Optional[Callable] = None) -> Tuple[Optional[object], Dict]:
+                            client_optimizer_fn: Optional[Any] = None,
+                            server_optimizer_fn: Optional[Any] = None) -> Tuple[Optional[object], Dict]:
         """
         Train a federated model using TensorFlow Federated.
         
@@ -129,29 +129,19 @@ class FLOrchestrator:
             federated_data: List of client datasets
             model_fn: Function that returns a TFF Model
             num_rounds: Number of federated rounds
-            client_optimizer_fn: Client optimizer function
-            server_optimizer_fn: Server optimizer function
+            client_optimizer_fn: TFF optimizer builder (not a function)
+            server_optimizer_fn: TFF optimizer builder (not a function)
             
         Returns:
             Tuple of (final_server_state, training_history)
         """
         try:
             logger.info(f"Starting federated training for {num_rounds} rounds...")
-            
-            # Set default optimizers if not provided
-            # These should be functions that *return* an optimizer instance when called.
-            if client_optimizer_fn is None:
-                client_optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=0.02)
-            if server_optimizer_fn is None:
-                server_optimizer_fn = lambda: tf.keras.optimizers.SGD(learning_rate=1.0)
-            
-            # Build federated averaging process using the provided model function
-            # Ensure that the optimizers passed to build_weighted_fed_avg are callables (functions)
-            # that return optimizer instances, not the instances themselves directly.
+            # Build federated averaging process using the provided model function and optimizer builders
             iterative_process = tff.learning.algorithms.build_weighted_fed_avg(
-                model_fn=model_fn, # This should be a no-arg function returning a tff.learning.Model
-                client_optimizer_fn=client_optimizer_fn, # Callable returning client optimizer
-                server_optimizer_fn=server_optimizer_fn  # Callable returning server optimizer
+                model_fn=model_fn,
+                client_optimizer_fn=client_optimizer_fn,
+                server_optimizer_fn=server_optimizer_fn
             )
             
             # Initialize the server state

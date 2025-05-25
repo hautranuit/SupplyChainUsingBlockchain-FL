@@ -1,0 +1,33 @@
+Giải nén file zip, đọc kĩ toàn bộ tất cả các file để hiểu rõ về project của tôi.
+Xem kĩ các file trong thư mục "Federated Learning".
+Ý tưởng ban đầu của tôi trong việc tích hợp hệ thống FL vào dự án nằm trong file pasted_content.txt.
+
+Quy trình hoạt động mong muốn:
+
+Giai đoạn 1: Tình huống bình thường (không có tấn công)
+1. Chuẩn bị dữ liệu: Chạy các script 01-06 trong phần Lifecycle_demo để tạo dữ liệu mô phỏng hoạt động bình thường
+2. Lưu trữ: Dữ liệu được lưu vào file demo_context.json
+3. Chạy FL: Thực thi lệnh: 
+python fl_integration/run_federated_learning.py --mode full --output-dir ./output/normal
+4. Kết quả: Hệ thống phân tích dữ liệu từ demo_context.json, train mô hình và kết luận "KHÔNG phát hiện tấn công"
+5. Lưu kết quả phân tích vào thư mục ./output/normal
+
+Giai đoạn 2: Tình huống có tấn công
+
+1. Mô phỏng tấn công: Chạy script 07 để tạo dữ liệu mô phỏng tấn công Sybil và Bribery
+2. Cập nhật dữ liệu: File demo_context.json được cập nhật với dữ liệu chứa tấn công
+3. Chạy FL lại: Thực thi lệnh:
+python fl_integration/run_federated_learning.py --mode full --output-dir ./output/attack
+4. Kết quả: Hệ thống phân tích dữ liệu mới, kết luận "PHÁT HIỆN tấn công" và chi tiết phát hiện.
+5. Lưu kết quả phân tích vào thư mục ./output/attack
+
+Yêu cầu bổ sung:
+1. Kết nối Blockchain: Mỗi lần chạy FL, hệ thống phải kết nối được với Amoy Polygon blockchain
+2. Thu thập dữ liệu Blockchain: Lấy được blocks, transactions, logs, event,... (chỉ để giám sát, không dùng làm input chính) rồi tìm cách hiển thị ra một file, hoặc một công cụ nào đó,... để xem. 
+3. Sử dụng dữ liệu mô phỏng: Do dữ liệu blockchain khó xử lý, hệ thống sẽ dùng demo_context.json làm input cho FL.
+
+Hiện tại quá trình triển khai hệ thống Federated Learning cho dự án CHAINFLIP này nằm toàn bộ trong thư mục "Federated Learning". Bạn có thể chỉnh sửa, thêm mới, tái cấu trúc file, thư mục, logic hoạt động hoặc xóa bất kì thư mục, file nào dư thừa (quan trọng vì hiện tại đang có khá nhiều file không cần thiết). Lưu ý tôi đã cài thư mục tensorflow federated trong môi trường WSL ubuntu nhưng vì là môi trường ảo nên tôi không thể cung cấp nó trong file zip cho bạn. 
+
+Chạy kiểm thử trên máy tính của bạn cho tới khi thành công (Tôi đã chạy các script 01-06(SupplyChain_dapp\scripts\lifecycle_demo) thành công nên file demo_context.json đã chứa dữ liệu cần thiết), bạn chỉ cần chạy lệnh python fl_integration/run_federated_learning.py --mode full --output-dir ./output/normal
+. Sau đó cung cấp cho tôi dưới dạng file zip các file bạn đã sửa(không đổi tên), xóa, thêm mới. Tôi sẽ tải về và thay thế file cũ. 
+Hiện tại bạn chỉ cần hoàn thành giai đoạn 1 giúp tôi.
