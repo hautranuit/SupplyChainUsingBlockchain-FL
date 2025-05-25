@@ -732,16 +732,24 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                 client_data['client_1'][model_name_key] = (np.array([]).astype(np.float32), np.array([]).astype(np.float32))
                 logger.warning(f"No data (real or synthetic) available for model {model_name_key} to be included in client_data.")
 
+        # Determine input_shape for each model based on actual feature shape
+        model_input_shapes = {}
+        for model_name_key in models_config.keys():
+            features = client_data['client_1'][model_name_key][0]
+            if features.size > 0:
+                model_input_shapes[model_name_key] = features.shape[1]
+            else:
+                model_input_shapes[model_name_key] = None
+
         global_models = {}
         training_history = {}
 
-        for model_name, input_shape in models_config.items():
-            if not client_data['client_1'][model_name][0].size > 0:
+        for model_name in models_config.keys():
+            input_shape = model_input_shapes[model_name]
+            if input_shape is None:
                 logger.warning(f"Skipping training for {model_name} due to lack of data.")
                 continue
-                
             logger.info(f"--- Training model: {model_name} ---")
-            
             try:
                 # Prepare federated data
                 federated_datasets = []
@@ -750,7 +758,6 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                     dataset = tf.data.Dataset.from_tensor_slices((features.astype(np.float32), labels.astype(np.float32)))
                     dataset = dataset.batch(args.batch_size).repeat(1)
                     federated_datasets.append(dataset)
-                
                 # Create TFF model function
                 sample_batch = federated_datasets[0]
                 model_fn = create_tff_model_fn(model_name, input_shape, sample_batch)
@@ -765,7 +772,6 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                     client_optimizer_fn=client_optimizer_builder,
                     server_optimizer_fn=server_optimizer_builder
                 )
-                
                 if server_state is not None:
                     # Create compiled model and transfer weights
                     if model_name == 'sybil_detection':
@@ -780,7 +786,6 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                         trained_model = create_arbitrator_bias_model(input_shape, compile_model=True)
                     elif model_name == 'dispute_risk':
                         trained_model = create_dispute_risk_model(input_shape, compile_model=True)
-                    
                     try:
                         # Sửa: lấy đúng trọng số đã huấn luyện từ server_state
                         model_weights = None
@@ -793,50 +798,21 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                         if model_weights is not None:
                             # Tùy thuộc vào kiểu model_weights, chuyển đổi về list numpy
                             if hasattr(model_weights, 'trainable'):
-                                trained_model.set_weights([w.numpy() for w in model_weights.trainable])
+                                trained_model.set_weights([w.numpy() if hasattr(w, 'numpy') else w for w in model_weights.trainable])
                             elif hasattr(model_weights, 'numpy'):
-                                trained_model.set_weights([w.numpy() for w in model_weights])
+                                trained_model.set_weights([w.numpy() if hasattr(w, 'numpy') else w for w in model_weights])
                             elif isinstance(model_weights, list):
                                 trained_model.set_weights([np.array(w) for w in model_weights])
                             else:
-                                logger.warning(f"Unknown model_weights type for {model_name}, cannot set weights.")
-                            logger.info(f"Successfully transferred trained weights to {model_name} model")
-                        else:
-                            logger.warning(f"Could not extract trained weights for {model_name} from server_state.")
+                                logger.warning(f"Unknown model_weights type for {model_name}")
+                        global_models[model_name] = trained_model
+                        training_history[model_name] = history
                     except Exception as e:
-                        logger.warning(f"Could not set weights for {model_name}: {str(e)}. Using compiled model with initial weights.")
-                    
-                    global_models[model_name] = trained_model
-                    training_history[model_name] = history # history is a list of dicts
-                    # Log training metrics
-                    logger.info(f"Training metrics for {model_name}:")
-                    if isinstance(history, list) and history:
-                        for round_num, metrics in enumerate(history):
-                            log_line = f"  Round {round_num + 1}:"
-                            if isinstance(metrics, dict):
-                                for metric_name, metric_value in metrics.items():
-                                    log_line += f" {metric_name}: {metric_value:.4f} " if isinstance(metric_value, float) else f" {metric_name}: {metric_value} "
-                            else:
-                                logger.info(f"  Round {round_num + 1}: {metrics}")
-                                log_line += f" Metrics: {str(metrics)}" # Fallback if metrics is not a dict
-                            logger.info(log_line.strip())
-                    elif history: # If history is not a list but has content (e.g. a single dict)
-                        logger.info(f"  History: {str(history)}")
-                    else:
-                        logger.info("  No detailed training history available or history is empty.")
-                    # Save model
-                    model_repository.save_model(trained_model, model_name, 'latest')
-                    logger.info(f"Saved {model_name} model")
+                        logger.error(f"Error transferring weights for {model_name}: {e}")
                 else:
-                    logger.error(f"Training failed for {model_name}")
-                    # Không tạo fallback model nữa, chỉ lưu lại trạng thái lỗi.
-                    global_models[model_name] = None
-                    training_history[model_name] = {}
+                    logger.warning(f"No server_state returned for {model_name}")
             except Exception as e:
-                logger.error(f"Error training {model_name}: {str(e)}")
-                logger.error(traceback.format_exc())
-                global_models[model_name] = None
-                training_history[model_name] = {}
+                logger.error(f"Error training model {model_name}: {e}")
 
         monitoring.stop_timer(training_timer)
         logger.info("Federated Training phase completed.")
@@ -1049,7 +1025,8 @@ def connect_and_fetch_blockchain_data(rpc_url: str, num_blocks_to_fetch: int, ou
         
         for block_num in range(start_block, latest_block_number + 1):
             logger.info(f"Fetching block: {block_num}")
-            block = connector.get_block(block_num)
+            # Sử dụng hàm mới để lấy đầy đủ thông tin contract
+            block = connector.get_block_with_contract_activity(block_num)
             if block:
                 # Convert AttributeDicts and HexBytes to JSON serializable types
                 block_serializable = json.loads(Web3.to_json(block))

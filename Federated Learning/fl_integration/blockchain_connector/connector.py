@@ -945,3 +945,38 @@ class BlockchainConnector:
                 logger.info(f"Cache loaded from {cache_file}")
             except Exception as e:
                 logger.error(f"Failed to load cache: {str(e)}")
+    
+    def get_block_with_contract_activity(self, block_number: int) -> Dict[str, Any]:
+        """
+        Get block data with all contract-related transactions and events.
+        Returns a dict with block info, contract_transactions, contract_events.
+        """
+        if not self.is_connected():
+            logger.error("Not connected to blockchain.")
+            return {}
+        try:
+            block = self.w3.eth.get_block(block_number, full_transactions=True)
+            block_data = dict(block)
+            contract_addr = self.contract_address.lower()
+            contract_txs = []
+            contract_events = []
+            for tx in block_data.get('transactions', []):
+                # 'to' can be None for contract creation
+                tx_to = tx.get('to')
+                if tx_to and tx_to.lower() == contract_addr:
+                    contract_txs.append(dict(tx))
+                    try:
+                        receipt = self.w3.eth.get_transaction_receipt(tx['hash'])
+                        for log in receipt['logs']:
+                            if log['address'].lower() == contract_addr:
+                                # Convert log to dict for JSON serializable
+                                log_dict = dict(log)
+                                contract_events.append(log_dict)
+                    except Exception as e:
+                        logger.warning(f"Failed to get receipt/logs for tx {tx['hash']}: {e}")
+            block_data['contract_transactions'] = contract_txs
+            block_data['contract_events'] = contract_events
+            return block_data
+        except Exception as e:
+            logger.error(f"Failed to fetch block with contract activity: {e}")
+            return {}

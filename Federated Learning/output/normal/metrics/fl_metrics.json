@@ -1,52 +1,52 @@
 {
   "system": {
-    "start_time": "2025-05-25T16:36:09.965087",
+    "start_time": "2025-05-25T21:28:46.027569",
     "component_status": {
       "blockchain_connector": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:09.966173",
+        "last_updated": "2025-05-25T21:28:46.028196",
         "details": {
-          "last_check": "2025-05-25T16:36:09.966162"
+          "last_check": "2025-05-25T21:28:46.028189"
         }
       },
       "data_processor": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:09.971249",
+        "last_updated": "2025-05-25T21:28:46.044494",
         "details": {
-          "last_check": "2025-05-25T16:36:09.971241"
+          "last_check": "2025-05-25T21:28:46.044470"
         }
       },
       "fl_orchestrator": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:09.992989",
+        "last_updated": "2025-05-25T21:28:46.053352",
         "details": {
-          "last_check": "2025-05-25T16:36:09.992973"
+          "last_check": "2025-05-25T21:28:46.053334"
         }
       },
       "model_repository": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:09.995921",
+        "last_updated": "2025-05-25T21:28:46.065523",
         "details": {
-          "last_check": "2025-05-25T16:36:09.995904"
+          "last_check": "2025-05-25T21:28:46.065512"
         }
       },
       "anomaly_detector": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:10.008636",
+        "last_updated": "2025-05-25T21:28:46.078701",
         "details": {
-          "last_check": "2025-05-25T16:36:10.008625"
+          "last_check": "2025-05-25T21:28:46.078693"
         }
       },
       "response_engine": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:36:10.018920",
+        "last_updated": "2025-05-25T21:28:46.098266",
         "details": {
-          "last_check": "2025-05-25T16:36:10.018909"
+          "last_check": "2025-05-25T21:28:46.098229"
         }
       }
     },
     "errors": [],
-    "uptime_seconds": 0.063092
+    "uptime_seconds": 0.08417
   },
   "performance": {
     "blockchain_connector": {
@@ -62,12 +62,34 @@
     "anomaly_detector": {
       "detections": 0,
       "false_positives": 0,
-      "false_negatives": 0
+      "false_negatives": 0,
+      "anomaly_detection_time": 0.3665447235107422,
+      "anomaly_detection_success_count": 1,
+      "avg_anomaly_detection_time": 0.3665447235107422,
+      "anomaly_detection_count": 1
+    },
+    "feature_extraction": {
+      "data_processing_time": 0.014710426330566406,
+      "data_processing_success_count": 1,
+      "avg_data_processing_time": 0.014710426330566406,
+      "data_processing_count": 1
+    },
+    "federated_training": {
+      "training_time": 10.100075244903564,
+      "training_success_count": 1,
+      "avg_training_time": 10.100075244903564,
+      "training_count": 1
+    },
+    "response_engine": {
+      "response_generation_time": 1.3589859008789062e-05,
+      "response_generation_success_count": 1,
+      "avg_response_generation_time": 1.3589859008789062e-05,
+      "response_generation_count": 1
     }
   },
   "events": [
     {
-      "timestamp": "2025-05-25T16:36:09.969428",
+      "timestamp": "2025-05-25T21:28:46.029569",
       "component": "main",
       "type": "system_start",
       "message": "Starting Federated Learning system",
@@ -105,5 +127,39 @@
         }
       }
     }
-  ]
+  ],
+  "timers": {
+    "1748183334000": {
+      "component": "feature_extraction",
+      "operation": "data_processing",
+      "start_time": 1748183334.0005865,
+      "end_time": 1748183334.015297,
+      "duration": 0.014710426330566406,
+      "success": true
+    },
+    "1748183334050": {
+      "component": "federated_training",
+      "operation": "training",
+      "start_time": 1748183334.0502863,
+      "end_time": 1748183344.1503615,
+      "duration": 10.100075244903564,
+      "success": true
+    },
+    "1748183344197": {
+      "component": "anomaly_detector",
+      "operation": "anomaly_detection",
+      "start_time": 1748183344.1975822,
+      "end_time": 1748183344.564127,
+      "duration": 0.3665447235107422,
+      "success": true
+    },
+    "1748183344609": {
+      "component": "response_engine",
+      "operation": "response_generation",
+      "start_time": 1748183344.6099322,
+      "end_time": 1748183344.6099458,
+      "duration": 1.3589859008789062e-05,
+      "success": true
+    }
+  }
 }

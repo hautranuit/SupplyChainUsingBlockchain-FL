@@ -1,0 +1,85 @@
+1. Mô tả tổng quan cuộc tấn công
+Mục tiêu: Thao túng quá trình chọn ngẫu nhiên tập con Primary Nodes (PNs) để qua mặt bước xác thực, cho phép giao dịch giả mạo (hàng giả) được phê duyệt.
+
+Chiến lược chính:
+
+Sybil Attack
+
+Tạo hàng loạt node giả (Sybil nodes), lý lịch “sạch” bằng cách tham gia giao dịch hợp pháp hay giả mạo giấy phép, để tăng độ tin cậy.
+
+Đưa các node giả này vào pool PNs, nâng khả năng chúng được chọn tham gia xác thực.
+
+Bribery Attack
+
+Khi đã có một tỷ lệ node giả đủ lớn, hacker hối lộ thêm (bằng tiền hoặc lợi ích) cho các PNs hợp lệ, nhằm:
+
+Bỏ qua lỗi (bỏ qua giao dịch chứa hàng giả).
+
+Đồng thuận thuận lợi (cần ≥ 2/3 phiếu tán thành để phê duyệt).
+
+2. Mô phỏng kịch bản tấn công cụ thể
+Ngữ cảnh thực tế
+
+Công ty A sản xuất đồ chơi cao cấp sử dụng hệ thống blockchain – IPFS – FL để theo dõi chuỗi cung ứng.
+
+Công ty B chuyên hàng giả thuê hacker tấn công để đưa sản phẩm giả vào thị trường.
+
+Các bước triển khai
+a. Tấn công vào hệ thống danh tiếng (Reputation)
+
+Sybil nodes giao dịch nội bộ để tạo lịch sử “trong sạch”.
+
+Hoặc xâm nhập hệ thống quản lý danh tiếng để sửa điểm của node giả.
+
+b. Giả mạo thông tin xác thực
+
+Làm giả giấy phép kinh doanh, chứng chỉ chất lượng để Sybil nodes vượt qua bước xác minh thủ công.
+
+Tấn công hoặc lừa đảo đơn vị xác thực để phê duyệt tài liệu giả.
+
+c. Thông đồng “người trong”
+
+Hối lộ/đe dọa nhân viên công ty A hoặc đơn vị logistics, để đưa Sybil nodes vào danh sách tin cậy.
+
+Sau đó, khi validator (PN) phát hiện dấu hiệu bất thường, hacker dùng bribery để ép buộc hoặc mua chuộc node bỏ qua.
+
+3. Yêu cầu giải pháp phòng ngừa bằng Federated Learning
+Phát hiện node giả qua phân tích hành vi
+
+Yêu cầu: Mô hình FL phải thu thập và so sánh đặc trưng giao dịch từ tất cả PNs mà không chia sẻ dữ liệu gốc.
+
+Kết quả mong đợi:
+
+Phát hiện nhanh Sybil nodes có mô hình giao dịch bất thường (ví dụ: hàng loạt giao dịch nhỏ liên tục).
+
+Đánh dấu, cách ly và yêu cầu xác minh lại node nghi ngờ.
+
+Giám sát giao dịch để phát hiện Bribery
+
+Yêu cầu: FL huấn luyện mô hình phát hiện “hành vi hối lộ” dựa trên:
+
+Các khoản thanh toán bất thường (số tiền lớn, tần suất cao giữa validator và một số node).
+
+Quyết định bất thường của validator (chuỗi nhiều giao dịch đáng ngờ được phê duyệt).
+
+Kết quả mong đợi:
+
+Cảnh báo kịp thời và tự động loại bỏ node validator nghi ngờ khỏi pool PNs.
+
+Cơ chế đánh giá danh tiếng phi tập trung
+
+Yêu cầu: FL tổng hợp đánh giá từ nhiều nguồn (đa node) thay vì lưu trữ tập trung.
+
+Kết quả mong đợi:
+
+Tránh hacker thay đổi tập trung một điểm reputation.
+
+Tự động phát hiện mức tăng điểm bất thường, kích hoạt xác thực bổ sung.
+
+4. Hạn chế và lưu ý
+Số lượng node hợp lệ: FL chỉ hiệu quả nếu tỉ lệ node thật cao; khi Sybil nodes chiếm đa số, mô hình có thể bị thao túng.
+
+Chất lượng dữ liệu đầu vào: Cần cơ chế đảm bảo integrity của dữ liệu huấn luyện, tránh hacker chen dữ liệu giả vào FL.
+
+Yêu cầu hạ tầng: Cần băng thông và tài nguyên tính toán đủ để cập nhật mô hình FL real-time.
+

@@ -1,11 +1,11 @@
 Federated Learning Execution Summary
-Timestamp: 2025-05-25T16:21:47.034920
+Timestamp: 2025-05-25T21:29:04.631539
 Mode: full
 
-Models Trained: 
+Models Trained: sybil_detection, node_behavior, batch_monitoring
 Total Anomalies Detected: 0
-Anomalies by Model: {}
+Anomalies by Model: {'sybil_detection': 0, 'node_behavior': 0, 'batch_monitoring': 0}
 Total Responses: 0
 Blockchain Blocks Fetched: 10
-Total Transactions Monitored: 4
+Total Transactions Monitored: 6
 Blockchain Data File: ./output/normal/results/blockchain_monitoring_raw.json

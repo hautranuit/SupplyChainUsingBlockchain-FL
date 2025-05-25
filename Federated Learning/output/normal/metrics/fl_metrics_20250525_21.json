@@ -1,12 +1,12 @@
 {
   "system": {
-    "start_time": "2025-05-25T16:06:47.659649",
+    "start_time": "2025-05-25T21:28:46.027569",
     "component_status": {
       "blockchain_connector": {
         "status": "healthy",
-        "last_updated": "2025-05-25T16:06:47.660228",
+        "last_updated": "2025-05-25T21:28:46.028196",
         "details": {
-          "last_check": "2025-05-25T16:06:47.660220"
+          "last_check": "2025-05-25T21:28:46.028189"
         }
       }
     },
@@ -31,7 +31,7 @@
   },
   "events": [
     {
-      "timestamp": "2025-05-25T16:06:47.661872",
+      "timestamp": "2025-05-25T21:28:46.029569",
       "component": "main",
       "type": "system_start",
       "message": "Starting Federated Learning system",

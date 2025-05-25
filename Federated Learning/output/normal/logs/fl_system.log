@@ -1,113 +1,25 @@
-2025-05-25 15:59:15,374 - monitoring - INFO - Performing health check
-2025-05-25 15:59:15,375 - monitoring - INFO - Health check thread started with interval 60 seconds
-2025-05-25 15:59:15,375 - monitoring - INFO - Component blockchain_connector status updated to healthy
-2025-05-25 15:59:15,375 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
-2025-05-25 15:59:15,376 - monitoring - INFO - Metrics directory: ./output/normal/metrics
-2025-05-25 15:59:15,376 - monitoring - INFO - Performance monitoring enabled: True
-2025-05-25 15:59:15,377 - monitoring - INFO - Health checks enabled: True
-2025-05-25 15:59:15,377 - monitoring - INFO - [main] Starting Federated Learning system
-2025-05-25 15:59:15,390 - monitoring - INFO - Component data_processor status updated to healthy
-2025-05-25 15:59:15,404 - monitoring - INFO - Component fl_orchestrator status updated to healthy
-2025-05-25 15:59:15,417 - monitoring - INFO - Component model_repository status updated to healthy
-2025-05-25 15:59:15,428 - monitoring - INFO - Component anomaly_detector status updated to healthy
-2025-05-25 15:59:15,440 - monitoring - INFO - Component response_engine status updated to healthy
-2025-05-25 15:59:23,344 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.012521028518676758
-2025-05-25 15:59:23,349 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.012521028518676758
-2025-05-25 15:59:23,369 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
-2025-05-25 15:59:23,374 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 0.0005092620849609375
-2025-05-25 15:59:23,385 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 0.0005092620849609375
-2025-05-25 15:59:23,394 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
-2025-05-25 15:59:23,404 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_time = 7.867813110351562e-06
-2025-05-25 15:59:23,415 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.avg_anomaly_detection_time = 7.867813110351562e-06
-2025-05-25 15:59:23,425 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_count = 1
-2025-05-25 15:59:23,433 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_time = 1.1205673217773438e-05
-2025-05-25 15:59:23,442 - monitoring - DEBUG - Performance metric recorded: response_engine.avg_response_generation_time = 1.1205673217773438e-05
-2025-05-25 15:59:23,452 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_count = 1
-2025-05-25 16:06:47,659 - monitoring - INFO - Performing health check
-2025-05-25 16:06:47,660 - monitoring - INFO - Health check thread started with interval 60 seconds
-2025-05-25 16:06:47,660 - monitoring - INFO - Component blockchain_connector status updated to healthy
-2025-05-25 16:06:47,660 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
-2025-05-25 16:06:47,661 - monitoring - INFO - Metrics directory: ./output/normal/metrics
-2025-05-25 16:06:47,661 - monitoring - INFO - Performance monitoring enabled: True
-2025-05-25 16:06:47,661 - monitoring - INFO - Health checks enabled: True
-2025-05-25 16:06:47,661 - monitoring - INFO - [main] Starting Federated Learning system
-2025-05-25 16:06:47,666 - monitoring - INFO - Component data_processor status updated to healthy
-2025-05-25 16:06:47,691 - monitoring - INFO - Component fl_orchestrator status updated to healthy
-2025-05-25 16:06:47,695 - monitoring - INFO - Component model_repository status updated to healthy
-2025-05-25 16:06:47,707 - monitoring - INFO - Component anomaly_detector status updated to healthy
-2025-05-25 16:06:47,719 - monitoring - INFO - Component response_engine status updated to healthy
-2025-05-25 16:06:55,665 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.006467580795288086
-2025-05-25 16:06:55,668 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.006467580795288086
-2025-05-25 16:06:55,690 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
-2025-05-25 16:06:55,694 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 0.0010979175567626953
-2025-05-25 16:06:55,705 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 0.0010979175567626953
-2025-05-25 16:06:55,713 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
-2025-05-25 16:06:55,725 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_time = 4.76837158203125e-06
-2025-05-25 16:06:55,734 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.avg_anomaly_detection_time = 4.76837158203125e-06
-2025-05-25 16:06:55,743 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_count = 1
-2025-05-25 16:06:55,754 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_time = 1.2874603271484375e-05
-2025-05-25 16:06:55,762 - monitoring - DEBUG - Performance metric recorded: response_engine.avg_response_generation_time = 1.2874603271484375e-05
-2025-05-25 16:06:55,771 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_count = 1
-2025-05-25 16:13:59,989 - monitoring - INFO - Performing health check
-2025-05-25 16:13:59,989 - monitoring - INFO - Health check thread started with interval 60 seconds
-2025-05-25 16:13:59,990 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
-2025-05-25 16:13:59,990 - monitoring - INFO - Component blockchain_connector status updated to healthy
-2025-05-25 16:13:59,991 - monitoring - INFO - Metrics directory: ./output/normal/metrics
-2025-05-25 16:13:59,991 - monitoring - INFO - Performance monitoring enabled: True
-2025-05-25 16:13:59,991 - monitoring - INFO - Health checks enabled: True
-2025-05-25 16:13:59,992 - monitoring - INFO - [main] Starting Federated Learning system
-2025-05-25 16:13:59,994 - monitoring - INFO - Component data_processor status updated to healthy
-2025-05-25 16:14:00,006 - monitoring - INFO - Component fl_orchestrator status updated to healthy
-2025-05-25 16:14:00,025 - monitoring - INFO - Component model_repository status updated to healthy
-2025-05-25 16:14:00,035 - monitoring - INFO - Component anomaly_detector status updated to healthy
-2025-05-25 16:14:00,046 - monitoring - INFO - Component response_engine status updated to healthy
-2025-05-25 16:14:08,332 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.008748531341552734
-2025-05-25 16:14:08,358 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.008748531341552734
-2025-05-25 16:14:08,362 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
-2025-05-25 16:14:08,374 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 0.0009617805480957031
-2025-05-25 16:14:08,385 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 0.0009617805480957031
-2025-05-25 16:14:08,397 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
-2025-05-25 16:14:08,406 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_time = 5.245208740234375e-06
-2025-05-25 16:14:08,414 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.avg_anomaly_detection_time = 5.245208740234375e-06
-2025-05-25 16:14:08,424 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_count = 1
-2025-05-25 16:14:08,443 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_time = 3.1948089599609375e-05
-2025-05-25 16:14:08,458 - monitoring - DEBUG - Performance metric recorded: response_engine.avg_response_generation_time = 3.1948089599609375e-05
-2025-05-25 16:14:08,472 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_count = 1
-2025-05-25 16:21:38,868 - monitoring - INFO - Performing health check
-2025-05-25 16:21:38,868 - monitoring - INFO - Health check thread started with interval 60 seconds
-2025-05-25 16:21:38,868 - monitoring - INFO - Component blockchain_connector status updated to healthy
-2025-05-25 16:21:38,869 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
-2025-05-25 16:21:38,869 - monitoring - INFO - Metrics directory: ./output/normal/metrics
-2025-05-25 16:21:38,869 - monitoring - INFO - Performance monitoring enabled: True
-2025-05-25 16:21:38,870 - monitoring - INFO - Health checks enabled: True
-2025-05-25 16:21:38,870 - monitoring - INFO - [main] Starting Federated Learning system
-2025-05-25 16:21:38,872 - monitoring - INFO - Component data_processor status updated to healthy
-2025-05-25 16:21:38,885 - monitoring - INFO - Component fl_orchestrator status updated to healthy
-2025-05-25 16:21:38,897 - monitoring - INFO - Component model_repository status updated to healthy
-2025-05-25 16:21:38,909 - monitoring - INFO - Component anomaly_detector status updated to healthy
-2025-05-25 16:21:38,920 - monitoring - INFO - Component response_engine status updated to healthy
-2025-05-25 16:21:46,910 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.007077693939208984
-2025-05-25 16:21:46,912 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.007077693939208984
-2025-05-25 16:21:46,921 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
-2025-05-25 16:21:46,931 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 0.0008425712585449219
-2025-05-25 16:21:46,943 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 0.0008425712585449219
-2025-05-25 16:21:46,955 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
-2025-05-25 16:21:46,964 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_time = 5.7220458984375e-06
-2025-05-25 16:21:46,974 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.avg_anomaly_detection_time = 5.7220458984375e-06
-2025-05-25 16:21:46,996 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_count = 1
-2025-05-25 16:21:47,000 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_time = 1.0251998901367188e-05
-2025-05-25 16:21:47,012 - monitoring - DEBUG - Performance metric recorded: response_engine.avg_response_generation_time = 1.0251998901367188e-05
-2025-05-25 16:21:47,025 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_count = 1
-2025-05-25 16:36:09,965 - monitoring - INFO - Performing health check
-2025-05-25 16:36:09,966 - monitoring - INFO - Component blockchain_connector status updated to healthy
-2025-05-25 16:36:09,965 - monitoring - INFO - Health check thread started with interval 60 seconds
-2025-05-25 16:36:09,966 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
-2025-05-25 16:36:09,967 - monitoring - INFO - Metrics directory: ./output/normal/metrics
-2025-05-25 16:36:09,968 - monitoring - INFO - Performance monitoring enabled: True
-2025-05-25 16:36:09,968 - monitoring - INFO - Health checks enabled: True
-2025-05-25 16:36:09,969 - monitoring - INFO - [main] Starting Federated Learning system
-2025-05-25 16:36:09,971 - monitoring - INFO - Component data_processor status updated to healthy
-2025-05-25 16:36:09,993 - monitoring - INFO - Component fl_orchestrator status updated to healthy
-2025-05-25 16:36:09,995 - monitoring - INFO - Component model_repository status updated to healthy
-2025-05-25 16:36:10,008 - monitoring - INFO - Component anomaly_detector status updated to healthy
-2025-05-25 16:36:10,018 - monitoring - INFO - Component response_engine status updated to healthy
+2025-05-25 21:28:46,027 - monitoring - INFO - Performing health check
+2025-05-25 21:28:46,027 - monitoring - INFO - Health check thread started with interval 60 seconds
+2025-05-25 21:28:46,028 - monitoring - INFO - Component blockchain_connector status updated to healthy
+2025-05-25 21:28:46,028 - monitoring - INFO - Monitoring system initialized with log directory: ./output/normal/logs
+2025-05-25 21:28:46,028 - monitoring - INFO - Metrics directory: ./output/normal/metrics
+2025-05-25 21:28:46,028 - monitoring - INFO - Performance monitoring enabled: True
+2025-05-25 21:28:46,029 - monitoring - INFO - Health checks enabled: True
+2025-05-25 21:28:46,029 - monitoring - INFO - [main] Starting Federated Learning system
+2025-05-25 21:28:46,044 - monitoring - INFO - Component data_processor status updated to healthy
+2025-05-25 21:28:46,053 - monitoring - INFO - Component fl_orchestrator status updated to healthy
+2025-05-25 21:28:46,065 - monitoring - INFO - Component model_repository status updated to healthy
+2025-05-25 21:28:46,078 - monitoring - INFO - Component anomaly_detector status updated to healthy
+2025-05-25 21:28:46,098 - monitoring - INFO - Component response_engine status updated to healthy
+2025-05-25 21:28:54,015 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.014710426330566406
+2025-05-25 21:28:54,018 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.014710426330566406
+2025-05-25 21:28:54,037 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
+2025-05-25 21:29:04,150 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 10.100075244903564
+2025-05-25 21:29:04,167 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 10.100075244903564
+2025-05-25 21:29:04,181 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
+2025-05-25 21:29:04,564 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_time = 0.3665447235107422
+2025-05-25 21:29:04,585 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.avg_anomaly_detection_time = 0.3665447235107422
+2025-05-25 21:29:04,589 - monitoring - DEBUG - Performance metric recorded: anomaly_detector.anomaly_detection_count = 1
+2025-05-25 21:29:04,609 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_time = 1.3589859008789062e-05
+2025-05-25 21:29:04,613 - monitoring - DEBUG - Performance metric recorded: response_engine.avg_response_generation_time = 1.3589859008789062e-05
+2025-05-25 21:29:04,629 - monitoring - DEBUG - Performance metric recorded: response_engine.response_generation_count = 1
