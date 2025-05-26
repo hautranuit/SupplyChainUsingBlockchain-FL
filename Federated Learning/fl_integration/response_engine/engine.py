@@ -46,10 +46,10 @@ class ResponseEngine:
     
     def __init__(self, 
                  config_path: str = None,
-                 sybil_node_threshold: int = 1,
                  suspicious_batch_threshold: int = 1,
                  high_risk_dispute_threshold: int = 1,
                  bribery_attack_threshold: int = 1,
+                 arbitrator_bias_threshold: int = 1,
                  overall_confidence_threshold: float = 0.7,
                  notification_channels: List[str] = ["log"]):
         """
@@ -57,10 +57,10 @@ class ResponseEngine:
         
         Args:
             config_path: Path to configuration file
-            sybil_node_threshold: Threshold for number of detected Sybil nodes
             suspicious_batch_threshold: Threshold for number of suspicious batches
             high_risk_dispute_threshold: Threshold for number of high-risk disputes
             bribery_attack_threshold: Threshold for number of detected bribery attacks
+            arbitrator_bias_threshold: Threshold for number of arbitrator bias incidents
             overall_confidence_threshold: Threshold for overall confidence
             notification_channels: List of notification channels
         """
@@ -73,10 +73,10 @@ class ResponseEngine:
                 # Extract response engine configuration
                 if 'response_engine' in config:
                     re_config = config['response_engine']
-                    sybil_node_threshold = re_config.get('sybil_node_threshold', sybil_node_threshold)
                     suspicious_batch_threshold = re_config.get('suspicious_batch_threshold', suspicious_batch_threshold)
                     high_risk_dispute_threshold = re_config.get('high_risk_dispute_threshold', high_risk_dispute_threshold)
                     bribery_attack_threshold = re_config.get('bribery_attack_threshold', bribery_attack_threshold)
+                    arbitrator_bias_threshold = re_config.get('arbitrator_bias_threshold', arbitrator_bias_threshold)
                     overall_confidence_threshold = re_config.get('overall_confidence_threshold', overall_confidence_threshold)
                 
                 # Extract notification channels
@@ -85,10 +85,10 @@ class ResponseEngine:
             except Exception as e:
                 logger.error(f"Failed to load configuration from {config_path}: {str(e)}")
         
-        self.sybil_node_threshold = sybil_node_threshold
         self.suspicious_batch_threshold = suspicious_batch_threshold
         self.high_risk_dispute_threshold = high_risk_dispute_threshold
         self.bribery_attack_threshold = bribery_attack_threshold
+        self.arbitrator_bias_threshold = arbitrator_bias_threshold
         self.overall_confidence_threshold = overall_confidence_threshold
         self.notification_channels = notification_channels
         
@@ -112,10 +112,10 @@ class ResponseEngine:
                 logger.error(f"Failed to load actions configuration: {str(e)}")
         
         logger.info(f"Response Engine initialized with thresholds: "
-                   f"sybil_node={self.sybil_node_threshold}, "
                    f"suspicious_batch={self.suspicious_batch_threshold}, "
                    f"high_risk_dispute={self.high_risk_dispute_threshold}, "
                    f"bribery_attack={self.bribery_attack_threshold}, "
+                   f"arbitrator_bias={self.arbitrator_bias_threshold}, "
                    f"overall_confidence={self.overall_confidence_threshold}")
         logger.info(f"Notification channels: {self.notification_channels}")
         logger.info(f"Actions: {self.actions}")
@@ -132,56 +132,56 @@ class ResponseEngine:
             Dictionary with evaluation results
         """
         # Extract detection counts
-        sybil_nodes_count = detection_results.get('sybil_nodes_count', 0)
         suspicious_batches_count = detection_results.get('suspicious_batches_count', 0)
         high_risk_disputes_count = detection_results.get('high_risk_disputes_count', 0)
         bribery_attacks_count = detection_results.get('bribery_attacks_count', 0)
+        arbitrator_bias_count = detection_results.get('arbitrator_bias_count', 0)
         
         # Extract confidence scores
-        sybil_confidence = detection_results.get('sybil_confidence', 0.0)
         batch_confidence = detection_results.get('batch_confidence', 0.0)
         dispute_confidence = detection_results.get('dispute_confidence', 0.0)
         bribery_confidence = detection_results.get('bribery_confidence', 0.0)
+        arbitrator_confidence = detection_results.get('arbitrator_confidence', 0.0)
         
         # Calculate overall confidence
         confidence_values = []
-        if sybil_confidence > 0:
-            confidence_values.append(sybil_confidence)
         if batch_confidence > 0:
             confidence_values.append(batch_confidence)
         if dispute_confidence > 0:
             confidence_values.append(dispute_confidence)
         if bribery_confidence > 0:
             confidence_values.append(bribery_confidence)
+        if arbitrator_confidence > 0:
+            confidence_values.append(arbitrator_confidence)
         
         overall_confidence = np.mean(confidence_values) if confidence_values else 0.0
         
         # Determine if thresholds are exceeded
-        sybil_threshold_exceeded = sybil_nodes_count >= self.sybil_node_threshold
         batch_threshold_exceeded = suspicious_batches_count >= self.suspicious_batch_threshold
         dispute_threshold_exceeded = high_risk_disputes_count >= self.high_risk_dispute_threshold
         bribery_threshold_exceeded = bribery_attacks_count >= self.bribery_attack_threshold
+        arbitrator_threshold_exceeded = arbitrator_bias_count >= self.arbitrator_bias_threshold
         confidence_threshold_exceeded = overall_confidence >= self.overall_confidence_threshold
         
         # Determine if action is needed
         action_needed = (
-            (sybil_threshold_exceeded or 
-             batch_threshold_exceeded or 
+            (batch_threshold_exceeded or 
              dispute_threshold_exceeded or 
-             bribery_threshold_exceeded) and 
+             bribery_threshold_exceeded or
+             arbitrator_threshold_exceeded) and 
             confidence_threshold_exceeded
         )
         
         # Determine attack type
         attack_types = []
-        if sybil_threshold_exceeded:
-            attack_types.append("sybil")
         if bribery_threshold_exceeded:
             attack_types.append("bribery")
         if batch_threshold_exceeded:
             attack_types.append("suspicious_batch")
         if dispute_threshold_exceeded:
             attack_types.append("high_risk_dispute")
+        if arbitrator_threshold_exceeded:
+            attack_types.append("arbitrator_bias")
         
         # Create evaluation results
         evaluation_results = {
@@ -191,22 +191,22 @@ class ResponseEngine:
             "attack_detected": len(attack_types) > 0,
             "attack_types": attack_types,
             "thresholds_exceeded": {
-                "sybil": sybil_threshold_exceeded,
                 "batch": batch_threshold_exceeded,
                 "dispute": dispute_threshold_exceeded,
-                "bribery": bribery_threshold_exceeded
+                "bribery": bribery_threshold_exceeded,
+                "arbitrator": arbitrator_threshold_exceeded
             },
             "counts": {
-                "sybil_nodes": sybil_nodes_count,
                 "suspicious_batches": suspicious_batches_count,
                 "high_risk_disputes": high_risk_disputes_count,
-                "bribery_attacks": bribery_attacks_count
+                "bribery_attacks": bribery_attacks_count,
+                "arbitrator_bias": arbitrator_bias_count
             },
             "confidence_scores": {
-                "sybil": float(sybil_confidence),
                 "batch": float(batch_confidence),
                 "dispute": float(dispute_confidence),
-                "bribery": float(bribery_confidence)
+                "bribery": float(bribery_confidence),
+                "arbitrator": float(arbitrator_confidence)
             }
         }
         
@@ -246,10 +246,6 @@ class ResponseEngine:
             
             message += "Detection Details:\n"
             
-            if "sybil" in attack_types:
-                message += f"- Sybil Nodes: {counts.get('sybil_nodes', 0)} detected "
-                message += f"(Confidence: {confidence_scores.get('sybil', 0.0):.4f})\n"
-            
             if "bribery" in attack_types:
                 message += f"- Bribery Attacks: {counts.get('bribery_attacks', 0)} detected "
                 message += f"(Confidence: {confidence_scores.get('bribery', 0.0):.4f})\n"
@@ -261,6 +257,10 @@ class ResponseEngine:
             if "high_risk_dispute" in attack_types:
                 message += f"- High-Risk Disputes: {counts.get('high_risk_disputes', 0)} detected "
                 message += f"(Confidence: {confidence_scores.get('dispute', 0.0):.4f})\n"
+                
+            if "arbitrator_bias" in attack_types:
+                message += f"- Arbitrator Bias: {counts.get('arbitrator_bias', 0)} detected "
+                message += f"(Confidence: {confidence_scores.get('arbitrator', 0.0):.4f})\n"
             
             message += "\nACTION REQUIRED: Please investigate and respond to this security incident."
         
@@ -275,10 +275,6 @@ class ResponseEngine:
             
             message += "Detection Details:\n"
             
-            if "sybil" in attack_types:
-                message += f"- Sybil Nodes: {counts.get('sybil_nodes', 0)} detected "
-                message += f"(Confidence: {confidence_scores.get('sybil', 0.0):.4f})\n"
-            
             if "bribery" in attack_types:
                 message += f"- Bribery Attacks: {counts.get('bribery_attacks', 0)} detected "
                 message += f"(Confidence: {confidence_scores.get('bribery', 0.0):.4f})\n"
@@ -290,6 +286,10 @@ class ResponseEngine:
             if "high_risk_dispute" in attack_types:
                 message += f"- High-Risk Disputes: {counts.get('high_risk_disputes', 0)} detected "
                 message += f"(Confidence: {confidence_scores.get('dispute', 0.0):.4f})\n"
+                
+            if "arbitrator_bias" in attack_types:
+                message += f"- Arbitrator Bias: {counts.get('arbitrator_bias', 0)} detected "
+                message += f"(Confidence: {confidence_scores.get('arbitrator', 0.0):.4f})\n"
             
             message += "\nNOTE: Confidence level below threshold for automatic response."
         
@@ -302,14 +302,14 @@ class ResponseEngine:
             message += f"Overall Confidence: {overall_confidence:.4f}\n\n"
             
             message += "Scan Details:\n"
-            message += f"- Sybil Nodes: {counts.get('sybil_nodes', 0)} detected "
-            message += f"(Confidence: {confidence_scores.get('sybil', 0.0):.4f})\n"
             message += f"- Bribery Attacks: {counts.get('bribery_attacks', 0)} detected "
             message += f"(Confidence: {confidence_scores.get('bribery', 0.0):.4f})\n"
             message += f"- Suspicious Batches: {counts.get('suspicious_batches', 0)} detected "
             message += f"(Confidence: {confidence_scores.get('batch', 0.0):.4f})\n"
             message += f"- High-Risk Disputes: {counts.get('high_risk_disputes', 0)} detected "
             message += f"(Confidence: {confidence_scores.get('dispute', 0.0):.4f})\n"
+            message += f"- Arbitrator Bias: {counts.get('arbitrator_bias', 0)} detected "
+            message += f"(Confidence: {confidence_scores.get('arbitrator', 0.0):.4f})\n"
         
         return message
     
@@ -519,24 +519,6 @@ class ResponseEngine:
         
         # Take blockchain actions if action needed
         if evaluation_results.get('action_needed', False) and blockchain_connector is not None:
-            # Flag Sybil nodes
-            if evaluation_results.get('thresholds_exceeded', {}).get('sybil', False):
-                sybil_nodes = detection_results.get('sybil_nodes', [])
-                sybil_confidence = evaluation_results.get('confidence_scores', {}).get('sybil', 0.0)
-                
-                for node in sybil_nodes:
-                    node_id = node.get('id', '')
-                    if node_id:
-                        success = self.flag_node_on_blockchain(
-                            node_id=node_id,
-                            reason="Detected as Sybil node",
-                            confidence=sybil_confidence,
-                            blockchain_connector=blockchain_connector
-                        )
-                        
-                        if success:
-                            response_results["blockchain_actions"]["nodes_flagged"].append(node_id)
-            
             # Flag suspicious batches
             if evaluation_results.get('thresholds_exceeded', {}).get('batch', False):
                 suspicious_batches = detection_results.get('suspicious_batches', [])

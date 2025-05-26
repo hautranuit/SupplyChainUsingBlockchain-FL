@@ -10,8 +10,15 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Any, Optional, Union, Tuple
 from datetime import datetime, timedelta
-import tensorflow as tf
 import traceback
+
+# Optional TensorFlow import for FL dataset creation
+try:
+    import tensorflow as tf
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
+    tf = None
 
 # JSON encoder tùy chỉnh để xử lý kiểu dữ liệu NumPy
 class NumpyJSONEncoder(json.JSONEncoder):
@@ -55,11 +62,11 @@ class DataProcessor:
     
     def preprocess_data(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Preprocess real data from demo_context.json for federated learning models.
-        Strictly validate all records, drop malformed or suspicious ones, and do not use synthetic data.
-        Enforce min_samples=30 only on real, validated data. Log dropped records for review.
+        Enhanced preprocessing for real data from demo_context.json for federated learning models.
+        Now includes comprehensive attack detection capabilities with ground truth labels.
+        Processes both normal operational data and attack data for robust ML training.
         """
-        logger.info("Starting data preprocessing for FL models using real demo_context.json data (strict mode)")
+        logger.info("Starting enhanced data preprocessing with attack detection capabilities")
 
         def safe_float(value, default=0.0):
             if value is None:
@@ -77,7 +84,7 @@ class DataProcessor:
             except (ValueError, TypeError):
                 return default
 
-        # Blockchain interaction types mapping to categories
+        # Enhanced blockchain interaction types mapping with attack patterns
         BLOCKCHAIN_INTERACTION_TYPES = {
             'MintProduct': 'production',
             'ListProduct': 'marketplace',
@@ -94,63 +101,115 @@ class DataProcessor:
             'ProposeBatch': 'batch_operations',
             'MakeDisputeDecision': 'dispute',
             'InitiateDispute': 'dispute',
-            # Add missing interaction types from real blockchain data
             'InitiatePurchase': 'marketplace',
             'DepositCollateral': 'marketplace',
             'OpenDispute': 'dispute',
             'ProposeArbitratorCandidate': 'governance',
-            'SelectArbitrator': 'governance'
+            'SelectArbitrator': 'governance',
+            # Attack-specific interaction types
+            'SybilRegistration': 'attack_sybil',
+            'CoordinatedVoting': 'attack_sybil',
+            'ArtificialActivity': 'attack_sybil',
+            'BribeReceived': 'attack_bribery',
+            'CompromisedVoting': 'attack_bribery',
+            'simulatedBehaviorChange': 'attack_bribery'
         }
 
         def is_valid_interaction(inter):
-            # Must have type and timestamp, and timestamp must be int
+            """Enhanced validation that includes attack interaction patterns"""
             if not isinstance(inter, dict):
                 return False
             if 'type' not in inter or 'timestamp' not in inter:
                 return False
             if not isinstance(inter['type'], str) or not isinstance(inter['timestamp'], int):
                 return False
-            # Check if interaction type is a known blockchain type
+            # Accept both normal and attack interaction types
             interaction_type = inter.get('type', '')
             if interaction_type not in BLOCKCHAIN_INTERACTION_TYPES:
-                logger.warning(f"Unknown blockchain interaction type: {interaction_type}")
+                logger.warning(f"Unknown interaction type: {interaction_type}")
                 return False
             return True
+
+        def extract_attack_features(node_address: str, node_info: dict, attack_metadata: dict) -> dict:
+            """Extract attack-specific features for enhanced detection"""
+            attack_features = {
+                'is_sybil': 0.0,
+                'is_bribed': 0.0,
+                'sybil_confidence': 0.0,
+                'bribery_confidence': 0.0,
+                'suspicious_pattern_count': 0.0,
+                'attack_interaction_ratio': 0.0
+            }
+            
+            # Check if node is marked as Sybil
+            if node_address in attack_metadata.get('sybilNodes', []):
+                attack_features['is_sybil'] = 1.0
+                # Find Sybil indicators
+                for indicator in attack_metadata.get('attackFeatures', {}).get('sybilIndicators', []):
+                    if indicator.get('nodeAddress') == node_address:
+                        attack_features['sybil_confidence'] = indicator.get('confidence', 0.0)
+                        break
+            
+            # Check if node is marked as bribed
+            if node_address in attack_metadata.get('bribedNodes', []):
+                attack_features['is_bribed'] = 1.0
+                # Find bribery indicators
+                for indicator in attack_metadata.get('attackFeatures', {}).get('briberyIndicators', []):
+                    if indicator.get('nodeAddress') == node_address:
+                        attack_features['bribery_confidence'] = indicator.get('confidence', 0.0)
+                        break
+            
+            # Count suspicious patterns
+            suspicious_patterns = node_info.get('suspiciousPatterns', [])
+            attack_features['suspicious_pattern_count'] = safe_float(len(suspicious_patterns)) / 10.0
+            
+            # Calculate attack interaction ratio
+            interactions = node_info.get('interactions', [])
+            attack_interactions = [i for i in interactions if 
+                                 BLOCKCHAIN_INTERACTION_TYPES.get(i.get('type', ''), '').startswith('attack_')]
+            total_interactions = len(interactions)
+            if total_interactions > 0:
+                attack_features['attack_interaction_ratio'] = len(attack_interactions) / total_interactions
+            
+            return attack_features
 
         try:
             nodes_data = input_data.get("nodes", {})
             products_data = input_data.get("products", {})
             batches_data = input_data.get("batches", {})
             disputes_data = input_data.get("disputes", {})
+            attack_metadata = input_data.get("attackMetadata", {})
+            ground_truth_labels = attack_metadata.get("groundTruthLabels", {})
 
-            logger.info(f"Real data summary: {len(nodes_data)} nodes, {len(products_data)} products, {len(batches_data)} batches, {len(disputes_data)} disputes")
+            logger.info(f"Enhanced data summary: {len(nodes_data)} nodes, {len(products_data)} products, "
+                       f"{len(batches_data)} batches, {len(disputes_data)} disputes")
+            
+            if attack_metadata:
+                logger.info(f"Attack data detected: {len(attack_metadata.get('sybilNodes', []))} Sybil nodes, "
+                           f"{len(attack_metadata.get('bribedNodes', []))} bribed nodes")
 
             processed_data = {
                 'sybil_detection': {'features': [], 'labels': []},
-                'batch_monitoring': {'features': [], 'labels': []},
-                'node_behavior': {'features': [], 'labels': []}
+                'bribery_detection': {'features': [], 'labels': []}
             }
             dropped_interactions = 0
             dropped_nodes = 0
-            # --- Sybil Detection ---
+            
+            # --- Enhanced Sybil Detection with Attack Data ---
             if nodes_data:
-                logger.info("Extracting features for Sybil detection from real node data (strict)")
+                logger.info("Extracting enhanced features for Sybil detection with attack patterns")
                 for node_address, node_info in nodes_data.items():
                     interactions = node_info.get('interactions', [])
-                    # Strictly filter interactions
                     valid_interactions = [i for i in interactions if is_valid_interaction(i)]
                     if len(valid_interactions) < 2:
                         dropped_nodes += 1
                         continue
-                    # Count blockchain interaction types by categories
+                    
+                    # Enhanced blockchain interaction categorization
                     interaction_categories = {
-                        'production': 0,
-                        'marketplace': 0, 
-                        'transfer': 0,
-                        'governance': 0,
-                        'logistics': 0,
-                        'batch_operations': 0,
-                        'dispute': 0
+                        'production': 0, 'marketplace': 0, 'transfer': 0, 'governance': 0,
+                        'logistics': 0, 'batch_operations': 0, 'dispute': 0,
+                        'attack_sybil': 0, 'attack_bribery': 0
                     }
                     
                     for interaction in valid_interactions:
@@ -159,13 +218,20 @@ class DataProcessor:
                         if category in interaction_categories:
                             interaction_categories[category] += 1
                     
-                    # Calculate feature values based on blockchain interactions
+                    # Calculate comprehensive features including attack indicators
                     vote_actions = interaction_categories['governance']
                     transfer_actions = interaction_categories['transfer'] + interaction_categories['batch_operations']
                     production_actions = interaction_categories['production']
                     marketplace_actions = interaction_categories['marketplace']
                     logistics_actions = interaction_categories['logistics']
                     dispute_actions = interaction_categories['dispute']
+                    attack_sybil_actions = interaction_categories['attack_sybil']
+                    attack_bribery_actions = interaction_categories['attack_bribery']
+                    
+                    # Extract attack-specific features
+                    attack_features = extract_attack_features(node_address, node_info, attack_metadata)
+                    
+                    # Enhanced feature vector with attack detection capabilities
                     features = [
                         safe_float(node_info.get('currentReputation', 0)) / 100.0,
                         safe_float(node_info.get('initialReputation', 0)) / 100.0,
@@ -177,38 +243,57 @@ class DataProcessor:
                         safe_float(marketplace_actions) / 5.0,
                         safe_float(logistics_actions) / 5.0,
                         safe_float(dispute_actions) / 3.0,
+                        # New attack detection features
+                        safe_float(attack_sybil_actions) / 5.0,
+                        attack_features['suspicious_pattern_count'],
+                        attack_features['attack_interaction_ratio'],
+                        attack_features['sybil_confidence'],
                     ]
-                    # Enhanced sybil detection based on blockchain patterns
-                    current_rep = node_info.get('currentReputation', 100)
                     
-                    # Sybil indicators: low reputation + suspicious patterns
-                    suspicious_patterns = 0
-                    if current_rep < 50:
-                        suspicious_patterns += 1
-                    if len(valid_interactions) > 15:  # Too many interactions
-                        suspicious_patterns += 1
-                    if dispute_actions > 2:  # Too many disputes
-                        suspicious_patterns += 1
-                    if vote_actions > 10:  # Excessive voting
-                        suspicious_patterns += 1
-                    if transfer_actions > 20:  # Excessive transfers
-                        suspicious_patterns += 1
+                    # Enhanced Sybil detection with ground truth labels
+                    if node_address in ground_truth_labels.get('sybilDetection', {}):
+                        is_sybil = ground_truth_labels['sybilDetection'][node_address]
+                    else:
+                        # Fallback to heuristic detection for nodes without ground truth
+                        current_rep = node_info.get('currentReputation', 100)
+                        suspicious_patterns = 0
+                        if current_rep < 50: suspicious_patterns += 1
+                        if len(valid_interactions) > 15: suspicious_patterns += 1
+                        if dispute_actions > 2: suspicious_patterns += 1
+                        if vote_actions > 10: suspicious_patterns += 1
+                        if transfer_actions > 20: suspicious_patterns += 1
+                        if attack_sybil_actions > 0: suspicious_patterns += 2  # Strong indicator
+                        if node_info.get('isSybil', False): suspicious_patterns += 3  # Explicit marking
                         
-                    is_sybil = 1.0 if suspicious_patterns >= 2 else 0.0
+                        is_sybil = 1.0 if suspicious_patterns >= 2 else 0.0
+                    
                     processed_data['sybil_detection']['features'].append(features)
                     processed_data['sybil_detection']['labels'].append(is_sybil)
-            # --- Batch Monitoring ---
+            
+            # --- Enhanced Batch Monitoring with Attack Patterns ---
             if batches_data:
-                logger.info("Extracting features for Batch monitoring from real batch data (strict)")
+                logger.info("Extracting enhanced features for Batch monitoring with attack detection")
                 for batch_id, batch_info in batches_data.items():
                     transactions = batch_info.get('transactions', [])
                     votes = batch_info.get('votes', {})
                     total_votes = len(votes)
                     positive_votes = sum(1 for vote_info in votes.values() if vote_info.get('vote', False))
                     approval_rate = positive_votes / total_votes if total_votes > 0 else 0.0
+                    
+                    # Check for attack-related patterns in batch
+                    sybil_votes = 0
+                    bribed_votes = 0
+                    for voter_addr, vote_info in votes.items():
+                        if voter_addr in attack_metadata.get('sybilNodes', []):
+                            sybil_votes += 1
+                        if voter_addr in attack_metadata.get('bribedNodes', []):
+                            bribed_votes += 1
+                    
                     propose_time = safe_int(batch_info.get('proposeTimestamp', 0))
                     commit_time = safe_int(batch_info.get('commitTimestamp', propose_time))
                     processing_duration = commit_time - propose_time if commit_time > propose_time else 0
+                    
+                    # Enhanced features with attack detection
                     features = [
                         safe_float(len(transactions)) / 5.0,
                         safe_float(total_votes) / 5.0,
@@ -216,88 +301,92 @@ class DataProcessor:
                         safe_float(processing_duration) / 3600.0,
                         1.0 if batch_info.get('status') == 'Committed' else 0.0,
                         safe_float(len(batch_info.get('selectedValidators', []))) / 5.0,
+                        # Attack detection features
+                        safe_float(sybil_votes) / max(1, total_votes),  # Ratio of Sybil votes
+                        safe_float(bribed_votes) / max(1, total_votes), # Ratio of bribed votes
                     ]
-                    has_anomaly = 1.0 if (approval_rate < 0.6 or processing_duration > 1800) else 0.0
+                    
+                    # Enhanced anomaly detection
+                    has_anomaly = 1.0 if (approval_rate < 0.6 or processing_duration > 1800 or 
+                                        sybil_votes > 0 or bribed_votes > 0) else 0.0
+                    
                     processed_data['batch_monitoring']['features'].append(features)
                     processed_data['batch_monitoring']['labels'].append(has_anomaly)
-            # --- Node Behavior ---
+            
+            # --- Enhanced Bribery Detection with Attack Detection ---
             if nodes_data:
-                logger.info("Extracting features for Node behavior analysis from real interaction patterns (strict)")
+                logger.info("Extracting enhanced features for Bribery detection with attack patterns")
                 for node_address, node_info in nodes_data.items():
                     interactions = node_info.get('interactions', [])
                     valid_interactions = [i for i in interactions if is_valid_interaction(i)]
                     if len(valid_interactions) < 2:
                         dropped_nodes += 1
                         continue
+                    
+                    # Enhanced temporal analysis
                     timestamps = [safe_int(inter.get('timestamp', 0)) for inter in valid_interactions]
                     timestamps.sort()
                     time_intervals = [timestamps[i] - timestamps[i-1] for i in range(1, len(timestamps))]
                     avg_interval = sum(time_intervals) / len(time_intervals) if time_intervals else 0
                     min_interval = min(time_intervals) if time_intervals else 0
-                    # Enhanced node behavior analysis with blockchain-specific patterns
+                    
+                    # Enhanced behavioral metrics
                     interaction_diversity = len(set(inter.get('type', '') for inter in valid_interactions))
+                    attack_features = extract_attack_features(node_address, node_info, attack_metadata)
                     
-                    # Calculate blockchain-specific behavior metrics
-                    blockchain_behavior_score = 0
-                    if production_actions > 0 and marketplace_actions > 0:  # Complete supply chain participation
-                        blockchain_behavior_score += 1
-                    if logistics_actions > 0:  # Transport participation
-                        blockchain_behavior_score += 1
-                    if vote_actions > 0:  # Governance participation
-                        blockchain_behavior_score += 1
+                    # Calculate behavioral change indicators
+                    behavioral_change_score = 0.0
+                    if node_info.get('isBribed', False):
+                        behavioral_change_score = 1.0
+                    elif attack_features['attack_interaction_ratio'] > 0.1:
+                        behavioral_change_score = 0.8
+                    elif len(node_info.get('suspiciousPatterns', [])) > 0:
+                        behavioral_change_score = 0.6
                     
+                    # Enhanced features for bribery detection (15 features)
                     features = [
                         safe_float(len(valid_interactions)) / 20.0,
-                        safe_float(interaction_diversity) / 15.0,  # More interaction types in blockchain
+                        safe_float(interaction_diversity) / 15.0,
                         safe_float(avg_interval) / 3600.0,
                         safe_float(min_interval) / 60.0,
-                        safe_float(dispute_actions) / 3.0,
                         safe_float(node_info.get('currentReputation', 0)) / 100.0,
-                        safe_float(blockchain_behavior_score) / 3.0,  # New blockchain-specific feature
-                        safe_float(production_actions) / 5.0,  # Production activity
-                        safe_float(logistics_actions) / 5.0,   # Logistics activity
+                        safe_float(node_info.get('initialReputation', 0)) / 100.0,
+                        # Attack detection features
+                        attack_features['attack_interaction_ratio'],
+                        behavioral_change_score,
+                        attack_features['suspicious_pattern_count'],
+                        attack_features['bribery_confidence'],
+                        # Additional bribery-specific features
+                        safe_float(attack_features.get('reputation_decline_rate', 0.0)),
+                        safe_float(attack_features.get('decision_bias_score', 0.0)),
+                        safe_float(attack_features.get('coordination_score', 0.0)),
+                        safe_float(attack_features.get('economic_incentive_score', 0.0)),
+                        safe_float(attack_features.get('timing_anomaly_score', 0.0)),
                     ]
-                    # Enhanced suspicious behavior detection for blockchain
-                    suspicious_indicators = 0
-                    if min_interval < 30:  # Too fast interactions
-                        suspicious_indicators += 1
-                    if dispute_actions > 1:  # Multiple disputes
-                        suspicious_indicators += 1
-                    if interaction_diversity < 2:  # Too narrow activity
-                        suspicious_indicators += 1
-                    if len(valid_interactions) > 25:  # Excessive activity
-                        suspicious_indicators += 1
-                    if blockchain_behavior_score == 0:  # No meaningful supply chain participation
-                        suspicious_indicators += 1
-                        
-                    is_suspicious = 1.0 if suspicious_indicators >= 2 else 0.0
-                    processed_data['node_behavior']['features'].append(features)
-                    processed_data['node_behavior']['labels'].append(is_suspicious)
-            # --- Dispute-based features for node_behavior ---
-            if disputes_data:
-                logger.info("Processing dispute data for additional insights (strict)")
-                for dispute_id, dispute_info in disputes_data.items():
-                    disputer = dispute_info.get('disputer', '')
-                    if disputer in nodes_data:
-                        dispute_features = [
-                            1.0,
-                            1.0 if dispute_info.get('status') == 'Enforced' else 0.0,
-                            safe_float(len(dispute_info.get('proposedCandidates', []))) / 5.0,
-                            safe_float(len(dispute_info.get('votes', {}))) / 5.0,
-                            safe_float(dispute_info.get('resolutionOutcome', 0)),
-                            0.5
-                        ]
-                        processed_data['node_behavior']['features'].append(dispute_features)
-                        processed_data['node_behavior']['labels'].append(1.0)
-            # --- Anti-Sybil/Bribery Heuristics ---
-            # Drop nodes with too many identical interactions (potential Sybil)
-            for model_name in processed_data:
-                feats = processed_data[model_name]['features']
-                labels = processed_data[model_name]['labels']
+                    
+                    # Enhanced anomaly detection with ground truth
+                    if node_address in ground_truth_labels.get('briberyDetection', {}):
+                        is_bribery = ground_truth_labels['briberyDetection'][node_address]
+                    else:
+                        # Fallback heuristic
+                        is_bribery = 1.0 if (behavioral_change_score > 0.5 or 
+                                           attack_features['attack_interaction_ratio'] > 0.2) else 0.0
+                    
+                    processed_data['bribery_detection']['features'].append(features)
+                    processed_data['bribery_detection']['labels'].append(is_bribery)
+            
+            # Remove duplicates for all models
+            for model_name, model_data in processed_data.items():
+                features_list = model_data['features']
+                labels_list = model_data['labels']
+                if len(features_list) == 0:
+                    continue
+                
+                # Remove exact duplicates
+                seen = set()
                 unique_feats = []
                 unique_labels = []
-                seen = set()
-                for f, l in zip(feats, labels):
+                for f, l in zip(features_list, labels_list):
                     f_tuple = tuple(f)
                     if f_tuple in seen:
                         dropped_interactions += 1
@@ -307,7 +396,8 @@ class DataProcessor:
                     unique_labels.append(l)
                 processed_data[model_name]['features'] = unique_feats
                 processed_data[model_name]['labels'] = unique_labels
-            # --- Generate synthetic blockchain data if needed (Fixed 30 sample minimum) ---
+            
+            # Enhanced synthetic data generation for attack patterns
             synthetic_data_generated = False
             MIN_SAMPLES_REQUIRED = 30  # Fixed minimum requirement for all models
             
@@ -316,39 +406,49 @@ class DataProcessor:
                 
                 if current_samples < MIN_SAMPLES_REQUIRED:
                     needed_samples = MIN_SAMPLES_REQUIRED - current_samples
-                    logger.info(f"{model_name}: Only {current_samples} real samples. Generating {needed_samples} synthetic blockchain samples to reach {MIN_SAMPLES_REQUIRED}.")
+                    logger.info(f"{model_name}: Only {current_samples} real samples. Generating {needed_samples} enhanced synthetic samples.")
                     
-                    synthetic_features, synthetic_labels = self._generate_synthetic_blockchain_data(
-                        model_name, model_data['features'], model_data['labels'], needed_samples, nodes_data
+                    synthetic_features, synthetic_labels = self._generate_enhanced_attack_synthetic_data(
+                        model_name, model_data['features'], model_data['labels'], needed_samples, 
+                        nodes_data, attack_metadata
                     )
                     
                     model_data['features'].extend(synthetic_features)
                     model_data['labels'].extend(synthetic_labels)
                     synthetic_data_generated = True
                     
-                    logger.info(f"{model_name}: Now has {len(model_data['features'])} samples (real + synthetic)")
+                    logger.info(f"{model_name}: Now has {len(model_data['features'])} samples (real + enhanced synthetic)")
 
             if synthetic_data_generated:
-                logger.info("Synthetic blockchain data generation completed to meet minimum sample requirements.")
+                logger.info("Enhanced synthetic data generation with attack patterns completed.")
             
-            # --- Enforce 30 samples minimum requirement ---
+            # Final validation
             for model_name, model_data in processed_data.items():
                 current_samples = len(model_data['features'])
                 
                 if current_samples < MIN_SAMPLES_REQUIRED:
                     logger.error(f"{model_name}: Still insufficient samples ({current_samples}), required minimum {MIN_SAMPLES_REQUIRED}.")
-                    # Clear insufficient data to prevent training errors
                     processed_data[model_name]['features'] = []
                     processed_data[model_name]['labels'] = []
                 else:
                     logger.info(f"{model_name}: {current_samples} samples available (minimum {MIN_SAMPLES_REQUIRED} satisfied).")
-            logger.info(f"Dropped {dropped_nodes} nodes and {dropped_interactions} duplicate/suspicious interactions during cleaning.")
-            logger.info("Strict data preprocessing completed successfully.")
+            
+            logger.info(f"Enhanced preprocessing completed: dropped {dropped_nodes} nodes and {dropped_interactions} duplicate interactions.")
+            
+            # Log attack data statistics
+            if attack_metadata:
+                total_positive_sybil = sum(processed_data['sybil_detection']['labels'])
+                total_positive_bribery = sum(processed_data['bribery_detection']['labels'])
+                logger.info(f"Attack detection summary: {total_positive_sybil} Sybil positives, {total_positive_bribery} bribery attacks detected")
+            
             return processed_data
+            
         except Exception as e:
-            logger.error(f"Error in data preprocessing (strict): {str(e)}")
+            logger.error(f"Error in enhanced data preprocessing: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise
-    
+
     def process_node_data(self, 
                          node_data: Dict[str, Any], 
                          transaction_data: List[Dict[str, Any]] = None,
@@ -664,21 +764,21 @@ class DataProcessor:
         
         return features_array, labels_array
     
-    def prepare_node_behavior_data(self, 
-                                  nodes_data: Dict[str, Any],
-                                  transactions_data: Dict[str, List[Dict[str, Any]]],
-                                  events_data: Dict[str, List[Dict[str, Any]]],
-                                  time_window: int = 10,
-                                  anomalous_nodes: List[str] = None) -> Tuple[np.ndarray, np.ndarray]:
+    def prepare_bribery_detection_data(self, 
+                                      nodes_data: Dict[str, Any],
+                                      transactions_data: Dict[str, List[Dict[str, Any]]],
+                                      events_data: Dict[str, List[Dict[str, Any]]],
+                                      time_window: int = 10,
+                                      bribed_nodes: List[str] = None) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Prepare time series data for node behavior model.
+        Prepare time series data for bribery detection model.
         
         Args:
             nodes_data: Dictionary of node data
             transactions_data: Dictionary of transaction data by node
             events_data: Dictionary of event data by node
             time_window: Number of time steps in the time series
-            anomalous_nodes: List of known anomalous node addresses
+            bribed_nodes: List of known bribed node addresses
             
         Returns:
             Tuple of (features, labels)
@@ -762,12 +862,12 @@ class DataProcessor:
             if time_series:
                 features.append(time_series)
                 
-                # Determine label (1 for anomalous, 0 for normal)
-                is_anomalous = 0
-                if anomalous_nodes and node_address in anomalous_nodes:
-                    is_anomalous = 1
+                # Determine label (1 for bribed, 0 for normal)
+                is_bribed = 0
+                if bribed_nodes and node_address in bribed_nodes:
+                    is_bribed = 1
                 
-                labels.append(is_anomalous)
+                labels.append(is_bribed)
         
         # Convert to numpy arrays
         if features:
@@ -853,7 +953,7 @@ class DataProcessor:
                          features: np.ndarray, 
                          labels: np.ndarray, 
                          batch_size: int = 32,
-                         shuffle: bool = True) -> tf.data.Dataset:
+                         shuffle: bool = True):
         """
         Create TensorFlow dataset from features and labels.
         
@@ -862,100 +962,37 @@ class DataProcessor:
             labels: Label array
             batch_size: Batch size for the dataset
             shuffle: Whether to shuffle the dataset
-            
         Returns:
-            TensorFlow dataset
+            TensorFlow dataset if TensorFlow is available, None otherwise
         """
+        if not TF_AVAILABLE:
+            logger.warning("TensorFlow not available. Cannot create TF dataset.")
+            return None
         # Create dataset
         dataset = tf.data.Dataset.from_tensor_slices((features, labels))
-        
-        # Shuffle if requested
         if shuffle:
             dataset = dataset.shuffle(buffer_size=len(features))
-        
-        # Batch
         dataset = dataset.batch(batch_size)
-        
         return dataset
     
-    def split_data(self, 
-                  features: np.ndarray, 
-                  labels: np.ndarray,
-                  test_size: float = 0.2,
-                  random_seed: int = 42) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def create_federated_tf_datasets(self, 
+                                    client_features: List[np.ndarray], 
+                                    client_labels: List[np.ndarray], 
+                                    batch_size: int = 32, 
+                                    shuffle: bool = True, 
+                                    random_seed: int = 42):
         """
-        Split data into training and testing sets.
-        
-        Args:
-            features: Feature array
-            labels: Label array
-            test_size: Proportion of data to use for testing
-            random_seed: Random seed for reproducibility
-            
-        Returns:
-            Tuple of (train_features, test_features, train_labels, test_labels)
+        Create federated TensorFlow datasets for each client.
+        Returns a list of tf.data.Dataset if TensorFlow is available, else None.
         """
-        # Set random seed
-        np.random.seed(random_seed)
-        
-        # Get indices
-        indices = np.random.permutation(len(features))
-        test_count = int(test_size * len(features))
-        test_indices = indices[:test_count]
-        train_indices = indices[test_count:]
-        
-        # Split data
-        train_features = features[train_indices]
-        test_features = features[test_indices]
-        train_labels = labels[train_indices]
-        test_labels = labels[test_indices]
-        
-        return train_features, test_features, train_labels, test_labels
-    
-    def create_federated_datasets(self, 
-                                 features: np.ndarray, 
-                                 labels: np.ndarray,
-                                 num_clients: int = 3,
-                                 batch_size: int = 32,
-                                 random_seed: int = 42) -> List[tf.data.Dataset]:
-        """
-        Create federated datasets for FL training.
-        
-        Args:
-            features: Feature array
-            labels: Label array
-            num_clients: Number of FL clients
-            batch_size: Batch size for the datasets
-            random_seed: Random seed for reproducibility
-            
-        Returns:
-            List of TensorFlow datasets, one per client
-        """
-        # Set random seed
-        np.random.seed(random_seed)
-        
-        # Get indices
-        indices = np.random.permutation(len(features))
-        
-        # Split indices among clients
-        client_indices = np.array_split(indices, num_clients)
-        
-        # Create datasets
+        if not TF_AVAILABLE:
+            logger.warning("TensorFlow not available. Cannot create federated TF datasets.")
+            return None
         federated_datasets = []
-        for client_idx in client_indices:
-            client_features = features[client_idx]
-            client_labels = labels[client_idx]
-            
-            # Create dataset
+        for features, labels in zip(client_features, client_labels):
             client_dataset = self.create_tf_dataset(
-                client_features,
-                client_labels,
-                batch_size=batch_size,
-                shuffle=True
-            )
-            
+                features, labels, batch_size=batch_size, shuffle=shuffle)
             federated_datasets.append(client_dataset)
-        
         return federated_datasets
     
     def save_processed_data(self, 
@@ -1204,9 +1241,9 @@ class DataProcessor:
         logger.info(f"Extracted batch monitoring features for {len(batch_features)} batches")
         return batch_features
     
-    def extract_node_behavior_features(self, processed_data: Dict[str, Any]) -> Dict[str, List[float]]:
+    def extract_bribery_detection_features(self, processed_data: Dict[str, Any]) -> Dict[str, List[float]]:
         """
-        Extract features specifically for node behavior analysis model.
+        Extract features specifically for bribery detection model.
         
         Args:
             processed_data: Processed blockchain data
@@ -1214,14 +1251,14 @@ class DataProcessor:
         Returns:
             Dictionary mapping node IDs to feature vectors
         """
-        node_features = {}
+        bribery_features = {}
         
         # Process node data
         for node_id, node_data in processed_data.get("nodes", {}).items():
             if "features" in node_data:
                 feature_dict = node_data["features"]
                 
-                # Extract relevant features for node behavior analysis
+                # Extract relevant features for bribery detection (15 features)
                 relevant_features = []
                 
                 # Transaction patterns
@@ -1229,8 +1266,17 @@ class DataProcessor:
                            "tx_value_std", "tx_value_min", "tx_value_max", "tx_value_total"]:
                     relevant_features.append(feature_dict.get(key, 0))
                 
-                # Reputation
+                # Reputation and behavioral change indicators
                 relevant_features.append(feature_dict.get("reputation", 0))
+                
+                # Bribery-specific features
+                relevant_features.append(feature_dict.get("reputation_decline_rate", 0))
+                relevant_features.append(feature_dict.get("decision_bias_score", 0))
+                relevant_features.append(feature_dict.get("coordination_score", 0))
+                relevant_features.append(feature_dict.get("economic_incentive_score", 0))
+                relevant_features.append(feature_dict.get("timing_anomaly_score", 0))
+                relevant_features.append(feature_dict.get("behavioral_change_score", 0))
+                relevant_features.append(feature_dict.get("corruption_confidence", 0))
                 
                 # Add batch validation statistics if available
                 batch_approvals = 0
@@ -1294,7 +1340,7 @@ class DataProcessor:
                 for _ in range(needed_samples):
                     features = [
                         random.uniform(0.2, 1.0),  # transactions normalized
-                        random.uniform(0.4, 1.0),  # total_votes normalized
+                        random.uniform(0.4, 1.0),  # total_votes
                         random.uniform(0.6, 1.0),  # approval_rate
                         random.uniform(0.1, 0.8),  # processing_duration
                         random.choice([0.0, 1.0]), # is_committed
@@ -1305,38 +1351,28 @@ class DataProcessor:
                     synthetic_features.append(features)
                     synthetic_labels.append(label)
                     
-            elif model_name == 'node_behavior':
+            elif model_name == 'bribery_detection':
                 for _ in range(needed_samples):
+                    # Enhanced features for bribery detection (15 features)
                     features = [
-                        random.uniform(0.1, 0.9),  # interactions normalized
+                        random.uniform(0.1, 1.0),  # interactions normalized
                         random.uniform(0.1, 0.8),  # interaction_diversity
                         random.uniform(0.2, 2.0),  # avg_interval hours
                         random.uniform(0.5, 10.0), # min_interval minutes
-                        random.uniform(0.0, 0.3),  # dispute_actions
-                        random.uniform(0.4, 1.0),  # reputation
-                        random.uniform(0.0, 1.0),  # blockchain_behavior_score
-                        random.uniform(0.0, 0.6),  # production_actions
-                        random.uniform(0.0, 0.4),  # logistics_actions
+                        random.uniform(0.4, 1.0),  # current_reputation
+                        random.uniform(0.4, 1.0),  # initial_reputation
+                        random.uniform(0.0, 0.3),  # attack_interaction_ratio
+                        random.uniform(0.0, 0.4),  # behavioral_change_score
+                        random.uniform(0.0, 0.2),  # suspicious_pattern_count
+                        random.uniform(0.0, 0.3),  # bribery_confidence
+                        random.uniform(0.0, 0.2),  # reputation_decline_rate
+                        random.uniform(0.0, 0.3),  # decision_bias_score
+                        random.uniform(0.0, 0.2),  # coordination_score
+                        random.uniform(0.0, 0.3),  # economic_incentive_score
+                        random.uniform(0.0, 0.2),  # timing_anomaly_score
                     ]
-                    # Generate realistic suspicious label
-                    label = 1.0 if random.random() < 0.25 else 0.0
-                    synthetic_features.append(features)
-                    synthetic_labels.append(label)
-            elif model_name == 'bribery_detection':
-                for _ in range(needed_samples):
-                    features = [
-                        random.uniform(0.1, 1.0),  # bribe_attempt_score
-                        random.uniform(0.0, 1.0),  # suspicious_transfer_ratio
-                        random.uniform(0.0, 1.0),  # vote_inconsistency
-                        random.uniform(0.0, 1.0),  # batch_approval_bias
-                        random.uniform(0.0, 1.0),  # batch_denial_bias
-                        random.uniform(0.0, 1.0),  # arbitrator_vote_bias
-                        random.uniform(0.0, 1.0),  # node_reputation
-                        random.uniform(0.0, 1.0),  # node_activity
-                        random.uniform(0.0, 1.0),  # transfer_frequency
-                        random.uniform(0.0, 1.0),  # governance_participation
-                    ]
-                    label = 1.0 if random.random() < 0.1 else 0.0
+                    # Generate realistic bribery detection label
+                    label = 1.0 if random.random() < 0.15 else 0.0
                     synthetic_features.append(features)
                     synthetic_labels.append(label)
             elif model_name == 'arbitrator_bias':
@@ -1411,6 +1447,165 @@ class DataProcessor:
                 synthetic_labels.append(label)
         
         logger.info(f"Generated {len(synthetic_features)} synthetic samples for {model_name}")
+        return synthetic_features, synthetic_labels
+
+    def _generate_enhanced_attack_synthetic_data(self, model_name: str, existing_features: List[List[float]], 
+                                               existing_labels: List[float], needed_samples: int, 
+                                               nodes_data: Dict[str, Any], attack_metadata: Dict[str, Any]) -> Tuple[List[List[float]], List[float]]:
+        """
+        Generate enhanced synthetic data that includes attack patterns and realistic blockchain behaviors.
+        This ensures the FL models have sufficient data to detect both normal and attack scenarios.
+        """
+        import random
+        import numpy as np
+        
+        synthetic_features = []
+        synthetic_labels = []
+        
+        logger.info(f"Generating enhanced synthetic data for {model_name} with attack pattern awareness")
+        
+        # Calculate label distribution from existing data (if any)
+        if existing_labels:
+            positive_ratio = np.mean(existing_labels)
+        else:
+            # Default ratios based on realistic attack scenarios
+            if model_name == 'sybil_detection':
+                positive_ratio = 0.15  # 15% attack nodes
+            elif model_name == 'bribery_detection':
+                positive_ratio = 0.12  # 12% bribery attacks
+            else:
+                positive_ratio = 0.10  # 10% anomalies
+        
+        # Enhanced feature generation based on model type
+        for i in range(needed_samples):
+            if model_name == 'sybil_detection':
+                # Generate Sybil detection features with attack awareness
+                is_attack = random.random() < positive_ratio
+                
+                if is_attack:
+                    # Generate attack pattern features
+                    features = [
+                        random.uniform(0.3, 0.7),  # currentReputation (lower for attacks)
+                        random.uniform(0.5, 0.9),  # initialReputation (artificially high)
+                        1.0,  # isVerified (attackers often verify first)
+                        random.uniform(0.1, 0.3),  # interactions (fewer genuine interactions)
+                        random.uniform(0.6, 1.0),  # vote_actions (excessive voting)
+                        random.uniform(0.3, 0.8),  # transfer_actions 
+                        random.uniform(0.0, 0.2),  # production_actions (low legitimate activity)
+                        random.uniform(0.0, 0.3),  # marketplace_actions
+                        random.uniform(0.0, 0.2),  # logistics_actions
+                        random.uniform(0.1, 0.5),  # dispute_actions
+                        random.uniform(0.2, 0.8),  # attack_sybil_actions (attack-specific)
+                        random.uniform(0.4, 0.9),  # suspicious_pattern_count
+                        random.uniform(0.3, 0.7),  # attack_interaction_ratio
+                        random.uniform(0.7, 0.95), # sybil_confidence
+                    ]
+                    label = 1.0
+                else:
+                    # Generate legitimate node features
+                    features = [
+                        random.uniform(0.6, 1.0),  # currentReputation (higher for legitimate)
+                        random.uniform(0.6, 1.0),  # initialReputation
+                        random.choice([0.0, 1.0]), # isVerified
+                        random.uniform(0.2, 0.8),  # interactions (varied)
+                        random.uniform(0.0, 0.4),  # vote_actions (normal voting)
+                        random.uniform(0.1, 0.6),  # transfer_actions
+                        random.uniform(0.1, 0.7),  # production_actions (legitimate activity)
+                        random.uniform(0.1, 0.6),  # marketplace_actions
+                        random.uniform(0.0, 0.5),  # logistics_actions
+                        random.uniform(0.0, 0.2),  # dispute_actions (few disputes)
+                        0.0,  # attack_sybil_actions (no attack actions)
+                        random.uniform(0.0, 0.3),  # suspicious_pattern_count (low)
+                        random.uniform(0.0, 0.1),  # attack_interaction_ratio (very low)
+                        0.0,  # sybil_confidence (not sybil)
+                    ]
+                    label = 0.0
+                    
+            elif model_name == 'batch_monitoring':
+                # Generate batch monitoring features
+                is_anomalous = random.random() < positive_ratio
+                
+                if is_anomalous:
+                    # Anomalous batch features
+                    features = [
+                        random.uniform(0.1, 0.4),  # transactions (few transactions)
+                        random.uniform(0.2, 0.6),  # total_votes
+                        random.uniform(0.0, 0.5),  # approval_rate (low approval)
+                        random.uniform(0.6, 1.0),  # processing_duration (long duration)
+                        0.0,  # is_committed (not committed)
+                        random.uniform(0.2, 0.6),  # validators
+                        random.uniform(0.2, 0.8),  # sybil_votes_ratio
+                        random.uniform(0.1, 0.6),  # bribed_votes_ratio
+                    ]
+                    label = 1.0
+                else:
+                    # Normal batch features
+                    features = [
+                        random.uniform(0.4, 1.0),  # transactions
+                        random.uniform(0.6, 1.0),  # total_votes
+                        random.uniform(0.7, 1.0),  # approval_rate (high approval)
+                        random.uniform(0.1, 0.5),  # processing_duration (normal)
+                        1.0,  # is_committed
+                        random.uniform(0.6, 1.0),  # validators
+                        0.0,  # sybil_votes_ratio (no sybil votes)
+                        0.0,  # bribed_votes_ratio (no bribed votes)
+                    ]
+                    label = 0.0
+                    
+            elif model_name == 'bribery_detection':
+                # Generate bribery detection features (15 features)
+                is_bribed = random.random() < positive_ratio
+                
+                if is_bribed:
+                    # Bribery attack features
+                    features = [
+                        random.uniform(0.3, 0.8),  # interactions
+                        random.uniform(0.1, 0.5),  # interaction_diversity (low diversity)
+                        random.uniform(0.0, 0.2),  # avg_interval (too fast)
+                        random.uniform(0.0, 0.1),  # min_interval (very fast)
+                        random.uniform(0.2, 0.6),  # current_reputation (degraded)
+                        random.uniform(0.5, 0.9),  # initial_reputation (was higher)
+                        random.uniform(0.3, 0.8),  # attack_interaction_ratio
+                        random.uniform(0.6, 1.0),  # behavioral_change_score
+                        random.uniform(0.4, 0.9),  # suspicious_pattern_count
+                        random.uniform(0.5, 0.9),  # bribery_confidence
+                        random.uniform(0.3, 0.7),  # reputation_decline_rate
+                        random.uniform(0.4, 0.8),  # decision_bias_score
+                        random.uniform(0.3, 0.7),  # coordination_score
+                        random.uniform(0.4, 0.8),  # economic_incentive_score
+                        random.uniform(0.3, 0.6),  # timing_anomaly_score
+                    ]
+                    label = 1.0
+                else:
+                    # Normal behavior features (15 features)
+                    features = [
+                        random.uniform(0.3, 0.9),  # interactions
+                        random.uniform(0.4, 0.9),  # interaction_diversity (good diversity)
+                        random.uniform(0.2, 2.0),  # avg_interval (normal timing)
+                        random.uniform(0.5, 10.0), # min_interval (reasonable gaps)
+                        random.uniform(0.6, 1.0),  # current_reputation (good)
+                        random.uniform(0.6, 1.0),  # initial_reputation (consistent)
+                        random.uniform(0.0, 0.2),  # attack_interaction_ratio (low)
+                        random.uniform(0.0, 0.3),  # behavioral_change_score (stable)
+                        random.uniform(0.0, 0.3),  # suspicious_pattern_count (low)
+                        0.0,  # bribery_confidence (not bribed)
+                        random.uniform(0.0, 0.1),  # reputation_decline_rate (stable)
+                        random.uniform(0.0, 0.2),  # decision_bias_score (fair)
+                        random.uniform(0.0, 0.2),  # coordination_score (independent)
+                        random.uniform(0.0, 0.2),  # economic_incentive_score (honest)
+                        random.uniform(0.0, 0.2),  # timing_anomaly_score (normal)
+                    ]
+                    label = 0.0
+            else:
+                # Fallback for unknown model types
+                features = [random.uniform(0.0, 1.0) for _ in range(8)]
+                label = 1.0 if random.random() < positive_ratio else 0.0
+            
+            synthetic_features.append(features)
+            synthetic_labels.append(label)
+        
+        logger.info(f"Generated {len(synthetic_features)} enhanced synthetic samples for {model_name} "
+                   f"with {sum(synthetic_labels)} positive (attack) cases")
         return synthetic_features, synthetic_labels
 
     def create_synthetic_blockchain_context(self, base_samples: int = 35) -> Dict[str, Any]:

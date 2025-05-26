@@ -7,7 +7,6 @@ import os
 import json
 import logging
 import numpy as np
-import tensorflow as tf
 from typing import Dict, List, Any, Optional, Union, Tuple
 from datetime import datetime, timedelta
 import time
@@ -59,12 +58,10 @@ class AnomalyDetector:
         self.detection_threshold = detection_threshold
         self.ensemble_method = ensemble_method
         
-        # Default model weights if not provided
+        # Default model weights for core attack detection models
         self.model_weights = model_weights or {
-            "sybil_detection": 0.3,
-            "batch_monitoring": 0.25,
-            "node_behavior": 0.25,
-            "dispute_risk": 0.2
+            "sybil_detection": 0.5,
+            "bribery_detection": 0.5
         }
         
         # Normalize weights to sum to 1
@@ -125,13 +122,13 @@ class AnomalyDetector:
     
     def detect_sybil_nodes(self, 
                           sybil_results: Dict[str, Any],
-                          node_behavior_results: Dict[str, Any] = None) -> List[str]:
+                          bribery_detection_results: Dict[str, Any] = None) -> List[str]:
         """
         Detect Sybil nodes based on model results.
         
         Args:
             sybil_results: Results from Sybil detection model
-            node_behavior_results: Results from node behavior model
+            bribery_detection_results: Results from bribery detection model
             
         Returns:
             List of detected Sybil node addresses
@@ -147,9 +144,9 @@ class AnomalyDetector:
                 if prediction >= self.detection_threshold:
                     detected_nodes.append(node_address)
         
-        # Incorporate node behavior results if available
-        if node_behavior_results and "predictions" in node_behavior_results:
-            behavior_predictions = node_behavior_results["predictions"]
+        # Incorporate bribery detection results if available
+        if bribery_detection_results and "predictions" in bribery_detection_results:
+            behavior_predictions = bribery_detection_results["predictions"]
             
             for node_address, prediction in behavior_predictions.items():
                 # Only add nodes not already detected
@@ -211,14 +208,14 @@ class AnomalyDetector:
     
     def detect_bribery_attacks(self, 
                              sybil_results: Dict[str, Any],
-                             node_behavior_results: Dict[str, Any],
+                             bribery_detection_results: Dict[str, Any],
                              batch_results: Dict[str, Any] = None) -> List[Dict[str, Any]]:
         """
         Detect bribery attacks based on model results.
         
         Args:
             sybil_results: Results from Sybil detection model
-            node_behavior_results: Results from node behavior model
+            bribery_detection_results: Results from bribery detection model
             batch_results: Results from batch monitoring model
             
         Returns:
@@ -226,9 +223,9 @@ class AnomalyDetector:
         """
         bribery_attacks = []
         
-        # Extract predictions from node behavior results
-        if "predictions" in node_behavior_results:
-            behavior_predictions = node_behavior_results["predictions"]
+        # Extract predictions from bribery detection results
+        if "predictions" in bribery_detection_results:
+            behavior_predictions = bribery_detection_results["predictions"]
             
             # Extract predictions from Sybil detection results
             sybil_predictions = sybil_results.get("predictions", {})
@@ -245,8 +242,8 @@ class AnomalyDetector:
                     # Check if node is associated with suspicious batches
                     associated_batches = []
                     
-                    if "node_batch_associations" in node_behavior_results:
-                        associations = node_behavior_results["node_batch_associations"]
+                    if "node_batch_associations" in bribery_detection_results:
+                        associations = bribery_detection_results["node_batch_associations"]
                         if node_address in associations:
                             for batch_id in associations[node_address]:
                                 if batch_id in batch_predictions and batch_predictions[batch_id] >= self.detection_threshold:
@@ -560,29 +557,29 @@ class AnomalyDetector:
         if "sybil_detection" in model_results:
             sybil_nodes = self.detect_sybil_nodes(
                 model_results["sybil_detection"],
-                model_results.get("node_behavior")
+                model_results.get("bribery_detection")
             )
             detection_results["details"]["sybil_nodes"] = sybil_nodes
         
-        # Detect suspicious batches
-        if "batch_monitoring" in model_results:
-            suspicious_batches = self.detect_suspicious_batches(
-                model_results["batch_monitoring"]
-            )
-            detection_results["details"]["suspicious_batches"] = suspicious_batches
+        # Detect suspicious batches (removed - not part of core models)
+        # if "batch_monitoring" in model_results:
+        #     suspicious_batches = self.detect_suspicious_batches(
+        #         model_results["batch_monitoring"]
+        #     )
+        #     detection_results["details"]["suspicious_batches"] = suspicious_batches
         
-        # Detect high-risk disputes
-        if "dispute_risk" in model_results:
-            high_risk_disputes = self.detect_high_risk_disputes(
-                model_results["dispute_risk"]
-            )
-            detection_results["details"]["high_risk_disputes"] = high_risk_disputes
+        # Detect high-risk disputes (removed - not part of core models)
+        # if "dispute_risk" in model_results:
+        #     high_risk_disputes = self.detect_high_risk_disputes(
+        #         model_results["dispute_risk"]
+        #     )
+        #     detection_results["details"]["high_risk_disputes"] = high_risk_disputes
         
         # Detect bribery attacks
-        if "sybil_detection" in model_results and "node_behavior" in model_results:
+        if "sybil_detection" in model_results and "bribery_detection" in model_results:
             bribery_attacks = self.detect_bribery_attacks(
                 model_results["sybil_detection"],
-                model_results["node_behavior"],
+                model_results["bribery_detection"],
                 model_results.get("batch_monitoring")
             )
             detection_results["details"]["bribery_attacks"] = bribery_attacks
@@ -594,17 +591,9 @@ class AnomalyDetector:
         if "sybil_detection" in model_results and "overall_score" in model_results["sybil_detection"]:
             model_scores["sybil_detection"] = model_results["sybil_detection"]["overall_score"]
         
-        # Add batch monitoring score
-        if "batch_monitoring" in model_results and "overall_score" in model_results["batch_monitoring"]:
-            model_scores["batch_monitoring"] = model_results["batch_monitoring"]["overall_score"]
-        
-        # Add node behavior score
-        if "node_behavior" in model_results and "overall_score" in model_results["node_behavior"]:
-            model_scores["node_behavior"] = model_results["node_behavior"]["overall_score"]
-        
-        # Add dispute risk score
-        if "dispute_risk" in model_results and "overall_score" in model_results["dispute_risk"]:
-            model_scores["dispute_risk"] = model_results["dispute_risk"]["overall_score"]
+        # Add bribery detection score
+        if "bribery_detection" in model_results and "overall_score" in model_results["bribery_detection"]:
+            model_scores["bribery_detection"] = model_results["bribery_detection"]["overall_score"]
         
         # Calculate ensemble score
         ensemble_score = self.calculate_ensemble_score(model_scores)
@@ -907,7 +896,7 @@ class AnomalyDetector:
             if sybil_nodes:
                 sybil_evidence = []
                 for node in sybil_nodes:
-                    node_score = sybil_predictions.get(node, 0.0) if 'sybil_predictions' in locals() else 0.9
+                    node_score = model_scores.get("sybil_detection", confidence)
                     sybil_evidence.append({
                         "node_address": node,
                         "confidence_score": node_score,

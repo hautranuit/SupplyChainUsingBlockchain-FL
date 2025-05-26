@@ -1,809 +1,951 @@
-// Improved Sybil Attack Simulation for ChainFLIP
+// Simplified Sybil Attack Simulation - 6 Phases
+// Uses only 3 Sybil nodes (signer[8], [9], [10])
+
 const { ethers } = require('hardhat');
 const fs = require('fs');
 const path = require('path');
-const { DateTime } = require('luxon'); // Add luxon for better timestamp handling
+const { DateTime } = require('luxon');
 
-// Configuration
-const NUM_SYBIL_NODES = 3;  // Number of Sybil nodes to create
-const SYBIL_CONTROLLER_DESCRIPTION = 'SybilMasterCoordinator'; // For logging/description
+// === SIMPLIFIED CONFIGURATION ===
+const SYBIL_CONFIG = {
+    numNodes: 3,                    // 3 Sybil nodes: signer[8], [9], [10]
+    initialReputation: 25,          // Starting reputation for Sybil nodes
+    targetReputation: 80,           // Target reputation for Primary Node upgrade
+    fakeProductTokenId: "4"         // Token ID for fake product (cloning token ID "2")
+};
 
-// Configuration for Bribery Attack (Scenario D)
-const NUM_BRIBED_NODES = 2; // Number of nodes to attempt to bribe
-const BRIBER_IDENTIFIER = 'MaliciousBriberScenarioD'; // Identifier for the bribing entity in Scenario D
+// Attack Identifiers
+const ATTACK_IDENTIFIERS = {
+    sybilController: 'SybilCoordinator_v1',
+    attackCampaign: `ATTACK_${DateTime.now().toFormat('yyyyMMdd_HHmmss')}`
+};
+
+// === UTILITY FUNCTIONS ===
+const contextFilePath = path.join(__dirname, 'demo_context.json');
 
 // Helper function for delays
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// --- Transaction Queue System ---
-const transactionQueue = [];
-let isProcessingQueue = false;
-const MIN_INTERVAL_MS = 750; // Minimum interval between finishing one tx and starting the next
-
-async function processTransactionQueue() {
-    if (isProcessingQueue) return;
-    isProcessingQueue = true;
-
-    while (transactionQueue.length > 0) {
-        const task = transactionQueue.shift();
-        console.log(`  [TX_QUEUE] Executing: ${task.description}`);
+// Read and update context file
+function readAndUpdateContext(updateFn) {
+    let contextData = {};
+    if (fs.existsSync(contextFilePath)) {
         try {
-            const txResponse = await task.action();
-            if (txResponse && typeof txResponse.wait === 'function') {
-                const receipt = await txResponse.wait();
-                console.log(`    Transaction successful: ${receipt.hash}`);
-                if (task.callback) {
-                    task.callback(null, receipt);
-                }
-            } else {
-                // For actions that don't return a typical tx response
-                console.log(`    Action completed (no transaction receipt).`);
-                if (task.callback) {
-                    task.callback(null, txResponse);
-                }
-            }
+            const fileContent = fs.readFileSync(contextFilePath, 'utf8');
+            contextData = JSON.parse(fileContent);
         } catch (error) {
-            console.error(`    Error executing ${task.description}:`, error.message);
-            if (task.callback) {
-                task.callback(error, null);
-            }
-        }
-        if (transactionQueue.length > 0) {
-            await delay(MIN_INTERVAL_MS);
+            console.error("Error reading context file:", error);
         }
     }
-    isProcessingQueue = false;
+    const updatedContext = updateFn(contextData);
+    try {
+        fs.writeFileSync(contextFilePath, JSON.stringify(updatedContext, null, 2));
+        console.log(`Context updated in ${contextFilePath}`);
+    } catch (error) {
+        console.error("Error writing context file:", error);
+    }
+    return updatedContext;
 }
-
-function addToTransactionQueue(description, action, callback) {
-    return new Promise((resolve, reject) => {
-        const wrappedCallback = (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-            if (callback) callback(error, result); // Also call original callback if provided
-        };
-        transactionQueue.push({ description, action, callback: wrappedCallback });
-        if (!isProcessingQueue) {
-            processTransactionQueue().catch(err => {
-                console.error("Error in processTransactionQueue:", err);
-            });
-        }
-    });
-}
-// --- End Transaction Queue System ---
 
 // Contract Enums (mirroring NodeManagement.sol)
 const ContractRole = { Manufacturer: 0, Transporter: 1, Customer: 2, Retailer: 3, Arbitrator: 4, Unassigned: 5 };
 const ContractNodeType = { Primary: 0, Secondary: 1, Unspecified: 2 };
-const BatchVoteType = { NotVoted: 0, Approve: 1, Deny: 2 };
 
-// --- Bribery Attack Simulation ---
-async function simulateBriberyAttack(bribingEntitySigner, context, sybilAttackLog, signers, addToTransactionQueue, ethersInstance) {
-    console.log(`  --- Starting Bribery Attack Simulation (Scenario D) ---`);
-    
-    // Initialize scenarioD details if not already present
-    if (!sybilAttackLog.scenarioD.details) {
-        sybilAttackLog.scenarioD.details = {};
-    }
-    
-    sybilAttackLog.scenarioD.details.briber = bribingEntitySigner.address;
-    sybilAttackLog.scenarioD.details.briberIdentifier = BRIBER_IDENTIFIER;
-    sybilAttackLog.scenarioD.details.timestamp = DateTime.now().toISO();
-
-    const potentialTargets = [];
-    if (context.arbitratorAddress) {
-        potentialTargets.push({ role: 'Arbitrator', address: context.arbitratorAddress });
-    }
-    for (let i = 1; i <= 3; i++) {
-        const key = `transporter${i}Address`;
-        if (context[key]) {
-            potentialTargets.push({ role: `Transporter${i}`, address: context[key] });
+// Helper functions to get data from context
+function getNodeAddressByRole(context, roleName) {
+    if (!context.nodes) return null;
+    for (const nodeAddr in context.nodes) {
+        const node = context.nodes[nodeAddr];
+        if (node.name && node.name.toLowerCase().includes(roleName.toLowerCase())) {
+            return nodeAddr;
         }
     }
-    if (context.retailerAddress) {
-        potentialTargets.push({ role: 'Retailer', address: context.retailerAddress });
-    }
-    // Add other roles from context if they are potential bribe targets
-    if (context.manufacturerAddress) {
-        potentialTargets.push({ role: 'Manufacturer', address: context.manufacturerAddress });
-    }
-    if (context.customerAddress) {
-        potentialTargets.push({ role: 'Customer', address: context.customerAddress });
-    }
-
-    const nodesToBribe = potentialTargets.filter(pt => pt.address !== bribingEntitySigner.address) // Cannot bribe self
-                                     .slice(0, Math.min(NUM_BRIBED_NODES, potentialTargets.length));
-
-    if (nodesToBribe.length === 0) {
-        console.log("    No valid targets found for bribery (or NUM_BRIBED_NODES is 0). Skipping bribery actions.");
-        sybilAttackLog.scenarioD.outcome = "No valid targets found or NUM_BRIBED_NODES is 0.";
-        return;
-    }
-
-    console.log(`    Attempting to bribe ${nodesToBribe.length} nodes:`);
-    nodesToBribe.forEach(node => console.log(`      - Target: ${node.role} (${node.address})`));
-
-    let successfulBribes = 0;
-
-    for (const node of nodesToBribe) {
-        // Using bribe calculation logic
-        const baseAmount = ethersInstance.utils.parseEther("0.01"); // 0.01 ETH base
-        const randomFactor = Math.floor(Math.random() * 100) / 100; // 0.00 to 0.99
-        const bribeAmount = baseAmount.add(ethersInstance.utils.parseEther(randomFactor.toFixed(2)));
-
-        const bribeActionDescription = `Briber (${bribingEntitySigner.address}) sends bribe of ${ethersInstance.utils.formatEther(bribeAmount)} ETH to ${node.role} (${node.address})`;
-
-        await addToTransactionQueue(
-            bribeActionDescription,
-            async () => bribingEntitySigner.sendTransaction({ to: node.address, value: bribeAmount }),
-            (error, receipt) => {
-                const bribeLogEntry = {
-                    type: 'bribePayment',
-                    briber: bribingEntitySigner.address,
-                    targetRole: node.role,
-                    targetAddress: node.address,
-                    bribeAmountETH: ethersInstance.utils.formatEther(bribeAmount),
-                    timestamp: DateTime.now().toISO(),
-                };
-                if (error) {
-                    console.error(`      [BRIBERY_CALLBACK] Failed - ${bribeActionDescription}: ${error.message}`);
-                    bribeLogEntry.status = 'failed';
-                    bribeLogEntry.error = error.message;
-                } else {
-                    console.log(`      [BRIBERY_CALLBACK] Success - ${bribeActionDescription}. Tx: ${receipt.hash}`);
-                    bribeLogEntry.status = 'success';
-                    bribeLogEntry.txHash = receipt.hash;
-                    
-                    // Ensure bribedNodes array exists
-                    if (!sybilAttackLog.scenarioD.bribedNodes) {
-                        sybilAttackLog.scenarioD.bribedNodes = [];
-                    }
-                    
-                    sybilAttackLog.scenarioD.bribedNodes.push({
-                        role: node.role,
-                        address: node.address,
-                        bribeAmountETH: ethersInstance.utils.formatEther(bribeAmount),
-                        txHash: receipt.hash,
-                        timestamp: bribeLogEntry.timestamp,
-                        expectedBehaviorChanges: getBehaviorChangesForRole(node.role)
-                    });
-                    successfulBribes++;
-                }
-                
-                // Ensure actions array exists
-                if (!sybilAttackLog.scenarioD.actions) {
-                    sybilAttackLog.scenarioD.actions = [];
-                }
-                
-                sybilAttackLog.scenarioD.actions.push(bribeLogEntry);
-            }
-        );
-    }
-
-    console.log("    Queueing bribe payments. Simulated behavioral changes will be logged based on successful bribes.");
-    sybilAttackLog.scenarioD.outcome = `Attempting to bribe ${nodesToBribe.length} nodes. Status of bribes will be updated after transaction processing.`;
-    console.log(`  --- Bribery Attack Simulation Logic Queued ---`);
+    return null;
 }
 
-function getBehaviorChangesForRole(role) {
-    // Define expected behavior changes based on role
-    const behaviorChanges = {
-        'Arbitrator': [
-            'Biased dispute resolutions favoring the briber',
-            'Delayed responses to non-briber disputes',
-            'Increased approval rate for briber-related transactions'
-        ],
-        'Transporter1': [
-            'Approval of suspicious batches',
-            'Collusion in batch validation',
-            'Prioritization of briber-related shipments'
-        ],
-        'Transporter2': [
-            'Approval of suspicious batches',
-            'Collusion in batch validation',
-            'Prioritization of briber-related shipments'
-        ],
-        'Transporter3': [
-            'Approval of suspicious batches',
-            'Collusion in batch validation',
-            'Prioritization of briber-related shipments'
-        ],
-        'Retailer': [
-            'False/inflated endorsements for briber products',
-            'Preferential treatment in marketplace listings',
-            'Manipulation of product ratings'
-        ],
-        'Manufacturer': [
-            'Quality control bypass for briber',
-            'Falsification of product specifications',
-            'Prioritization of briber orders'
-        ],
-        'Customer': [
-            'False positive reviews',
-            'Suppression of negative feedback',
-            'Artificial demand creation'
-        ]
-    };
+function getProductByTokenId(context, tokenId) {
+    // Search for product information in node interactions
+    if (!context.nodes) return null;
     
-    return behaviorChanges[role] || ['Generic malicious behavior'];
-}
-
-function logSimulatedBehavioralChanges(sybilAttackLog, bribingEntitySignerAddress) {
-    console.log("    Logging simulated behavioral changes of successfully bribed nodes...");
-    const bribedNodesInLog = sybilAttackLog.scenarioD.bribedNodes || [];
-
-    if (bribedNodesInLog.length === 0) {
-        console.log("      No nodes were successfully bribed, so no behavioral changes to log.");
-        return;
+    // Look for MintProduct interactions to get product details
+    for (const nodeAddr in context.nodes) {
+        const node = context.nodes[nodeAddr];
+        if (node.interactions) {
+            for (const interaction of node.interactions) {
+                if (interaction.type === "MintProduct" && interaction.tokenId === tokenId) {
+                    // Found the minting interaction, create a product object
+                    return {
+                        tokenId: tokenId,
+                        uniqueProductID: `DEMO_PROD_${tokenId.padStart(3, '0')}`,
+                        batchNumber: `BATCH_${tokenId}_${Date.now()}`,
+                        manufacturingDate: new Date().toISOString().split('T')[0],
+                        expirationDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+                        productType: `Product Type ${tokenId}`,
+                        manufacturerID: `MFG_${nodeAddr.slice(0, 8)}`,
+                        quickAccessURL: `https://demo-product-${tokenId}.example.com`,
+                        nftReference: `ipfs://demo-nft-${tokenId}`,
+                        currentOwnerAddress: nodeAddr,
+                        mintedBy: nodeAddr,
+                        mintTimestamp: interaction.timestamp
+                    };
+                }
+            }
+        }
     }
-
-    // Ensure simulatedBehavioralChanges array exists
-    if (!sybilAttackLog.scenarioD.simulatedBehavioralChanges) {
-        sybilAttackLog.scenarioD.simulatedBehavioralChanges = [];
-    }
-
-    for (const bribedNode of bribedNodesInLog) {
-        const behaviorChanges = bribedNode.expectedBehaviorChanges || getBehaviorChangesForRole(bribedNode.role);
-        
-        const simBehaviorLog = {
-            type: "simulatedBehaviorChange",
-            actorRole: bribedNode.role,
-            actorAddress: bribedNode.address,
-            description: `${bribedNode.role} ${bribedNode.address} is considered bribed. Expected behaviors: ${behaviorChanges.join(', ')}`,
-            expectedBehaviors: behaviorChanges,
-            bribedBy: bribingEntitySignerAddress,
-            bribeAmount: bribedNode.bribeAmountETH,
-            timestamp: DateTime.now().toISO()
+    
+    // If not found, create a basic product object for token ID "2" (commonly referenced)
+    if (tokenId === "2") {
+        return {
+            tokenId: "2",
+            uniqueProductID: "DEMO_PROD_002",
+            batchNumber: "BATCH_002_DEMO",
+            manufacturingDate: "2025-01-15",
+            expirationDate: "2026-01-15",
+            productType: "Electronics",
+            manufacturerID: "MFG_DEMO_002",
+            quickAccessURL: "https://demo-product-2.example.com",
+            nftReference: "ipfs://demo-nft-002",
+            currentOwnerAddress: "0x04351e7df40d04b5e610c4aa033facf435b98711" // Default to manufacturer
         };
-        
-        sybilAttackLog.scenarioD.simulatedBehavioralChanges.push(simBehaviorLog);
-        console.log(`      - ${simBehaviorLog.description}`);
+    }
+    
+    return null;
+}
+
+// === NEW/IMPROVED HELPERS ===
+// Add an interaction to a node, creating the node/interactions array if needed
+function addInteractionToNode(context, address, interaction) {
+    if (!context.nodes) context.nodes = {};
+    if (!context.nodes[address]) {
+        context.nodes[address] = { address, interactions: [] };
+    }
+    if (!Array.isArray(context.nodes[address].interactions)) {
+        context.nodes[address].interactions = [];
+    }
+    context.nodes[address].interactions.push(interaction);
+}
+
+// Mark a node as Sybil with all relevant flags
+function markNodeAsSybil(context, sybilNode, campaign, nodeTypeName) {
+    if (!context.nodes) context.nodes = {};
+    if (!context.nodes[sybilNode.address]) {
+        context.nodes[sybilNode.address] = {
+            address: sybilNode.address,
+            name: sybilNode.name,
+            role: sybilNode.role,
+            roleName: "Transporter",
+            nodeType: sybilNode.nodeType,
+            nodeTypeName,
+            initialReputation: sybilNode.initialReputation,
+            currentReputation: sybilNode.currentReputation,
+            isVerified: true,
+            isSybil: true,
+            attackCampaign: campaign,
+            suspiciousActivity: true,
+            interactions: []
+        };
+    } else {
+        Object.assign(context.nodes[sybilNode.address], {
+            isSybil: true,
+            attackCampaign: campaign,
+            suspiciousActivity: true,
+            currentReputation: sybilNode.currentReputation,
+            nodeType: sybilNode.nodeType,
+            nodeTypeName
+        });
     }
 }
 
+// Mark a node as bribed
+function markNodeAsBribed(context, address, bribeRecord) {
+    if (!context.nodes) context.nodes = {};
+    if (!context.nodes[address]) {
+        context.nodes[address] = { address, interactions: [] };
+    }
+    Object.assign(context.nodes[address], {
+        receivedBribe: true,
+        bribeAmount: bribeRecord.amount,
+        briberAddress: bribeRecord.from,
+        suspiciousActivity: true
+    });
+}
+
+// === MAIN EXECUTION ===
 async function main() {
-    // --- Initial Setup ---
-    console.log("=== INITIALIZING SIMULATION ENVIRONMENT ==="); 
-    const signers = await ethers.getSigners();
-    if (signers.length < 11) { // Base requirement for deployer + 3 sybils + other roles from context. Briber will use one of the 'other' available signers.
-        throw new Error(`Need at least 11 signers. Found ${signers.length}. Deployer, ${NUM_SYBIL_NODES} Sybils, 1 Briber, and other roles defined in demo_context.json are required.`);
-    }
-    const deployerSigner = signers[0]; 
-    const sybilSigners = signers.slice(8, 8 + NUM_SYBIL_NODES); 
-    const briberSigner = signers[7]; // Assigning a specific signer for the briber
-
-    // Define gas options
-    const gasOptions = {
-        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'), 
-        maxFeePerGas: ethers.parseUnits('100', 'gwei')       
-    };
-    console.log("Using gasOptions for transactions:", gasOptions);
-
-    if (sybilSigners.length < NUM_SYBIL_NODES) {
-        throw new Error(`Could not retrieve enough signers for Sybil nodes. Expected ${NUM_SYBIL_NODES}, got ${sybilSigners.length}. Total signers: ${signers.length}`);
-    }
-    console.log("Deployer Signer address:", deployerSigner.address);
-    sybilSigners.forEach((signer, i) => console.log(`  Sybil Node ${i+1} (Signer Index ${8+i}) Address: ${signer.address}`));
-    console.log(`Briber Signer (Scenario D) address: ${briberSigner.address}`);
-
-    // Load context from demo_context.json
-    const contextFilePath = path.join(__dirname, 'demo_context.json');
-    if (!fs.existsSync(contextFilePath)) {
-      console.error("Error: demo_context.json not found. Please run previous lifecycle scripts.");
-      process.exit(1);
-    }
+    console.log("=== SYBIL ATTACK SIMULATION - 6 PHASES ===");
+    console.log(`Campaign: ${ATTACK_IDENTIFIERS.attackCampaign}`);
+    console.log(`Controller: ${ATTACK_IDENTIFIERS.sybilController}`);
+    
+    // Load context and setup
     const context = JSON.parse(fs.readFileSync(contextFilePath, 'utf8'));
-    const supplyChainNFTAddress = context.supplyChainNFTAddress || context.contractAddress; // Handle potential naming difference
-    if (!supplyChainNFTAddress) {
-      console.error("Error: supplyChainNFTAddress or contractAddress not found in demo_context.json.");
-      process.exit(1);
+    const contractAddress = context.contractAddress;
+    if (!contractAddress) {
+        throw new Error("Contract address not found in context");
     }
-    const supplyChainNFT = await ethers.getContractAt("SupplyChainNFT", supplyChainNFTAddress, deployerSigner);
-    console.log(`Connected to SupplyChainNFT at ${supplyChainNFTAddress}`);
 
-    // Initialize log object with improved structure
-    const sybilAttackLog = {
-        simulationDate: DateTime.now().toISO(),
-        simulationStartTime: DateTime.now().toISO(),
-        contractAddress: supplyChainNFTAddress,
-        sybilController: SYBIL_CONTROLLER_DESCRIPTION,
-        numSybilNodes: NUM_SYBIL_NODES,
+    const signers = await ethers.getSigners();
+    if (signers.length < 11) {
+        throw new Error(`Need at least 11 signers. Found ${signers.length}`);
+    }
+
+    // Setup signers
+    const deployerSigner = signers[0];
+    const sybilSigners = [signers[8], signers[9], signers[10]]; // 3 Sybil nodes
+    const buyerSigner = signers.find(s => s.address.toLowerCase() === getNodeAddressByRole(context, "buyer"));
+    const retailerSigner = signers.find(s => s.address.toLowerCase() === getNodeAddressByRole(context, "retailer"));
+
+    console.log("Deployer:", deployerSigner.address);
+    console.log("Sybil Nodes:", sybilSigners.map(s => s.address));
+    console.log("Buyer:", buyerSigner?.address);
+    console.log("Retailer:", retailerSigner?.address);
+
+    const supplyChainNFT = await ethers.getContractAt("SupplyChainNFT", contractAddress, deployerSigner);
+    
+    const gasOptions = {
+        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'),
+        maxFeePerGas: ethers.parseUnits('100', 'gwei')
+    };
+
+    // Initialize attack log
+    const attackLog = {
+        timestamp: DateTime.now().toISO(),
+        campaign: ATTACK_IDENTIFIERS.attackCampaign,
+        phases: [],
         sybilNodes: [],
-        scenarioA: { 
-            description: "Sybil nodes attempt to gain high reputation rapidly through self-referrals or controlled interactions (simulated by admin setting high initial reputation).", 
-            actions: [], 
-            outcome: "",
-            details: {}
-        },
-        scenarioB: { 
-            description: "Sybil nodes collude to dominate validation/arbitration processes (simulated by coordinated voting on a pre-existing batch).", 
-            actions: [], 
-            outcome: "",
-            details: {}
-        },
-        scenarioC: { 
-            description: "Sybil nodes propose and approve a counterfeit/invalid batch of transactions.", 
-            actions: [], 
-            outcome: "",
-            details: {}
-        },
-        scenarioD: {
-            description: "A malicious entity (briber) attempts to influence network participants by sending them direct payments (bribes). Bribed nodes are expected to alter their behavior.",
-            briberAddress: briberSigner.address,
-            briberIdentifier: BRIBER_IDENTIFIER,
-            numNodesTargetedForBribe: NUM_BRIBED_NODES,
-            bribedNodes: [],   // Stores info about successfully bribed nodes
-            actions: [],       // Log of bribe transaction attempts
-            simulatedBehavioralChanges: [], // Log of expected changes from bribed nodes
-            outcome: "Bribery attempts logged. Behavioral changes are simulated for FL model training.",
-            details: {}
-        },
-        // Add a new section for FL model integration metadata
-        flIntegrationMetadata: {
-            sybilNodeAddresses: [], // Will be populated with addresses
-            bribedNodeAddresses: [], // Will be populated with addresses
-            attackTimestamps: {
-                scenarioA: null,
-                scenarioB: null,
-                scenarioC: null,
-                scenarioD: null
-            },
-            featureSignals: {
-                // Will contain signals that FL models should look for
-                sybilDetection: [],
-                batchMonitoring: [],
-                nodeBehavior: [],
-                disputeRisk: []
-            }
+        fakeProducts: [],
+        bribery: [],
+        flTrainingData: {
+            sybilDetection: [],
+            briberyDetection: []
         }
     };
 
-    console.log("\n=== SIMULATING SYBIL ATTACK ===");
+    // ==================== PHASE 1: ĐĂNG KÝ CÁC NODE SYBIL ====================
+    console.log("\n🎭 PHASE 1: Register Sybil nodes");
+    
+    const phase1Log = {
+        phase: 1,
+        description: "Đăng ký các node Sybil",
+        startTime: DateTime.now().toISO(),
+        actions: []
+    };
 
-    // Ensure context is loaded
-    if (!fs.existsSync(contextFilePath)) {
-        console.error(`Error: demo_context.json not found at ${contextFilePath}`);
-        process.exit(1);
-    }
-
-    // --- Register Sybil Nodes ---
-    console.log("\n--- Registering Sybil Nodes ---");
-    for (let i = 0; i < sybilSigners.length; i++) {
-        const sybilNodeSigner = sybilSigners[i];
-        const sybilNodeAddress = sybilNodeSigner.address;
-        console.log(`  Registering Sybil Node ${i+1}: ${sybilNodeAddress}`);
-
-        // Create Sybil node entry in log
-        const sybilNodeEntry = {
-            id: `Sybil_${i+1}`,
-            address: sybilNodeAddress,
-            initialization: [],
-            activities: []
+    for (let i = 0; i < SYBIL_CONFIG.numNodes; i++) {
+        const signer = sybilSigners[i];
+        const sybilName = `Sybil_Node_${i + 1}`;
+        
+        console.log(`  Registering ${sybilName} (${signer.address})`);
+        
+        // Set as verified node
+        console.log(`    Setting as verified node...`);
+        const verifyTx = await supplyChainNFT.connect(deployerSigner).setVerifiedNode(signer.address, true, gasOptions);
+        await verifyTx.wait();
+        
+        // Set role as Retailer (not Transporter)
+        console.log(`    Setting role as Retailer...`);
+        const roleTx = await supplyChainNFT.connect(deployerSigner).setRole(signer.address, ContractRole.Retailer, gasOptions);
+        await roleTx.wait();
+        
+        // Set node type as Secondary
+        console.log(`    Setting node type as Secondary...`);
+        const nodeTypeTx = await supplyChainNFT.connect(deployerSigner).setNodeType(signer.address, ContractNodeType.Secondary, gasOptions);
+        await nodeTypeTx.wait();
+        
+        // Set initial reputation
+        console.log(`    Setting initial reputation to ${SYBIL_CONFIG.initialReputation}...`);
+        const repTx = await supplyChainNFT.connect(deployerSigner).adminUpdateReputation(signer.address, SYBIL_CONFIG.initialReputation, gasOptions);
+        await repTx.wait();
+        
+        const sybilNode = {
+            id: `SYBIL_${i + 1}`,
+            name: sybilName,
+            address: signer.address,
+            role: ContractRole.Retailer, // Changed to Retailer
+            nodeType: ContractNodeType.Secondary,
+            initialReputation: SYBIL_CONFIG.initialReputation,
+            currentReputation: SYBIL_CONFIG.initialReputation
         };
-        sybilAttackLog.sybilNodes.push(sybilNodeEntry);
-        sybilAttackLog.flIntegrationMetadata.sybilNodeAddresses.push(sybilNodeAddress);
+        
+        attackLog.sybilNodes.push(sybilNode);
+        phase1Log.actions.push({
+            action: "registerSybilNode",
+            nodeId: sybilNode.id,
+            address: signer.address,
+            timestamp: DateTime.now().toISO()
+        });
+        
+        // Add to FL training data
+        attackLog.flTrainingData.sybilDetection.push({
+            nodeAddress: signer.address,
+            isSybil: true,
+            registrationPattern: "coordinated_registration",
+            initialReputation: SYBIL_CONFIG.initialReputation,
+            timestamp: DateTime.now().toUnixInteger()
+        });
+        
+        await delay(2000); // 2 second delay between registrations
+    }
+    
+    phase1Log.endTime = DateTime.now().toISO();
+    attackLog.phases.push(phase1Log);
+    console.log("✅ PHASE 1 Complete: 3 Sybil nodes registered");
 
-        // Set node as verified
-        await addToTransactionQueue(
-            `Set Sybil ${i+1} (${sybilNodeAddress}) as verified node`,
-            () => supplyChainNFT.connect(deployerSigner).setVerifiedNode(sybilNodeAddress, true, gasOptions),
-            (error, receipt) => {
-                const actionEntry = {
-                    action: "setVerifiedNode",
-                    verified: true,
-                    actor: deployerSigner.address,
-                    target: sybilNodeAddress,
-                    timestamp: DateTime.now().toISO()
-                };
-                if (error) {
-                    console.error(`    Failed to set Sybil ${i+1} as verified: ${error.message}`);
-                    actionEntry.status = "failed";
-                    actionEntry.error = error.message;
-                } else {
-                    console.log(`    Sybil ${i+1} set as verified. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                    actionEntry.status = "success";
-                    actionEntry.txHash = receipt ? receipt.hash : null;
-                }
-                sybilNodeEntry.initialization.push(actionEntry);
+    // === RESET TOKEN OWNERSHIP BEFORE PHASE 2 ===
+    // Correct original owners for tokens 1, 2, 3
+    const originalOwners = {
+        "1": "0x724876f86fA52568aBc51955BD3A68bFc1441097", 
+        "2": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23",
+        "3": "0x72EB9742d3B684ebA40F11573b733Ac9dB499f23"
+    };
+    for (const tokenId of ["1", "2", "3"]) {
+        if (!originalOwners[tokenId]) continue;
+        let currentOwner;
+        try {
+            currentOwner = await supplyChainNFT.ownerOf(tokenId);
+        } catch (err) {
+            continue;
+        }
+        if (currentOwner.toLowerCase() !== originalOwners[tokenId].toLowerCase()) {
+            const currentSigner = signers.find(s => s.address.toLowerCase() === currentOwner.toLowerCase());
+            if (currentSigner) {
+                try {
+                    await supplyChainNFT.connect(currentSigner).approve(originalOwners[tokenId], tokenId, gasOptions);
+                } catch (e) {}
+                try {
+                    await supplyChainNFT.connect(currentSigner).transferFrom(currentOwner, originalOwners[tokenId], tokenId, gasOptions);
+                } catch (e) {}
             }
-        );
-
-        // Set node role (Secondary)
-        await addToTransactionQueue(
-            `Set Sybil ${i+1} (${sybilNodeAddress}) role to Secondary`,
-            () => supplyChainNFT.connect(deployerSigner).setRole(sybilNodeAddress, ContractRole.Transporter, gasOptions),
-            (error, receipt) => {
-                const actionEntry = {
-                    action: "setRole",
-                    role: "Transporter",
-                    roleValue: ContractRole.Transporter,
-                    actor: deployerSigner.address,
-                    target: sybilNodeAddress,
-                    timestamp: DateTime.now().toISO()
-                };
-                if (error) {
-                    console.error(`    Failed to set Sybil ${i+1} role: ${error.message}`);
-                    actionEntry.status = "failed";
-                    actionEntry.error = error.message;
-                } else {
-                    console.log(`    Sybil ${i+1} role set to Transporter. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                    actionEntry.status = "success";
-                    actionEntry.txHash = receipt ? receipt.hash : null;
-                }
-                sybilNodeEntry.initialization.push(actionEntry);
-            }
-        );
-
-        // Set node type (Secondary)
-        await addToTransactionQueue(
-            `Set Sybil ${i+1} (${sybilNodeAddress}) node type to Secondary`,
-            () => supplyChainNFT.connect(deployerSigner).setNodeType(sybilNodeAddress, ContractNodeType.Secondary, gasOptions),
-            (error, receipt) => {
-                const actionEntry = {
-                    action: "setNodeType",
-                    nodeType: "Secondary",
-                    nodeTypeValue: ContractNodeType.Secondary,
-                    actor: deployerSigner.address,
-                    target: sybilNodeAddress,
-                    timestamp: DateTime.now().toISO()
-                };
-                if (error) {
-                    console.error(`    Failed to set Sybil ${i+1} node type: ${error.message}`);
-                    actionEntry.status = "failed";
-                    actionEntry.error = error.message;
-                } else {
-                    console.log(`    Sybil ${i+1} node type set to Secondary. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                    actionEntry.status = "success";
-                    actionEntry.txHash = receipt ? receipt.hash : null;
-                }
-                sybilNodeEntry.initialization.push(actionEntry);
-            }
-        );
-
-        // Set initial reputation (artificially high for Sybil detection)
-        const initialReputation = 50 + Math.floor(Math.random() * 30); // 50-79
-        await addToTransactionQueue(
-            `Set Sybil ${i+1} (${sybilNodeAddress}) initial reputation to ${initialReputation}`,
-            () => supplyChainNFT.connect(deployerSigner).adminUpdateReputation(sybilNodeAddress, initialReputation, gasOptions),
-            (error, receipt) => {
-                const actionEntry = {
-                    action: "adminUpdateReputation",
-                    newReputation: initialReputation,
-                    actor: deployerSigner.address,
-                    target: sybilNodeAddress,
-                    timestamp: DateTime.now().toISO()
-                };
-                if (error) {
-                    console.error(`    Failed to set Sybil ${i+1} reputation: ${error.message}`);
-                    actionEntry.status = "failed";
-                    actionEntry.error = error.message;
-                } else {
-                    console.log(`    Sybil ${i+1} reputation set to ${initialReputation}. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                    actionEntry.status = "success";
-                    actionEntry.txHash = receipt ? receipt.hash : null;
-                }
-                sybilNodeEntry.initialization.push(actionEntry);
-            }
-        );
+        }
     }
 
-    console.log("  Processing Sybil node registration in queue...");
-    await processTransactionQueue();
-    console.log("--- Sybil Node Registration Complete ---");
-    sybilAttackLog.flIntegrationMetadata.attackTimestamps.registration = DateTime.now().toISO();
-
-    // --- Scenario A: Sybil nodes file frivolous disputes ---
-    console.log("\n--- Scenario A: Sybil Nodes File Frivolous Disputes ---");
-    sybilAttackLog.scenarioA.details.startTime = DateTime.now().toISO();
-    
-    // Find a target token ID from context
-    const targetTokenId = context.productDetails && context.productDetails.length > 0 ? 
-                          context.productDetails[0].tokenId : null;
-    
-    if (targetTokenId) {
-        console.log(`  Target Token ID for frivolous disputes: ${targetTokenId}`);
-        sybilAttackLog.scenarioA.details.targetTokenId = targetTokenId;
-        
-        // Each Sybil node files a frivolous dispute
-        for (let i = 0; i < sybilSigners.length; i++) {
-            const sybilNodeSigner = sybilSigners[i];
-            const sybilNodeAddress = sybilNodeSigner.address;
-            const disputeReason = `Frivolous dispute ${i+1} from Sybil node ${sybilNodeAddress}`;
-            const evidenceData = JSON.stringify({
-                timestamp: DateTime.now().toISO(),
-                disputeReason: disputeReason,
-                fabricatedEvidence: true
+    // ==================== PHASE 2: PRODUCT TRANSACTIONS ====================
+    console.log("\n💰 PHASE 2: Product transactions between Buyer/Retailer and Sybil nodes");
+    const phase2Log = {
+        phase: 2,
+        description: "Product transactions and ownership verification",
+        startTime: DateTime.now().toISO(),
+        actions: []
+    };
+    const products = ["1", "2", "3"];
+    const polAmounts = ["0.2", "0.4", "0.6"];
+    for (let i = 0; i < products.length && i < SYBIL_CONFIG.numNodes; i++) {
+        const tokenId = products[i];
+        const sybilSigner = sybilSigners[i];
+        const polAmount = ethers.parseEther(polAmounts[i]);
+        // Check current owner before attempting transfer
+        let currentOwner;
+        try {
+            currentOwner = await supplyChainNFT.ownerOf(tokenId);
+            console.log(`    [Check] Token ${tokenId} current owner: ${currentOwner}`);
+        } catch (err) {
+            console.error(`    [Error] Could not fetch owner for token ${tokenId}:`, err.message);
+            phase2Log.actions.push({
+                action: "checkOwnerFailed",
+                tokenId,
+                error: err.message,
+                timestamp: DateTime.now().toISO()
             });
-            
-            await addToTransactionQueue(
-                `Sybil ${i+1} (${sybilNodeAddress}) files frivolous dispute for Token ID ${targetTokenId}`,
-                () => supplyChainNFT.connect(sybilNodeSigner).openDispute(targetTokenId, disputeReason, evidenceData, gasOptions),
-                (error, receipt) => {
-                    const actionEntry = {
-                        type: 'frivolousDispute',
-                        tokenId: targetTokenId,
-                        reason: disputeReason,
-                        sybilNode: sybilNodeAddress,
-                        timestamp: DateTime.now().toISO()
-                    };
-                    if (error) {
-                        console.error(`    Failed - Sybil ${i+1} (${sybilNodeAddress}) frivolous dispute: ${error.message}`);
-                        actionEntry.status = 'failed';
-                        actionEntry.error = error.message;
-                    } else {
-                        console.log(`    Success - Sybil ${i+1} (${sybilNodeAddress}) filed frivolous dispute. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                        actionEntry.status = 'success';
-                        actionEntry.txHash = receipt ? receipt.hash : null;
-                        
-                        // Extract dispute ID from event if available
-                        if (receipt && receipt.events) {
-                            const disputeOpenedEvent = receipt.events.find(e => e.event === 'DisputeOpened');
-                            if (disputeOpenedEvent && disputeOpenedEvent.args) {
-                                actionEntry.disputeId = disputeOpenedEvent.args.disputeId.toString();
+            continue;
+        }
+        // Dùng signer là owner hiện tại để chuyển token cho sybil node
+        const currentSigner = signers.find(s => s.address.toLowerCase() === currentOwner.toLowerCase());
+        if (!currentSigner) {
+            console.warn(`    [Skip] No signer for current owner ${currentOwner} of token ${tokenId}`);
+            phase2Log.actions.push({
+                action: "noSignerForOwner",
+                tokenId,
+                owner: currentOwner,
+                to: sybilSigner.address,
+                timestamp: DateTime.now().toISO()
+            });
+            continue;
+        }
+        if (currentOwner.toLowerCase() === sybilSigner.address.toLowerCase()) {
+            console.log(`    [Skip] Token ${tokenId} already owned by Sybil node ${sybilSigner.address}`);
+            phase2Log.actions.push({
+                action: "alreadySybilOwner",
+                tokenId,
+                owner: currentOwner,
+                to: sybilSigner.address,
+                timestamp: DateTime.now().toISO()
+            });
+            continue;
+        }
+        try {
+            // Approve nếu cần
+            try {
+                await supplyChainNFT.connect(currentSigner).approve(sybilSigner.address, tokenId, gasOptions);
+                console.log(`    [Approve] Owner ${currentOwner} approved Sybil node ${sybilSigner.address} for token ${tokenId}`);
+            } catch (e) {
+                console.log(`    [Approve] (Optional) Approve failed or unnecessary for token ${tokenId}: ${e.message}`);
+            }
+            const transferTx = await supplyChainNFT.connect(currentSigner).transferFrom(currentOwner, sybilSigner.address, tokenId, gasOptions);
+            console.log(`    [Transfer] Token ${tokenId} transferred from ${currentOwner} to ${sybilSigner.address}, tx: ${transferTx.hash}`);
+            // Check new owner
+            const newOwner = await supplyChainNFT.ownerOf(tokenId);
+            console.log(`    [Check] New owner of token ${tokenId}: ${newOwner}`);
+            phase2Log.actions.push({
+                action: "transferNFT",
+                tokenId,
+                from: currentOwner,
+                to: sybilSigner.address,
+                txHash: transferTx.hash,
+                newOwner,
+                timestamp: DateTime.now().toISO()
+            });
+        } catch (err) {
+            console.error(`    [Error] Transfer failed for token ${tokenId} from ${currentOwner} to ${sybilSigner.address}:`, err.message);
+            phase2Log.actions.push({
+                action: "transferFailed",
+                tokenId,
+                from: currentOwner,
+                to: sybilSigner.address,
+                error: err.message,
+                timestamp: DateTime.now().toISO()
+            });
+            continue;
+        }
+        // After transfer, verify and retry if not successful
+        let newOwner;
+        try {
+            newOwner = await supplyChainNFT.ownerOf(tokenId);
+        } catch (e) { newOwner = undefined; }
+        if (newOwner && newOwner.toLowerCase() !== sybilSigner.address.toLowerCase()) {
+            // Retry transfer once if failed
+            try {
+                await supplyChainNFT.connect(currentSigner).approve(sybilSigner.address, tokenId, gasOptions);
+            } catch (e) {}
+            try {
+                const transferTx2 = await supplyChainNFT.connect(currentSigner).transferFrom(currentOwner, sybilSigner.address, tokenId, gasOptions);
+                await transferTx2.wait();
+                newOwner = await supplyChainNFT.ownerOf(tokenId);
+                phase2Log.actions.push({
+                    action: "retryTransferNFT",
+                    tokenId,
+                    from: currentOwner,
+                    to: sybilSigner.address,
+                    txHash: transferTx2.hash,
+                    newOwner,
+                    timestamp: DateTime.now().toISO()
+                });
+            } catch (err2) {
+                phase2Log.actions.push({
+                    action: "retryTransferFailed",
+                    tokenId,
+                    from: currentOwner,
+                    to: sybilSigner.address,
+                    error: err2.message,
+                    timestamp: DateTime.now().toISO()
+                });
+            }
+        }
+        await delay(2000);
+    }
+    phase2Log.endTime = DateTime.now().toISO();
+    attackLog.phases.push(phase2Log);
+    console.log("✅ PHASE 2 Complete: Product transactions and ownership verified");
+
+    // ==================== PHASE 3: SYBIL NODES PROPOSE AND COMMIT BATCH ====================
+    console.log("\n📦 PHASE 3: Sybil nodes propose, validate, and commit multiple batches");
+    const phase3Log = {
+        phase: 3,
+        description: "Propose, validate, and commit multiple batches with validator selection and interleaved reputation update",
+        startTime: DateTime.now().toISO(),
+        actions: []
+    };
+    // Use products array from earlier phase
+    let sybilReputations = [attackLog.sybilNodes[0].currentReputation, attackLog.sybilNodes[1].currentReputation, attackLog.sybilNodes[2].currentReputation];
+    const batchCount = 10;
+    // Increase candidate pool for validator selection
+    const candidateValidators = signers.slice(1, 7); // 6 candidates (skip deployer)
+    for (let round = 0; round < batchCount; round++) {
+        const fromIdx = round % 3;
+        const toIdx = (round + 1) % 3;
+        const tokenId = products[round % 3];
+        const batchTransactions = [
+            { from: sybilSigners[fromIdx].address, to: sybilSigners[toIdx].address, tokenId: BigInt(tokenId) }
+        ];
+        const proposerSigner = sybilSigners[fromIdx];
+        // Randomly select 3 validators from candidate pool for this batch
+        const shuffled = candidateValidators.slice().sort(() => 0.5 - Math.random());
+        const selectedValidators = shuffled.slice(0, 3).map(s => s.address);
+        let proposeTx, proposeReceipt, batchProposedEvent, batchId;
+        try {
+            proposeTx = await supplyChainNFT.connect(proposerSigner).proposeBatch(batchTransactions, gasOptions);
+            proposeReceipt = await proposeTx.wait();
+            if (proposeReceipt.events && Array.isArray(proposeReceipt.events)) {
+                batchProposedEvent = proposeReceipt.events.find(e => e.event === 'BatchProposed');
+            }
+            if (!batchProposedEvent) {
+                try {
+                    const iface = new ethers.Interface(supplyChainNFT.interface.fragments || supplyChainNFT.interface);
+                    for (const log of proposeReceipt.logs) {
+                        try {
+                            const parsed = iface.parseLog(log);
+                            if (parsed.name === 'BatchProposed') {
+                                batchProposedEvent = { args: parsed.args };
+                                break;
                             }
-                        }
+                        } catch (e) {}
                     }
-                    sybilAttackLog.scenarioA.actions.push(actionEntry);
-                    sybilAttackLog.sybilNodes[i].activities.push(actionEntry);
-                }
-            );
-        }
-    } else {
-        console.warn("  Warning: No target token ID found in context. Skipping frivolous disputes (Scenario A).");
-        sybilAttackLog.scenarioA.outcome = "Skipped: No target token ID found in context.";
-    }
-    
-    console.log("  Processing frivolous disputes in queue...");
-    await processTransactionQueue();
-    console.log("--- Scenario A: Frivolous Disputes Complete ---");
-    sybilAttackLog.flIntegrationMetadata.attackTimestamps.scenarioA = DateTime.now().toISO();
-
-    // --- Scenario B: Sybil nodes collude on batch validation ---
-    console.log("\n--- Scenario B: Sybil Nodes Collude on Batch Validation ---");
-    sybilAttackLog.scenarioB.details.startTime = DateTime.now().toISO();
-    
-    // Find a target batch ID from context
-    const targetBatchId = context.targetBatchIdForSybilTest || 
-                         (context.batchDetails && context.batchDetails.length > 0 ? 
-                          context.batchDetails[0].batchId : null);
-    
-    if (targetBatchId) {
-        console.log(`  Target Batch ID for collusive voting: ${targetBatchId}`);
-        sybilAttackLog.scenarioB.details.targetBatchId = targetBatchId;
-        
-        // All Sybil nodes vote the same way (Deny) on the batch
-        for (let i = 0; i < sybilSigners.length; i++) {
-            const sybilNodeSigner = sybilSigners[i];
-            const sybilNodeAddress = sybilNodeSigner.address;
-            const voteDecision = BatchVoteType.Deny; // All Sybils vote to Deny
-
-            await addToTransactionQueue(
-                `Sybil ${i+1} (${sybilNodeAddress}): Vote ${Object.keys(BatchVoteType).find(k => BatchVoteType[k] === voteDecision)} on Batch ${targetBatchId}`,
-                () => supplyChainNFT.connect(sybilNodeSigner).castBatchVote(targetBatchId, voteDecision, gasOptions), 
-                (error, receipt) => { 
-                    const actionEntry = {
-                        type: 'collusiveVoting',
-                        batchId: targetBatchId,
-                        vote: Object.keys(BatchVoteType).find(k => BatchVoteType[k] === voteDecision),
-                        sybilNode: sybilNodeAddress,
+                } catch (e) {}
+            }
+            if (batchProposedEvent && batchProposedEvent.args) {
+                batchId = batchProposedEvent.args.batchId?.toString();
+            } else {
+                console.error(`[Error] Could not find BatchProposed event in proposeReceipt (round ${round + 1}).`);
+                continue;
+            }
+            // Log batch proposal details
+            console.log(`\n  [BatchProposed] Round ${round + 1}, Batch ID: ${batchId}`);
+            console.log(`    Transactions:`, batchTransactions);
+            console.log(`    Selected Validators:`, selectedValidators);
+            phase3Log.actions.push({
+                action: "proposeBatch",
+                round: round + 1,
+                batchId,
+                proposer: proposerSigner.address,
+                transactions: batchTransactions,
+                selectedValidators,
+                timestamp: DateTime.now().toISO()
+            });
+            // Validators vote
+            let approvals = 0;
+            let requiredApprovals = 0;
+            const validatorVotes = [];
+            try {
+                const superMajorityFraction = await supplyChainNFT.superMajorityFraction();
+                requiredApprovals = Math.ceil(selectedValidators.length * Number(superMajorityFraction) / 100);
+                for (let i = 0; i < selectedValidators.length; i++) {
+                    const validatorAddr = selectedValidators[i];
+                    const validatorSigner = signers.find(s => s.address.toLowerCase() === validatorAddr.toLowerCase());
+                    if (!validatorSigner) continue;
+                    const vote = approvals < requiredApprovals;
+                    if (vote) approvals++;
+                    const voteTx = await supplyChainNFT.connect(validatorSigner).validateBatch(batchId, vote, gasOptions);
+                    const voteReceipt = await voteTx.wait();
+                    validatorVotes.push({validator: validatorSigner.address, approve: vote, txHash: voteReceipt.transactionHash});
+                    phase3Log.actions.push({
+                        action: "validateBatch",
+                        round: round + 1,
+                        batchId,
+                        validator: validatorSigner.address,
+                        approve: vote,
+                        txHash: voteReceipt.transactionHash,
                         timestamp: DateTime.now().toISO()
-                    };
-                    if (error) {
-                        console.error(`    Failed - Sybil ${i+1} (${sybilNodeAddress}) castBatchVote on batch ${targetBatchId}: ${error.message}`);
-                        actionEntry.status = 'failed';
-                        actionEntry.error = error.message;
-                    } else {
-                        console.log(`    Success - Sybil ${i+1} (${sybilNodeAddress}) castBatchVote on batch ${targetBatchId} as ${actionEntry.vote}. Tx: ${receipt ? receipt.hash : 'N/A'}`);
-                        actionEntry.status = 'success';
-                        actionEntry.txHash = receipt ? receipt.hash : null;
-                    }
-                    sybilAttackLog.sybilNodes[i].activities.push(actionEntry);
-                    sybilAttackLog.scenarioB.actions.push(actionEntry);
+                    });
+                    console.log(`    Validator ${validatorSigner.address} voted ${vote ? 'APPROVE' : 'DENY'} (tx: ${voteReceipt.transactionHash})`);
+                    await delay(500);
                 }
-            );
+            } catch (error) {
+                console.error(`    ERROR during validator voting (round ${round + 1}):`, error);
+            }
+            // Commit batch if approvals reached
+            if (approvals >= requiredApprovals) {
+                let commitTx, commitReceipt, isCommitted = false, isFlagged = false;
+                try {
+                    commitTx = await supplyChainNFT.connect(deployerSigner).commitBatch(batchId, gasOptions);
+                    commitReceipt = await commitTx.wait();
+                    const batchDetails = await supplyChainNFT.getBatchDetails(batchId);
+                    isCommitted = batchDetails.committed;
+                    isFlagged = batchDetails.flagged;
+                } catch (error) {
+                    commitReceipt = { transactionHash: "N/A (Commit Error)" };
+                }
+                phase3Log.actions.push({
+                    action: "commitBatch",
+                    round: round + 1,
+                    batchId,
+                    txHash: commitReceipt.transactionHash,
+                    timestamp: DateTime.now().toISO()
+                });
+                // Check ownership and log
+                for (const tx of batchTransactions) {
+                    const owner = await supplyChainNFT.ownerOf(tx.tokenId);
+                    phase3Log.actions.push({
+                        action: "checkOwner",
+                        round: round + 1,
+                        tokenId: tx.tokenId.toString(),
+                        owner,
+                        timestamp: DateTime.now().toISO()
+                    });
+                    console.log(`    [Ownership] Token ${tx.tokenId} new owner: ${owner}`);
+                }
+                // Interleaved: Update reputation for all Sybil nodes by +10 after each commit
+                if (isCommitted) {
+                    for (let i = 0; i < SYBIL_CONFIG.numNodes; i++) {
+                        sybilReputations[i] = (sybilReputations[i] || 0) + 10;
+                        const signer = sybilSigners[i];
+                        const repTx = await supplyChainNFT.connect(deployerSigner).adminUpdateReputation(signer.address, sybilReputations[i], gasOptions);
+                        await repTx.wait();
+                        attackLog.sybilNodes[i].currentReputation = sybilReputations[i];
+                        phase3Log.actions.push({
+                            action: "updateReputation",
+                            round: round + 1,
+                            nodeAddress: signer.address,
+                            newReputation: sybilReputations[i],
+                            timestamp: DateTime.now().toISO()
+                        });
+                        console.log(`    [Reputation] ${signer.address} updated to ${sybilReputations[i]}`);
+                        attackLog.flTrainingData.sybilDetection.push({
+                            nodeAddress: signer.address,
+                            reputationChange: sybilReputations[i],
+                            reputationManipulation: true,
+                            timestamp: DateTime.now().toUnixInteger()
+                        });
+                    }
+                }
+                console.log(`  [BatchResult] Round ${round + 1}: Batch ${batchId} committed. Approvals: ${approvals}/${selectedValidators.length}`);
+            } else {
+                console.log(`  [BatchResult] Round ${round + 1}: Batch ${batchId} NOT committed. Approvals: ${approvals}/${selectedValidators.length}`);
+            }
+            // Log summary for this batch
+            phase3Log.actions.push({
+                action: "batchSummary",
+                round: round + 1,
+                batchId,
+                transactions: batchTransactions,
+                selectedValidators,
+                validatorVotes,
+                sybilReputations: sybilReputations.slice(),
+                timestamp: DateTime.now().toISO()
+            });
+            await delay(1000);
+        } catch (err) {
+            console.error(`[Error] Batch round ${round + 1} failed:`, err.message);
+            continue;
         }
-    } else {
-        sybilAttackLog.scenarioB.outcome = "Skipped: targetBatchIdForSybilTest not found in demo_context.json.";
-        console.warn("  Warning: targetBatchIdForSybilTest not found in demo_context.json. Sybil collusion (Scenario B) will be skipped.");
     }
-    
-    console.log("  Processing Sybil collusive voting in queue...");
-    await processTransactionQueue();
-    console.log("--- Scenario B: Collusive Voting Complete ---");
-    sybilAttackLog.flIntegrationMetadata.attackTimestamps.scenarioB = DateTime.now().toISO();
+    phase3Log.endTime = DateTime.now().toISO();
+    attackLog.phases.push(phase3Log);
+    console.log("✅ PHASE 3 Complete: 10 NFT batch transfers and reputation updates interleaved");
 
-    // --- Scenario C: Sybil nodes propose and approve counterfeit batch ---
-    console.log('\n--- Scenario C: Sybil Nodes Propose and Approve Counterfeit Batch ---');
-    sybilAttackLog.scenarioC.details.startTime = DateTime.now().toISO();
-    
-    const sybilProposer = sybilSigners[0]; // First Sybil will propose
+    // ==================== PHASE 5: PROMOTE TO PRIMARY NODE ====================
+    console.log("\n🚀 PHASE 5: Promote Sybil nodes to Primary Node");
+    const phase5Log = {
+        phase: 5,
+        description: "Thăng cấp thành Primary Node",
+        startTime: DateTime.now().toISO(),
+        actions: []
+    };
+    // Only call setNodeType for promotion, do not forcibly set reputation
+    for (let i = 0; i < SYBIL_CONFIG.numNodes; i++) {
+        const signer = sybilSigners[i];
+        console.log(`  Promoting Sybil Node ${i + 1} to Primary Node (Current Reputation: ${attackLog.sybilNodes[i].currentReputation})`);
+        const nodeTypeTx = await supplyChainNFT.connect(deployerSigner).setNodeType(signer.address, ContractNodeType.Primary, gasOptions);
+        await nodeTypeTx.wait();
+        attackLog.sybilNodes[i].nodeType = ContractNodeType.Primary;
+        phase5Log.actions.push({
+            action: "upgradeToPrimary",
+            nodeAddress: signer.address,
+            reputation: attackLog.sybilNodes[i].currentReputation,
+            timestamp: DateTime.now().toISO()
+        });
+        // Add to FL training data
+        attackLog.flTrainingData.sybilDetection.push({
+            nodeAddress: signer.address,
+            nodeTypeChange: "Secondary_to_Primary",
+            rapidPromotion: true,
+            timestamp: DateTime.now().toUnixInteger()
+        });
+        await delay(2000);
+    }
+    phase5Log.endTime = DateTime.now().toISO();
+    attackLog.phases.push(phase5Log);
+    console.log("✅ PHASE 5 Complete: All Sybil nodes promoted to Primary");
 
-    // Create counterfeit transaction data
-    const counterfeitTransactions = [
-        {
-            from: sybilProposer.address,
-            to: ethers.Wallet.createRandom().address,
-            tokenId: 999999,
-        },
-        {
-            from: sybilProposer.address,
-            to: ethers.Wallet.createRandom().address,
-            tokenId: 999998, 
-        }
+    // ==================== PHASE 6: ATTACK - FAKE PRODUCT & BRIBERY ====================
+    console.log("\n⚔️ PHASE 6: Attack - Inject fake product and bribe validators");
+    
+    const phase6Log = {
+        phase: 6,
+        description: "Tấn công với hàng giả và hối lộ",
+        startTime: DateTime.now().toISO(),
+        actions: []
+    };
+
+    // 6.1: Create fake product (clone token ID "2" metadata)
+    console.log("  6.1: Create fake product (clone token ID '2')");
+    
+    const originalProduct = getProductByTokenId(context, "2");
+    if (originalProduct) {
+        // Mint fake product with same metadata as token ID "2"
+        const fakeProductData = {
+            recipient: sybilSigners[0].address, // Give to first Sybil node
+            uniqueProductID: originalProduct.uniqueProductID + "_FAKE", // Mark as fake
+            batchNumber: originalProduct.batchNumber + "_COUNTERFEIT",
+            manufacturingDate: originalProduct.manufacturingDate,
+            expirationDate: originalProduct.expirationDate,
+            productType: originalProduct.productType, // Same product type
+            manufacturerID: originalProduct.manufacturerID + "_FAKE",
+            quickAccessURL: "http://fake-product.malicious.com",
+            nftReference: originalProduct.nftReference // Same NFT reference (suspicious!)
+        };
+        
+        console.log(`    Minting fake product (Token ID: ${SYBIL_CONFIG.fakeProductTokenId})`);
+        console.log(`    Cloning metadata from Token ID '2'`);
+        console.log(`    Fake Product Type: ${fakeProductData.productType}`);
+        
+        // Mint the fake product
+        const mintTx = await supplyChainNFT.connect(deployerSigner).mintNFT(
+            {
+                recipient: fakeProductData.recipient,
+                uniqueProductID: fakeProductData.uniqueProductID,
+                batchNumber: fakeProductData.batchNumber,
+                manufacturingDate: fakeProductData.manufacturingDate,
+                expirationDate: fakeProductData.expirationDate,
+                productType: fakeProductData.productType,
+                manufacturerID: fakeProductData.manufacturerID,
+                quickAccessURL: fakeProductData.quickAccessURL,
+                nftReference: fakeProductData.nftReference
+            },
+            gasOptions
+        );
+        const mintReceipt = await mintTx.wait();
+        
+        const fakeProduct = {
+            tokenId: SYBIL_CONFIG.fakeProductTokenId,
+            originalTokenId: "2",
+            ownerAddress: sybilSigners[0].address,
+            isCounterfeit: true,
+            clonedMetadata: true,
+            ...fakeProductData
+        };
+        
+        attackLog.fakeProducts.push(fakeProduct);
+        
+        phase6Log.actions.push({
+            action: "mintFakeProduct",
+            tokenId: SYBIL_CONFIG.fakeProductTokenId,
+            clonedFrom: "2",
+            ownerAddress: sybilSigners[0].address,
+            timestamp: DateTime.now().toISO()
+        });
+        
+        // Add to FL training data
+        attackLog.flTrainingData.sybilDetection.push({
+            nodeAddress: sybilSigners[0].address,
+            productCounterfeiting: true,
+            originalTokenId: "2",
+            fakeTokenId: SYBIL_CONFIG.fakeProductTokenId,
+            timestamp: DateTime.now().toUnixInteger()
+        });
+    }
+
+    // 6.2: Propose malicious batch with fake product
+    console.log("  6.2: Propose batch containing fake product");
+    
+    const maliciousTransactions = [
+        { from: sybilSigners[0].address, to: sybilSigners[1].address, tokenId: SYBIL_CONFIG.fakeProductTokenId },
+        { from: sybilSigners[1].address, to: buyerSigner?.address || sybilSigners[2].address, tokenId: SYBIL_CONFIG.fakeProductTokenId }
     ];
     
-    sybilAttackLog.scenarioC.details.counterfeitTransactions = counterfeitTransactions.map(tx => ({
-        from: tx.from,
-        to: tx.to,
-        tokenId: tx.tokenId.toString()
-    }));
+    const maliciousProposeTx = await supplyChainNFT.connect(sybilSigners[0]).proposeBatch(maliciousTransactions, gasOptions);
+    const maliciousReceipt = await maliciousProposeTx.wait();
+    
+    const maliciousBatchEvent = maliciousReceipt.events?.find(e => e.event === 'BatchProposed');
+    const maliciousBatchId = maliciousBatchEvent?.args?.batchId?.toString();
+    
+    console.log(`    Malicious Batch ID: ${maliciousBatchId} (contains fake product)`);
 
-    let proposedBatchIdScenarioC;
-
-    // Sybil node 0 proposes counterfeit batch
-    await addToTransactionQueue(
-        `Sybil Node 0 (${sybilProposer.address}) proposes a counterfeit batch`,
-        async () => {
-            const tx = await supplyChainNFT.connect(sybilProposer).proposeBatch(counterfeitTransactions, gasOptions);
-            const receipt = await tx.wait();
-            // Find BatchProposed event to get batchId
-            const event = receipt.events?.find(e => e.event === 'BatchProposed');
-            if (event && event.args) {
-                proposedBatchIdScenarioC = event.args.batchId;
-                console.log(`  Counterfeit Batch Proposed with ID: ${proposedBatchIdScenarioC}`);
-                sybilAttackLog.scenarioC.actions.push({
-                    type: 'counterfeitBatchProposal',
-                    action: 'ProposeCounterfeitBatch',
-                    batchId: proposedBatchIdScenarioC.toString(),
-                    proposerNode: sybilProposer.address,
-                    transactions: counterfeitTransactions.map(t => ({...t, tokenId: t.tokenId.toString()})),
-                    timestamp: DateTime.now().toISO(),
-                    status: 'success',
-                    txHash: receipt.hash
-                });
-                sybilAttackLog.scenarioC.details.counterfeitBatchId = proposedBatchIdScenarioC.toString();
-            } else {
-                throw new Error("BatchProposed event not found or batchId missing.");
-            }
-            return tx;
-        },
-        (error) => {
-            if (error) {
-                sybilAttackLog.scenarioC.actions.push({
-                    type: 'counterfeitBatchProposal',
-                    action: 'ProposeCounterfeitBatch',
-                    proposerNode: sybilProposer.address,
-                    transactions: counterfeitTransactions.map(t => ({...t, tokenId: t.tokenId.toString()})),
-                    timestamp: DateTime.now().toISO(),
-                    status: 'failed',
-                    error: error.message
-                });
-            }
+    // 6.3: Sybil nodes vote approve for malicious batch
+    console.log("  6.3: Sybil nodes vote to approve batch containing fake product");
+    
+    if (maliciousBatchId) {
+        for (let i = 0; i < 2; i++) { // 2 Sybil nodes approve
+            const validatorSigner = sybilSigners[i];
+            console.log(`    Sybil Node ${i + 1} approves malicious batch`);
+            
+            const approveTx = await supplyChainNFT.connect(validatorSigner).validateBatch(maliciousBatchId, true, gasOptions);
+            await approveTx.wait();
+            
+            await delay(1000);
         }
-    );
-    await processTransactionQueue(); // Process proposal before voting
+    }
 
-    if (proposedBatchIdScenarioC === undefined) {
-        console.error('  [SCENARIO C] Failed to propose counterfeit batch. Skipping votes.');
-        sybilAttackLog.scenarioC.outcome = 'Failed to propose batch';
-    } else {
-        // All Sybil nodes vote to approve the counterfeit batch
-        for (let i = 0; i < sybilSigners.length; i++) {
-            const currentSybil = sybilSigners[i];
-            await addToTransactionQueue(
-                `Sybil Node ${i} (${currentSybil.address}) votes to APPROVE counterfeit batch ${proposedBatchIdScenarioC}`,
-                () => supplyChainNFT.connect(currentSybil).validateBatch(proposedBatchIdScenarioC, true, gasOptions), // true for Approve
-                (error, receipt) => {
-                    const actionEntry = {
-                        type: 'counterfeitBatchApproval',
-                        action: 'VoteCounterfeitBatch',
-                        batchId: proposedBatchIdScenarioC.toString(),
-                        vote: 'Approve',
-                        sybilNode: currentSybil.address,
-                        timestamp: DateTime.now().toISO()
-                    };
-                    if (error) {
-                        actionEntry.status = 'failed';
-                        actionEntry.error = error.message;
-                    } else {
-                        actionEntry.status = 'success';
-                        actionEntry.txHash = receipt ? receipt.hash : null;
-                    }
-                    sybilAttackLog.scenarioC.actions.push(actionEntry);
-                    sybilAttackLog.sybilNodes[i].activities.push(actionEntry);
-                }
-            );
-        }
-        await processTransactionQueue(); // Process all votes
-
-        // Check batch status after voting
-        try {
-            const batchDetails = await supplyChainNFT.getBatchDetails(proposedBatchIdScenarioC);
-            console.log(`  [SCENARIO C] Details of counterfeit batch ${proposedBatchIdScenarioC}:`, {
-                validated: batchDetails.validated,
-                committed: batchDetails.committed,
-                approvals: batchDetails.approvals ? batchDetails.approvals.toString() : (await supplyChainNFT.batchApprovals(proposedBatchIdScenarioC)).toString(),
-                denials: batchDetails.denials ? batchDetails.denials.toString() : (await supplyChainNFT.batchDenials(proposedBatchIdScenarioC)).toString(),
-                proposer: batchDetails.proposer,
-                flagged: batchDetails.flagged
+    // 6.4: Bribery attack on legitimate validators
+    console.log("  6.4: Bribery attack on other validators");
+    
+    const bribeAmount = ethers.parseEther("1.0"); // 1 POL bribe
+    const legitimateValidators = [
+        buyerSigner?.address,
+        retailerSigner?.address
+    ].filter(addr => addr); // Remove undefined addresses
+    
+    for (const validatorAddress of legitimateValidators) {
+        if (validatorAddress) {
+            console.log(`    Sending bribe of ${ethers.formatEther(bribeAmount)} POL to ${validatorAddress}`);
+            
+            // Send bribe (ETH transfer)
+            const bribeTx = await sybilSigners[0].sendTransaction({
+                to: validatorAddress,
+                value: bribeAmount,
+                ...gasOptions
             });
-            sybilAttackLog.scenarioC.outcome = {
-                message: 'Sybil nodes attempted to approve a counterfeit batch.',
-                batchId: proposedBatchIdScenarioC.toString(),
-                details: {
-                    validated: batchDetails.validated,
-                    committed: batchDetails.committed,
-                    approvals: (await supplyChainNFT.batchApprovals(proposedBatchIdScenarioC)).toString(),
-                    denials: (await supplyChainNFT.batchDenials(proposedBatchIdScenarioC)).toString(),
-                    proposer: batchDetails.proposer,
-                    flagged: batchDetails.flagged
-                }
+            await bribeTx.wait();
+            
+            const bribeRecord = {
+                from: sybilSigners[0].address,
+                to: validatorAddress,
+                amount: ethers.formatEther(bribeAmount),
+                purpose: "influence_validation",
+                maliciousBatchId: maliciousBatchId,
+                timestamp: DateTime.now().toISO()
             };
-        } catch (e) {
-            console.error(`  [SCENARIO C] Error fetching details for batch ${proposedBatchIdScenarioC}: ${e.message}`);
-            sybilAttackLog.scenarioC.outcome = `Error fetching details for batch ${proposedBatchIdScenarioC}: ${e.message}`;
+            
+            attackLog.bribery.push(bribeRecord);
+            
+            // Add to FL training data
+            attackLog.flTrainingData.briberyDetection.push({
+                briberAddress: sybilSigners[0].address,
+                targetAddress: validatorAddress,
+                amount: ethers.formatEther(bribeAmount),
+                briberyType: "validation_influence",
+                relatedBatch: maliciousBatchId,
+                timestamp: DateTime.now().toUnixInteger()
+            });
+            
+            console.log("    ⚠️ Validator may change behavior after receiving bribe");
+            
+            await delay(2000);
         }
     }
-    console.log("--- Scenario C: Counterfeit Batch Complete ---");
-    sybilAttackLog.flIntegrationMetadata.attackTimestamps.scenarioC = DateTime.now().toISO();
+    
+    phase6Log.actions.push({
+        action: "executeAttack",
+        maliciousBatchId: maliciousBatchId,
+        fakeProductTokenId: SYBIL_CONFIG.fakeProductTokenId,
+        briberyTargets: legitimateValidators.length,
+        totalBribeAmount: ethers.formatEther(bribeAmount * BigInt(legitimateValidators.length)),
+        timestamp: DateTime.now().toISO()
+    });
+    
+    phase6Log.endTime = DateTime.now().toISO();
+    attackLog.phases.push(phase6Log);
+    console.log("⚔️ PHASE 6 Complete: Attack finished - Fake product and bribery executed");
 
-    // --- Scenario D: Bribery Attack ---
-    console.log('\n--- Scenario D: Simulating Bribery Attack ---');
-    sybilAttackLog.scenarioD.details.startTime = DateTime.now().toISO();
+    // ==================== FINALIZATION ====================
+    console.log("\n📊 SYBIL ATTACK SUMMARY");
     
-    await simulateBriberyAttack(briberSigner, context, sybilAttackLog, signers, addToTransactionQueue, ethers);
-    
-    console.log("  Processing bribery transactions in queue...");
-    await processTransactionQueue(); // Process any queued bribery transactions
-    
-    // Log simulated behavioral changes based on successful bribes
-    logSimulatedBehavioralChanges(sybilAttackLog, briberSigner.address);
-    
-    // Update FL metadata with bribed node addresses
-    if (sybilAttackLog.scenarioD.bribedNodes) {
-        sybilAttackLog.flIntegrationMetadata.bribedNodeAddresses = 
-            sybilAttackLog.scenarioD.bribedNodes.map(node => node.address);
-    }
-    
-    console.log("--- Bribery Attack Simulation (Scenario D) Complete ---");
-    sybilAttackLog.flIntegrationMetadata.attackTimestamps.scenarioD = DateTime.now().toISO();
-
-    // Add feature signals for FL models
-    sybilAttackLog.flIntegrationMetadata.featureSignals = {
-        sybilDetection: [
-            "Recently registered nodes with artificially high reputation",
-            "Nodes with minimal transaction history but high verification status",
-            "Coordinated voting patterns across multiple nodes"
-        ],
-        batchMonitoring: [
-            "Batch proposals with non-existent token IDs",
-            "Coordinated approval of suspicious batches",
-            "Consistent denial of legitimate batches"
-        ],
-        nodeBehavior: [
-            "Sudden changes in voting patterns after receiving bribes",
-            "Abnormal transaction frequency or value spikes",
-            "Coordinated actions across multiple nodes in short timeframes"
-        ],
-        disputeRisk: [
-            "Multiple frivolous disputes filed in short succession",
-            "Disputes filed by nodes with minimal transaction history",
-            "Coordinated dispute filing patterns"
-        ]
+    attackLog.endTime = DateTime.now().toISO();
+    attackLog.summary = {
+        totalSybilNodes: SYBIL_CONFIG.numNodes,
+        fakeProductsCreated: attackLog.fakeProducts.length,
+        briberyAttempts: attackLog.bribery.length,
+        totalBribeAmount: attackLog.bribery.reduce((sum, b) => sum + parseFloat(b.amount), 0),
+        phasesCompleted: attackLog.phases.length,
+        flTrainingRecords: {
+            sybilDetection: attackLog.flTrainingData.sybilDetection.length,
+            briberyDetection: attackLog.flTrainingData.briberyDetection.length
+        }
     };
 
-    // Finalize log
-    sybilAttackLog.simulationEndTime = DateTime.now().toISO();
-    const logFilePath = path.join(__dirname, 'sybil_attack_log.json');
-    fs.writeFileSync(logFilePath, JSON.stringify(sybilAttackLog, null, 2));
-    console.log(`\nSybil attack simulation log saved to: ${logFilePath}`);
+    console.log("Sybil Nodes created:", attackLog.summary.totalSybilNodes);
+    console.log("Fake products created:", attackLog.summary.fakeProductsCreated);
+    console.log("Bribery attempts:", attackLog.summary.briberyAttempts);
+    console.log("Total bribe amount:", attackLog.summary.totalBribeAmount, "POL");
+    console.log("FL Training Records:");
+    console.log("  - Sybil Detection:", attackLog.summary.flTrainingRecords.sybilDetection);
+    console.log("  - Bribery Detection:", attackLog.summary.flTrainingRecords.briberyDetection);
 
-    console.log("\n=== SYBIL ATTACK SIMULATION FINISHED ===");
+    // Update demo_context.json with ALL attack data for FL integration
+    readAndUpdateContext(currentContext => {
+        // Initialize attack data structure
+        if (!currentContext.attackData) {
+            currentContext.attackData = {};
+        }
+        // Store complete attack log directly in demo_context.json
+        currentContext.attackData.sybilAttack = {
+            timestamp: attackLog.timestamp,
+            campaign: ATTACK_IDENTIFIERS.attackCampaign,
+            controller: ATTACK_IDENTIFIERS.sybilController,
+            phases: attackLog.phases,
+            summary: attackLog.summary,
+            sybilNodes: attackLog.sybilNodes,
+            fakeProducts: attackLog.fakeProducts,
+            briberyRecords: attackLog.bribery,
+            flTrainingData: attackLog.flTrainingData
+        };
+        // Mark Sybil node addresses in nodes section for detection
+        for (const sybilNode of attackLog.sybilNodes) {
+            markNodeAsSybil(currentContext, sybilNode, ATTACK_IDENTIFIERS.attackCampaign, sybilNode.nodeType === 0 ? "Primary" : "Secondary");
+        }
+        // Add fake product interactions to Sybil nodes
+        for (const fakeProduct of attackLog.fakeProducts) {
+            addInteractionToNode(currentContext, fakeProduct.ownerAddress, {
+                type: "MintFakeProduct",
+                tokenId: fakeProduct.tokenId,
+                originalTokenId: fakeProduct.originalTokenId,
+                timestamp: DateTime.now().toUnixInteger(),
+                details: `Minted counterfeit product ${fakeProduct.uniqueProductID} (clone of token ${fakeProduct.originalTokenId})`,
+                isCounterfeit: true,
+                clonedMetadata: true,
+                detectionMarkers: {
+                    suspiciousManufacturerID: fakeProduct.manufacturerID.includes("_FAKE"),
+                    suspiciousBatchNumber: fakeProduct.batchNumber.includes("_COUNTERFEIT"),
+                    duplicateNFTReference: true,
+                    maliciousURL: fakeProduct.quickAccessURL.includes("malicious")
+                }
+            });
+        }
+        // Add bribery detection markers to affected nodes
+        for (const bribeRecord of attackLog.bribery) {
+            markNodeAsBribed(currentContext, bribeRecord.to, bribeRecord);
+            addInteractionToNode(currentContext, bribeRecord.to, {
+                type: "ReceiveBribe",
+                from: bribeRecord.from,
+                amount: bribeRecord.amount,
+                purpose: bribeRecord.purpose,
+                relatedBatch: bribeRecord.maliciousBatchId,
+                timestamp: DateTime.now().toUnixInteger(),
+                details: `Received bribe of ${bribeRecord.amount} POL from ${bribeRecord.from}`
+            });
+        }
+        // Add attack-related interactions to Sybil nodes
+        for (let i = 0; i < attackLog.sybilNodes.length; i++) {
+            const sybilNode = attackLog.sybilNodes[i];
+            const sybilAddress = sybilNode.address;
+            addInteractionToNode(currentContext, sybilAddress, {
+                type: "SybilRegistration",
+                campaign: ATTACK_IDENTIFIERS.attackCampaign,
+                phase: "Phase 1 - Registration",
+                timestamp: DateTime.now().toUnixInteger(),
+                details: `Registered as Sybil node in attack campaign ${ATTACK_IDENTIFIERS.attackCampaign}`
+            });
+            addInteractionToNode(currentContext, sybilAddress, {
+                type: "ReputationManipulation",
+                oldReputation: sybilNode.initialReputation,
+                newReputation: sybilNode.currentReputation,
+                phase: "Phase 4 - Reputation Update",
+                timestamp: DateTime.now().toUnixInteger(),
+                details: `Artificially boosted reputation from ${sybilNode.initialReputation} to ${sybilNode.currentReputation}`
+            });
+            if (sybilNode.nodeType === 0) { // Primary
+                addInteractionToNode(currentContext, sybilAddress, {
+                    type: "SuspiciousPromotion",
+                    oldNodeType: "Secondary",
+                    newNodeType: "Primary",
+                    phase: "Phase 5 - Primary Upgrade",
+                    timestamp: DateTime.now().toUnixInteger(),
+                    details: "Rapidly promoted to Primary node through reputation manipulation"
+                });
+            }
+        }
+        return currentContext;
+    });
+
+    console.log("\n🎯 SYBIL ATTACK SIMULATION COMPLETE!");
+    console.log("🔬 Data is ready for FL training with 2 core models:");
+    console.log("   - sybil_detection");
+    console.log("   - bribery_detection");
+    console.log("\n📁 Attack data integrated into:");
+    console.log(`   - ${contextFilePath} (complete attack data for FL training)`);
 }
 
+// Execute main function
 main()
     .then(() => process.exit(0))
     .catch((error) => {
-        console.error("Critical error in Sybil attack simulation script:", error);
+        console.error("Script execution failed:", error);
         process.exit(1);
     });
