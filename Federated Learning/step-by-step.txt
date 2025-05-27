@@ -10,11 +10,12 @@
 (cmd window) npx hardhat run 05_scenario_batch_processing.cjs --network amoy
 (cmd window) npx hardhat run 06_scenario_dispute_resolution.cjs --network amoy
 
-# Train the initial model with normal data
-python run_federated_learning.py --mode full --output-dir ./output/normal
-
 # Attack simulation
 (cmd window) npx hardhat run 07_simulate_sybil_bribery_attack.cjs --network amoy
 
-# Retrain ALL models with anomalous data
-python run_federated_learning.py --mode full --output_dir ./output/attack
+# Train the model 
+./run_fl_complete.sh
+python run_feder
+ated_learning.py --mode full --output_dir ./output/analysis
+
+

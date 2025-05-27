@@ -1,0 +1,73 @@
+{
+  "system": {
+    "start_time": "2025-05-28T00:48:52.705226",
+    "component_status": {
+      "blockchain_connector": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.706021",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.706012"
+        }
+      }
+    },
+    "errors": []
+  },
+  "performance": {
+    "blockchain_connector": {
+      "requests": 0,
+      "errors": 0,
+      "avg_response_time": 0
+    },
+    "fl_orchestrator": {
+      "training_rounds": 0,
+      "clients_participated": 0,
+      "avg_training_time": 0
+    },
+    "anomaly_detector": {
+      "detections": 0,
+      "false_positives": 0,
+      "false_negatives": 0
+    }
+  },
+  "events": [
+    {
+      "timestamp": "2025-05-28T00:48:52.708414",
+      "component": "main",
+      "type": "system_start",
+      "message": "Starting Federated Learning system (TRAIN ONLY)",
+      "level": "INFO",
+      "details": {
+        "mode": "full",
+        "config": {
+          "fl_orchestrator": {
+            "aggregation_strategy": "federated_averaging",
+            "privacy_budget": 1.0,
+            "dp_noise_multiplier": 0.1,
+            "max_grad_norm": 1.0,
+            "client_auth_enabled": true,
+            "secure_aggregation": true,
+            "differential_privacy": false
+          },
+          "anomaly_detector": {
+            "threshold": 0.5,
+            "algorithm": "isolation_forest",
+            "contamination": 0.1
+          },
+          "response_engine": {
+            "response_strategy": "adaptive",
+            "severity_levels": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "blockchain_connector": {
+            "rpc_url": "https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94",
+            "num_blocks_to_fetch": 10
+          }
+        }
+      }
+    }
+  ]
+}

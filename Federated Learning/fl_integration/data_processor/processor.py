@@ -112,7 +112,12 @@ class DataProcessor:
             'ArtificialActivity': 'attack_sybil',
             'BribeReceived': 'attack_bribery',
             'CompromisedVoting': 'attack_bribery',
-            'simulatedBehaviorChange': 'attack_bribery'
+            'simulatedBehaviorChange': 'attack_bribery',
+            # New attack interaction types from demo_context
+            'ReceiveBribe': 'attack_bribery',
+            'ReputationManipulation': 'attack_sybil',
+            'SuspiciousPromotion': 'attack_sybil',
+            'MintFakeProduct': 'attack_sybil'
         }
 
         def is_valid_interaction(inter):
@@ -190,7 +195,8 @@ class DataProcessor:
 
             processed_data = {
                 'sybil_detection': {'features': [], 'labels': []},
-                'bribery_detection': {'features': [], 'labels': []}
+                'bribery_detection': {'features': [], 'labels': []},
+                'batch_monitoring': {'features': [], 'labels': []}
             }
             dropped_interactions = 0
             dropped_nodes = 0
@@ -1252,6 +1258,7 @@ class DataProcessor:
             Dictionary mapping node IDs to feature vectors
         """
         bribery_features = {}
+        node_features = {}  # Add missing initialization
         
         # Process node data
         for node_id, node_data in processed_data.get("nodes", {}).items():

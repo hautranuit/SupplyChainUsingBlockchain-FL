@@ -1,0 +1,19 @@
+2025-05-28 00:48:52,705 - monitoring - INFO - Performing health check
+2025-05-28 00:48:52,705 - monitoring - INFO - Health check thread started with interval 60 seconds
+2025-05-28 00:48:52,706 - monitoring - INFO - Component blockchain_connector status updated to healthy
+2025-05-28 00:48:52,706 - monitoring - INFO - Monitoring system initialized with log directory: results/fl_training_20250528_004803/logs
+2025-05-28 00:48:52,707 - monitoring - INFO - Metrics directory: results/fl_training_20250528_004803/metrics
+2025-05-28 00:48:52,707 - monitoring - INFO - Performance monitoring enabled: True
+2025-05-28 00:48:52,707 - monitoring - INFO - Health checks enabled: True
+2025-05-28 00:48:52,708 - monitoring - INFO - [main] Starting Federated Learning system (TRAIN ONLY)
+2025-05-28 00:48:52,711 - monitoring - INFO - Component data_processor status updated to healthy
+2025-05-28 00:48:52,727 - monitoring - INFO - Component fl_orchestrator status updated to healthy
+2025-05-28 00:48:52,737 - monitoring - INFO - Component model_repository status updated to healthy
+2025-05-28 00:48:52,747 - monitoring - INFO - Component anomaly_detector status updated to healthy
+2025-05-28 00:48:52,759 - monitoring - INFO - Component response_engine status updated to healthy
+2025-05-28 00:49:00,897 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.009369611740112305
+2025-05-28 00:49:00,900 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.009369611740112305
+2025-05-28 00:49:00,914 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
+2025-05-28 00:49:16,501 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 15.577274799346924
+2025-05-28 00:49:16,507 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 15.577274799346924
+2025-05-28 00:49:16,517 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1

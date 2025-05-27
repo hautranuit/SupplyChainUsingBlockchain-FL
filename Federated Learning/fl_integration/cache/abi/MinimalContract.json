@@ -1,0 +1,1 @@
+{"abi": [{"inputs": [], "name": "getAllNodes", "outputs": [{"type": "address[]", "name": ""}], "stateMutability": "view", "type": "function"}]}

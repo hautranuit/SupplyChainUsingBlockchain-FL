@@ -46,8 +46,8 @@ async function main() {
     const signers = await ethers.getSigners();
     const deployer = signers[0]; // Will also be the initial admin for roles
     const manufacturerAcc = signers[1];
-    const transporter1Acc = signers[2]; // Primary Node in original comment, Secondary here based on config
-    const transporter2Acc = signers[3]; // Primary Node in original comment, Secondary here based on config
+    const transporter1Acc = signers[2]; 
+    const transporter2Acc = signers[3]; 
     const transporter3Acc = signers[4]; // Secondary Node, also batch proposer
     const retailerAcc = signers[5];
     const buyerAcc = signers[6];

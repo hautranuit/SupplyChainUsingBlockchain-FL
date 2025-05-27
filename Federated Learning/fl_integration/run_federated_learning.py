@@ -22,6 +22,63 @@ from web3 import Web3
 import tensorflow as tf
 import tensorflow_federated as tff
 
+# Enhanced Loss Functions for Better Model Calibration
+class OptimizedLossFunctions:
+    """Enhanced loss functions to address high loss with good accuracy issue."""
+    
+    @staticmethod
+    def focal_loss(alpha=0.25, gamma=2.0):
+        """
+        Focal Loss to address class imbalance and reduce overconfident predictions.
+        Focuses training on hard examples.
+        """
+        def focal_loss_fn(y_true, y_pred):
+            # Convert predictions to probabilities
+            y_pred = tf.clip_by_value(y_pred, tf.keras.backend.epsilon(), 1 - tf.keras.backend.epsilon())
+            
+            # Calculate focal loss
+            alpha_factor = y_true * alpha + (1 - y_true) * (1 - alpha)
+            focal_weight = y_true * (1 - y_pred) ** gamma + (1 - y_true) * y_pred ** gamma
+            focal_loss = alpha_factor * focal_weight * tf.keras.backend.binary_crossentropy(y_true, y_pred)
+            
+            return tf.reduce_mean(focal_loss)
+        
+        focal_loss_fn.__name__ = 'focal_loss'
+        return focal_loss_fn
+    
+    @staticmethod
+    def label_smoothing_loss(smoothing=0.1):
+        """
+        Label smoothing to improve model calibration and reduce overconfidence.
+        """
+        def label_smoothing_fn(y_true, y_pred):
+            # Apply label smoothing
+            y_true_smooth = y_true * (1 - smoothing) + 0.5 * smoothing
+            return tf.keras.losses.binary_crossentropy(y_true_smooth, y_pred)
+        
+        label_smoothing_fn.__name__ = 'label_smoothing_loss'
+        return label_smoothing_fn
+    
+    @staticmethod
+    def get_optimized_optimizer(learning_rate=0.005, optimization_strategy="standard"):
+        """Get optimized optimizer with better convergence properties."""
+        if optimization_strategy == "adaptive":
+            return tf.keras.optimizers.AdamW(
+                learning_rate=learning_rate,
+                weight_decay=0.01,
+                beta_1=0.9,
+                beta_2=0.999,
+                epsilon=1e-7
+            )
+        elif optimization_strategy == "momentum":
+            return tf.keras.optimizers.SGD(
+                learning_rate=learning_rate,
+                momentum=0.9,
+                nesterov=True
+            )
+        else:
+            return tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
 # Add project paths to sys.path
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(script_dir)
@@ -100,6 +157,22 @@ def parse_args():
     parser.add_argument('--verbose', action='store_true',
                        help='Enable verbose logging')
     
+    # Loss optimization arguments
+    parser.add_argument('--loss-optimization', type=str, default='standard',
+                       choices=['standard', 'focal_loss', 'label_smoothing'],
+                       help='Loss function optimization strategy for better calibration')
+    parser.add_argument('--focal-alpha', type=float, default=0.25,
+                       help='Alpha parameter for focal loss (class weighting)')
+    parser.add_argument('--focal-gamma', type=float, default=2.0,
+                       help='Gamma parameter for focal loss (focusing parameter)')
+    parser.add_argument('--label-smoothing', type=float, default=0.1,
+                       help='Label smoothing factor (0.0 = no smoothing, 0.1 = mild smoothing)')
+    parser.add_argument('--optimizer-strategy', type=str, default='standard',
+                       choices=['standard', 'adaptive', 'momentum'],
+                       help='Optimizer strategy for better convergence')
+    parser.add_argument('--enable-loss-analysis', action='store_true',
+                       help='Enable detailed loss analysis and reporting')
+    
     args = parser.parse_args()
     # Force input_data_file to demo_context.json if not set
     if not args.input_data_file:
@@ -165,19 +238,26 @@ def setup_directories(args) -> Dict[str, str]:
     }
 
 def create_sybil_detection_model(input_shape: int, compile_model: bool = True):
-    """Create a model for Sybil detection."""
+    """Create an improved model for Sybil detection with better architecture."""
     model = tf.keras.Sequential([
-        tf.keras.layers.Dense(32, activation='relu', input_shape=(input_shape,)),
-        tf.keras.layers.Dropout(0.1),
+        tf.keras.layers.Dense(64, activation='relu', input_shape=(input_shape,)),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.3),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dropout(0.1),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
     
     if compile_model:
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999),
             loss='binary_crossentropy',
-            metrics=['accuracy', tf.keras.metrics.AUC(name='auc')]
+            metrics=['accuracy', tf.keras.metrics.AUC(name='auc'), 
+                    tf.keras.metrics.Precision(name='precision'),
+                    tf.keras.metrics.Recall(name='recall')]
         )
     return model
 
@@ -190,9 +270,9 @@ def create_batch_monitoring_model(input_shape: int, compile_model: bool = True):
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(16, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-    
-    if compile_model:        model.compile(
+    ])    
+    if compile_model:
+        model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
             loss='binary_crossentropy',
             metrics=['accuracy']
@@ -238,23 +318,28 @@ def create_dispute_risk_model(input_shape: int, compile_model: bool = True):
     return model
 
 def create_bribery_detection_model(input_shape: int, compile_model: bool = True):
-    """Create a model for bribery attack detection."""
+    """Create an improved model for bribery attack detection with better architecture."""
     model = tf.keras.Sequential([
-        tf.keras.layers.Dense(256, activation='relu', input_shape=(input_shape,)),
+        tf.keras.layers.Dense(128, activation='relu', input_shape=(input_shape,)),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dropout(0.3),
         tf.keras.layers.Dense(64, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.3),
         tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dropout(0.1),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
     
     if compile_model:
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0006),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999),
             loss='binary_crossentropy',
-            metrics=['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall()]
+            metrics=['accuracy', tf.keras.metrics.AUC(name='auc'),
+                    tf.keras.metrics.Precision(name='precision'), 
+                    tf.keras.metrics.Recall(name='recall')]
         )
     return model
 
@@ -322,26 +407,66 @@ def format_blockchain_events_table(events: List[Dict], output_file_path: str = N
     return table_content
 
 def generate_synthetic_bribery_data(num_samples: int, num_features: int = 15):
-    """Generate synthetic data for bribery detection training."""
+    """Generate synthetic data for bribery detection training with improved attack patterns."""
     np.random.seed(45)
     features = []
     labels = []
     ids_list = []
+    
     for i in range(num_samples):
-        feature_vector = [
-            np.random.exponential(0.3), np.random.gamma(2, 0.5), np.random.beta(2, 8),
-            np.random.normal(0.1, 0.05), np.random.poisson(2), np.random.uniform(0, 1),
-            np.random.exponential(0.2), np.random.normal(0.05, 0.02), np.random.beta(1, 10),
-            np.random.gamma(1, 0.3), np.random.uniform(0, 1), np.random.normal(0.03, 0.01),
-            np.random.exponential(0.15), np.random.beta(2, 15), np.random.uniform(0, 1)
-        ]
+        is_bribed = np.random.random() < 0.20  # 20% bribed nodes
+        
+        if is_bribed:
+            # Bribed nodes show behavioral changes and bias patterns
+            feature_vector = [
+                np.random.exponential(0.4),  # Unusual activity frequency changes
+                np.random.gamma(3, 0.3),     # Changed interaction patterns
+                np.random.beta(1, 8),        # Reduced interaction diversity
+                np.random.normal(0.15, 0.05), # Shorter intervals (urgent behavior)
+                np.random.normal(70, 15),    # Declining reputation
+                np.random.normal(120, 10),   # Initial reputation (before decline)
+                np.random.uniform(0.4, 0.8), # High attack interaction ratio
+                np.random.uniform(0.6, 0.9), # High behavioral change score
+                np.random.uniform(2, 5),     # More suspicious patterns
+                np.random.uniform(0.7, 1.0), # High bribery confidence
+                np.random.uniform(0.6, 0.9), # High reputation decline rate
+                np.random.uniform(0.5, 0.8), # Decision bias score
+                np.random.uniform(0.4, 0.7), # Coordination score
+                np.random.uniform(0.3, 0.6), # Economic incentive score
+                np.random.uniform(0.2, 0.5)  # Timing anomaly score
+            ]
+        else:
+            # Normal nodes maintain consistent, unbiased behavior
+            feature_vector = [
+                np.random.exponential(0.2),  # Normal activity frequency
+                np.random.gamma(1, 0.8),     # Stable interaction patterns
+                np.random.beta(3, 5),        # Good interaction diversity
+                np.random.normal(0.08, 0.03), # Normal intervals
+                np.random.normal(110, 25),   # Stable reputation
+                np.random.normal(105, 20),   # Consistent initial reputation
+                np.random.uniform(0, 0.2),   # Low attack interaction ratio
+                np.random.uniform(0, 0.3),   # Low behavioral change
+                np.random.uniform(0, 2),     # Few suspicious patterns
+                np.random.uniform(0, 0.3),   # Low bribery confidence
+                np.random.uniform(0, 0.2),   # Low reputation decline
+                np.random.uniform(0, 0.3),   # Low decision bias
+                np.random.uniform(0, 0.2),   # Low coordination score
+                np.random.uniform(0, 0.2),   # Low economic incentive
+                np.random.uniform(0, 0.2)    # Low timing anomaly
+            ]
+          # Ensure correct feature count
         if len(feature_vector) < num_features:
             feature_vector.extend([0.1] * (num_features - len(feature_vector)))
-        else:
+        elif len(feature_vector) > num_features:
             feature_vector = feature_vector[:num_features]
+            
+        # Validate feature vector is all numeric
+        feature_vector = [float(x) for x in feature_vector]
+        
         features.append(feature_vector)
-        labels.append(1 if np.random.random() < 0.25 else 0)
+        labels.append(1 if is_bribed else 0)
         ids_list.append({'validator_id': f'synthetic_validator_bribery_{i}', 'synthetic_marker': True})
+    
     return {'features': features, 'labels': labels, 'ids': ids_list}
 
 def generate_synthetic_arbitrator_data(num_samples: int, num_features: int = 15):
@@ -391,26 +516,67 @@ def generate_synthetic_dispute_data(num_samples: int, num_features: int = 15):
     return {'features': features, 'labels': labels, 'ids': ids_list}
 
 def generate_synthetic_sybil_data(num_samples: int, num_features: int = 15):
-    """Generate synthetic data for Sybil detection training."""
+    """Generate synthetic data for Sybil detection training with improved attack patterns."""
     np.random.seed(42)
     features = []
     labels = []
     ids_list = []
+    
     for i in range(num_samples):
-        feature_vector = [
-            np.random.normal(0.5, 0.2), np.random.exponential(0.3), np.random.gamma(2, 2),
-            np.random.beta(2, 5), np.random.normal(100, 30), np.random.poisson(5),
-            np.random.uniform(0, 1), np.random.normal(0.7, 0.15), np.random.exponential(0.2),
-            np.random.uniform(0, 24), np.random.normal(0.8, 0.1), np.random.gamma(1, 1),
-            np.random.beta(3, 2), np.random.normal(0.6, 0.2), np.random.uniform(0, 1)
-        ]
+        is_sybil = np.random.random() < 0.25  # 25% Sybil nodes
+        
+        if is_sybil:
+            # Sybil nodes exhibit coordinated, artificial patterns
+            feature_vector = [
+                np.random.normal(0.8, 0.1),  # High activity frequency (coordinated)
+                np.random.exponential(0.1),  # Low uniqueness (similar patterns)
+                np.random.gamma(3, 1),       # High correlation with other nodes
+                np.random.beta(1, 5),        # Low randomness in transactions
+                np.random.normal(80, 10),    # Lower reputation
+                np.random.poisson(3),        # Fewer distinct counterparties
+                np.random.uniform(0, 0.3),   # Role features (likely not manufacturer/retailer)
+                np.random.normal(0.2, 0.1),  # Lower verification rate
+                np.random.exponential(0.05), # Minimal dispute activity
+                np.random.uniform(18, 24),   # Active during specific hours (coordination)
+                np.random.normal(0.3, 0.1),  # Low product interaction
+                np.random.gamma(1, 0.5),     # Artificial batch activity
+                np.random.beta(1, 8),        # Low verification score
+                np.random.normal(0.1, 0.05), # Minimal product details activity
+                np.random.uniform(0, 0.2)    # Low batch proposal activity
+            ]
+        else:
+            # Legitimate nodes have organic, diverse patterns
+            feature_vector = [
+                np.random.normal(0.4, 0.3),  # Moderate, varied activity
+                np.random.exponential(0.4),  # Higher uniqueness
+                np.random.gamma(1, 2),       # Lower correlation
+                np.random.beta(3, 3),        # Higher randomness
+                np.random.normal(120, 20),   # Higher reputation
+                np.random.poisson(8),        # More distinct counterparties
+                np.random.uniform(0, 1),     # Various roles
+                np.random.normal(0.8, 0.15), # Higher verification rate
+                np.random.exponential(0.3),  # Normal dispute activity
+                np.random.uniform(0, 24),    # Active throughout day
+                np.random.normal(0.7, 0.2),  # Higher product interaction
+                np.random.gamma(2, 1),       # Organic batch activity
+                np.random.beta(3, 2),        # Higher verification score
+                np.random.normal(0.6, 0.2),  # Normal product details activity
+                np.random.uniform(0, 0.8)    # Varied batch proposal activity
+            ]
+        
+        # Ensure correct feature count
         if len(feature_vector) < num_features:
             feature_vector.extend([0.5] * (num_features - len(feature_vector)))
-        else:
+        elif len(feature_vector) > num_features:
             feature_vector = feature_vector[:num_features]
+            
+        # Validate feature vector is all numeric
+        feature_vector = [float(x) for x in feature_vector]
+        
         features.append(feature_vector)
-        labels.append(1 if np.random.random() < 0.2 else 0)
+        labels.append(1 if is_sybil else 0)
         ids_list.append({'node_id': f'synthetic_sybil_node_{i}', 'synthetic_marker': True})
+    
     return {'features': features, 'labels': labels, 'ids': ids_list}
 
 def generate_synthetic_batch_data(num_samples: int, num_features: int = 15):
@@ -667,8 +833,7 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
                 logger.info(f"No data available for {model_name} after preparation.")
         
         client_data = {'client_1': {}}
-        
-        # Core models configuration - Focus on attack detection only
+          # Core models configuration - Focus on attack detection only
         core_models_config = {
             'sybil_detection': 14,  # 14 features for Sybil detection
             'bribery_detection': 15  # 15 features for Bribery detection
@@ -680,9 +845,38 @@ def run_federated_learning(args, dirs: Dict[str, str], config: Dict[str, Any]):
             if model_name_key in model_training_input_data and \
                model_training_input_data[model_name_key] and \
                len(model_training_input_data[model_name_key].get('features', [])) > 0:
-                features = np.array(model_training_input_data[model_name_key]['features'])
-                labels = np.array(model_training_input_data[model_name_key]['labels'])
-                client_data['client_1'][model_name_key] = (features, labels)
+                
+                # Ensure all feature vectors have consistent shape
+                raw_features = model_training_input_data[model_name_key]['features']
+                expected_features = core_models_config[model_name_key]
+                
+                # Validate and fix feature vector shapes
+                validated_features = []
+                for feature_vector in raw_features:
+                    if isinstance(feature_vector, list):
+                        # Ensure correct number of features
+                        if len(feature_vector) < expected_features:
+                            # Pad with zeros if too short
+                            feature_vector.extend([0.0] * (expected_features - len(feature_vector)))
+                        elif len(feature_vector) > expected_features:
+                            # Truncate if too long
+                            feature_vector = feature_vector[:expected_features]
+                        validated_features.append(feature_vector)
+                    else:
+                        logger.warning(f"Invalid feature vector format for {model_name_key}: {type(feature_vector)}")
+                        # Create default feature vector
+                        validated_features.append([0.0] * expected_features)
+                
+                # Convert to numpy arrays with validated shapes
+                try:
+                    features = np.array(validated_features, dtype=np.float32)
+                    labels = np.array(model_training_input_data[model_name_key]['labels'], dtype=np.float32)
+                    
+                    logger.info(f"Successfully created arrays for {model_name_key}: features shape {features.shape}, labels shape {labels.shape}")
+                    client_data['client_1'][model_name_key] = (features, labels)
+                except Exception as array_error:
+                    logger.error(f"Error creating numpy arrays for {model_name_key}: {array_error}")
+                    client_data['client_1'][model_name_key] = (np.array([]).astype(np.float32), np.array([]).astype(np.float32))
             else:
                 client_data['client_1'][model_name_key] = (np.array([]).astype(np.float32), np.array([]).astype(np.float32))
                 logger.warning(f"No data (real or synthetic) available for model {model_name_key} to be included in client_data.")

@@ -1,0 +1,139 @@
+{
+  "system": {
+    "start_time": "2025-05-28T00:48:52.705226",
+    "component_status": {
+      "blockchain_connector": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.706021",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.706012"
+        }
+      },
+      "data_processor": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.711488",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.711468"
+        }
+      },
+      "fl_orchestrator": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.727726",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.727708"
+        }
+      },
+      "model_repository": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.737104",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.737088"
+        }
+      },
+      "anomaly_detector": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.747380",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.747361"
+        }
+      },
+      "response_engine": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T00:48:52.759548",
+        "details": {
+          "last_check": "2025-05-28T00:48:52.759533"
+        }
+      }
+    },
+    "errors": [],
+    "uptime_seconds": 0.065721
+  },
+  "performance": {
+    "blockchain_connector": {
+      "requests": 0,
+      "errors": 0,
+      "avg_response_time": 0
+    },
+    "fl_orchestrator": {
+      "training_rounds": 0,
+      "clients_participated": 0,
+      "avg_training_time": 0
+    },
+    "anomaly_detector": {
+      "detections": 0,
+      "false_positives": 0,
+      "false_negatives": 0
+    },
+    "feature_extraction": {
+      "data_processing_time": 0.009369611740112305,
+      "data_processing_success_count": 1,
+      "avg_data_processing_time": 0.009369611740112305,
+      "data_processing_count": 1
+    },
+    "federated_training": {
+      "training_time": 15.577274799346924,
+      "training_success_count": 1,
+      "avg_training_time": 15.577274799346924,
+      "training_count": 1
+    }
+  },
+  "events": [
+    {
+      "timestamp": "2025-05-28T00:48:52.708414",
+      "component": "main",
+      "type": "system_start",
+      "message": "Starting Federated Learning system (TRAIN ONLY)",
+      "level": "INFO",
+      "details": {
+        "mode": "full",
+        "config": {
+          "fl_orchestrator": {
+            "aggregation_strategy": "federated_averaging",
+            "privacy_budget": 1.0,
+            "dp_noise_multiplier": 0.1,
+            "max_grad_norm": 1.0,
+            "client_auth_enabled": true,
+            "secure_aggregation": true,
+            "differential_privacy": false
+          },
+          "anomaly_detector": {
+            "threshold": 0.5,
+            "algorithm": "isolation_forest",
+            "contamination": 0.1
+          },
+          "response_engine": {
+            "response_strategy": "adaptive",
+            "severity_levels": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "blockchain_connector": {
+            "rpc_url": "https://polygon-amoy.infura.io/v3/d455e91357464c0cb3727309e4256e94",
+            "num_blocks_to_fetch": 10
+          }
+        }
+      }
+    }
+  ],
+  "timers": {
+    "1748368140888": {
+      "component": "feature_extraction",
+      "operation": "data_processing",
+      "start_time": 1748368140.8880806,
+      "end_time": 1748368140.8974502,
+      "duration": 0.009369611740112305,
+      "success": true
+    },
+    "1748368140924": {
+      "component": "federated_training",
+      "operation": "training",
+      "start_time": 1748368140.9241643,
+      "end_time": 1748368156.501439,
+      "duration": 15.577274799346924,
+      "success": true
+    }
+  }
+}

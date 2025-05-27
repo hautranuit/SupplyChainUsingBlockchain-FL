@@ -107,6 +107,8 @@ abstract contract BatchProcessing is Ownable {
 
         for (uint256 i = 0; i < numToSelect; i++) {
             require(totalReputation > 0, "Reputation sum error");
+            // Update random seed for each selection to ensure different entropy
+            randSeed = uint256(keccak256(abi.encodePacked(randSeed, i, block.difficulty, block.coinbase)));
             uint256 rand = randSeed % totalReputation;
             uint256 cumulative = 0;
             uint256 selectedIndex = 0;
