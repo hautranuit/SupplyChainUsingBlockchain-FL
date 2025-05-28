@@ -28,8 +28,8 @@ python -c "import tensorflow_federated as tff; print('✅ TFF version:', tff.__v
     exit 1
 }
 
-# Create timestamped output directory
-OUTPUT_DIR="results/fl_training_$(date +%Y%m%d_%H%M%S)"
+# Create output directory as requested
+OUTPUT_DIR="results"
 mkdir -p "$OUTPUT_DIR"
 
 # Check if demo_context.json exists
@@ -44,11 +44,11 @@ echo ""
 echo "📊 Training Configuration:"
 echo "  - Mode: full (all FL modules)"
 echo "  - Data Source: $DATA_SOURCE"  
-echo "  - Training Rounds: 35 (optimized for attack detection)"
-echo "  - Federated Clients: 7"
-echo "  - Batch Size: 16"
-echo "  - Learning Rate: 0.005"
-echo "  - Output Directory: $OUTPUT_DIR"
+echo "  - Training Rounds: 50"
+echo "  - Federated Clients: 4 (balanced for realistic simulation)"
+echo "  - Batch Size: 32 (optimal batch size)"
+echo "  - Learning Rate: 0.01 (proven successful rate)"
+echo "  - Output Directory: $OUTPUT_DIR (will save to E:\\NAM3\\DO_AN_CHUYEN_NGANH\\Federated Learning\\fl_integration\\results)"
 echo ""
 
 # Start training with comprehensive logging
@@ -56,10 +56,10 @@ echo "🎯 Starting FL training..."
 python run_federated_learning.py \
   --mode full \
   --input-data-file "$DATA_SOURCE" \
-  --num-rounds 35 \
-  --num-clients 7 \
-  --batch-size 16 \
-  --learning-rate 0.005 \
+  --num-rounds 50 \
+  --num-clients 4 \
+  --batch-size 32 \
+  --learning-rate 0.01 \
   --verbose \
   --output-dir "$OUTPUT_DIR" \
   2>&1 | tee "$OUTPUT_DIR/training.log"

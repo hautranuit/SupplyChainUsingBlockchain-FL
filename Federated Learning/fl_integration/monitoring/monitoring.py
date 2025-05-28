@@ -14,9 +14,9 @@ import threading
 import traceback
 import numpy as np
 
-# JSON encoder tùy chỉnh để xử lý kiểu dữ liệu NumPy
+# Custom JSON encoder to handle NumPy data types
 class NumpyJSONEncoder(json.JSONEncoder):
-    """JSON Encoder hỗ trợ các kiểu dữ liệu NumPy."""
+    """JSON Encoder supporting NumPy data types."""
     def default(self, obj):
         if isinstance(obj, np.integer):
             return int(obj)

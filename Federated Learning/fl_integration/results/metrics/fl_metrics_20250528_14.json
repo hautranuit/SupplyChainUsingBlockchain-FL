@@ -1,12 +1,19 @@
 {
   "system": {
-    "start_time": "2025-05-28T00:48:52.705226",
+    "start_time": "2025-05-28T14:41:56.359691",
     "component_status": {
       "blockchain_connector": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.706021",
+        "last_updated": "2025-05-28T14:41:56.361213",
         "details": {
-          "last_check": "2025-05-28T00:48:52.706012"
+          "last_check": "2025-05-28T14:41:56.361206"
+        }
+      },
+      "data_processor": {
+        "status": "healthy",
+        "last_updated": "2025-05-28T14:41:56.365936",
+        "details": {
+          "last_check": "2025-05-28T14:41:56.365920"
         }
       }
     },
@@ -31,7 +38,7 @@
   },
   "events": [
     {
-      "timestamp": "2025-05-28T00:48:52.708414",
+      "timestamp": "2025-05-28T14:41:56.363200",
       "component": "main",
       "type": "system_start",
       "message": "Starting Federated Learning system (TRAIN ONLY)",

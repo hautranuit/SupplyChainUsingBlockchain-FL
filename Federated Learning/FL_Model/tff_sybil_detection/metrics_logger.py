@@ -5,6 +5,18 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, average_precision_score
 
+# Custom JSON encoder to handle NumPy data types
+class NumpyJSONEncoder(json.JSONEncoder):
+    """JSON Encoder supporting NumPy data types."""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NumpyJSONEncoder, self).default(obj)
+
 class MetricsLogger:
     """
     A class for logging, visualizing, and analyzing metrics during Federated Learning training.
@@ -54,7 +66,7 @@ class MetricsLogger:
         }
         
         with open(self.metrics_file, 'w') as f:
-            json.dump(metrics_data, f, indent=2)
+            json.dump(metrics_data, f, indent=2, cls=NumpyJSONEncoder)
     
     def log_train_metrics(self, round_num, metrics):
         """
@@ -188,7 +200,7 @@ class MetricsLogger:
                 data[metrics_type].append(metrics)
             
             with open(self.metrics_file, 'w') as f:
-                json.dump(data, f, indent=2)
+                json.dump(data, f, indent=2, cls=NumpyJSONEncoder)
         except Exception as e:
             print(f"Error updating metrics file: {e}")
     
@@ -368,7 +380,7 @@ class MetricsLogger:
         # Save report
         report_file = os.path.join(self.output_dir, "summary_report.json")
         with open(report_file, 'w') as f:
-            json.dump(report, f, indent=2)
+            json.dump(report, f, indent=2, cls=NumpyJSONEncoder)
         
         # Generate text report
         text_report = f"""
@@ -431,13 +443,13 @@ class MetricsLogger:
             data["experiment_config"] = config
             
             with open(self.metrics_file, 'w') as f:
-                json.dump(data, f, indent=2)
+                json.dump(data, f, indent=2, cls=NumpyJSONEncoder)
         except Exception as e:
             print(f"Error updating metrics file with config: {e}")
         
         # Save config to separate file
         config_file = os.path.join(self.output_dir, "experiment_config.json")
         with open(config_file, 'w') as f:
-            json.dump(config, f, indent=2)
+            json.dump(config, f, indent=2, cls=NumpyJSONEncoder)
         
         print(f"Experiment configuration saved to {config_file}")

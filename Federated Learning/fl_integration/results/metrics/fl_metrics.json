@@ -1,52 +1,52 @@
 {
   "system": {
-    "start_time": "2025-05-28T00:48:52.705226",
+    "start_time": "2025-05-28T14:41:56.359691",
     "component_status": {
       "blockchain_connector": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.706021",
+        "last_updated": "2025-05-28T14:41:56.361213",
         "details": {
-          "last_check": "2025-05-28T00:48:52.706012"
+          "last_check": "2025-05-28T14:41:56.361206"
         }
       },
       "data_processor": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.711488",
+        "last_updated": "2025-05-28T14:41:56.365936",
         "details": {
-          "last_check": "2025-05-28T00:48:52.711468"
+          "last_check": "2025-05-28T14:41:56.365920"
         }
       },
       "fl_orchestrator": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.727726",
+        "last_updated": "2025-05-28T14:41:56.381409",
         "details": {
-          "last_check": "2025-05-28T00:48:52.727708"
+          "last_check": "2025-05-28T14:41:56.381398"
         }
       },
       "model_repository": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.737104",
+        "last_updated": "2025-05-28T14:41:56.384429",
         "details": {
-          "last_check": "2025-05-28T00:48:52.737088"
+          "last_check": "2025-05-28T14:41:56.384420"
         }
       },
       "anomaly_detector": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.747380",
+        "last_updated": "2025-05-28T14:41:56.396223",
         "details": {
-          "last_check": "2025-05-28T00:48:52.747361"
+          "last_check": "2025-05-28T14:41:56.396201"
         }
       },
       "response_engine": {
         "status": "healthy",
-        "last_updated": "2025-05-28T00:48:52.759548",
+        "last_updated": "2025-05-28T14:41:56.414635",
         "details": {
-          "last_check": "2025-05-28T00:48:52.759533"
+          "last_check": "2025-05-28T14:41:56.414594"
         }
       }
     },
     "errors": [],
-    "uptime_seconds": 0.065721
+    "uptime_seconds": 0.059968
   },
   "performance": {
     "blockchain_connector": {
@@ -65,21 +65,21 @@
       "false_negatives": 0
     },
     "feature_extraction": {
-      "data_processing_time": 0.009369611740112305,
+      "data_processing_time": 0.010535240173339844,
       "data_processing_success_count": 1,
-      "avg_data_processing_time": 0.009369611740112305,
+      "avg_data_processing_time": 0.010535240173339844,
       "data_processing_count": 1
     },
     "federated_training": {
-      "training_time": 15.577274799346924,
+      "training_time": 18.661919355392456,
       "training_success_count": 1,
-      "avg_training_time": 15.577274799346924,
+      "avg_training_time": 18.661919355392456,
       "training_count": 1
     }
   },
   "events": [
     {
-      "timestamp": "2025-05-28T00:48:52.708414",
+      "timestamp": "2025-05-28T14:41:56.363200",
       "component": "main",
       "type": "system_start",
       "message": "Starting Federated Learning system (TRAIN ONLY)",
@@ -116,23 +116,33 @@
           }
         }
       }
+    },
+    {
+      "timestamp": "2025-05-28T14:42:28.371434",
+      "component": "main",
+      "type": "system_end",
+      "message": "Federated Learning system shutdown",
+      "level": "INFO",
+      "details": {
+        "models_trained": 2
+      }
     }
   ],
   "timers": {
-    "1748368140888": {
+    "1748418129623": {
       "component": "feature_extraction",
       "operation": "data_processing",
-      "start_time": 1748368140.8880806,
-      "end_time": 1748368140.8974502,
-      "duration": 0.009369611740112305,
+      "start_time": 1748418129.623914,
+      "end_time": 1748418129.6344492,
+      "duration": 0.010535240173339844,
       "success": true
     },
-    "1748368140924": {
+    "1748418129664": {
       "component": "federated_training",
       "operation": "training",
-      "start_time": 1748368140.9241643,
-      "end_time": 1748368156.501439,
-      "duration": 15.577274799346924,
+      "start_time": 1748418129.6647995,
+      "end_time": 1748418148.3267188,
+      "duration": 18.661919355392456,
       "success": true
     }
   }

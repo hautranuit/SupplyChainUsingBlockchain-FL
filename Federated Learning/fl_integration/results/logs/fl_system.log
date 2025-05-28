@@ -1,0 +1,20 @@
+2025-05-28 14:41:56,359 - monitoring - INFO - Performing health check
+2025-05-28 14:41:56,361 - monitoring - INFO - Health check thread started with interval 60 seconds
+2025-05-28 14:41:56,361 - monitoring - INFO - Component blockchain_connector status updated to healthy
+2025-05-28 14:41:56,361 - monitoring - INFO - Monitoring system initialized with log directory: results/logs
+2025-05-28 14:41:56,362 - monitoring - INFO - Metrics directory: results/metrics
+2025-05-28 14:41:56,362 - monitoring - INFO - Performance monitoring enabled: True
+2025-05-28 14:41:56,362 - monitoring - INFO - Health checks enabled: True
+2025-05-28 14:41:56,362 - monitoring - INFO - [main] Starting Federated Learning system (TRAIN ONLY)
+2025-05-28 14:41:56,365 - monitoring - INFO - Component data_processor status updated to healthy
+2025-05-28 14:41:56,381 - monitoring - INFO - Component fl_orchestrator status updated to healthy
+2025-05-28 14:41:56,384 - monitoring - INFO - Component model_repository status updated to healthy
+2025-05-28 14:41:56,396 - monitoring - INFO - Component anomaly_detector status updated to healthy
+2025-05-28 14:41:56,414 - monitoring - INFO - Component response_engine status updated to healthy
+2025-05-28 14:42:09,634 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_time = 0.010535240173339844
+2025-05-28 14:42:09,641 - monitoring - DEBUG - Performance metric recorded: feature_extraction.avg_data_processing_time = 0.010535240173339844
+2025-05-28 14:42:09,651 - monitoring - DEBUG - Performance metric recorded: feature_extraction.data_processing_count = 1
+2025-05-28 14:42:28,326 - monitoring - DEBUG - Performance metric recorded: federated_training.training_time = 18.661919355392456
+2025-05-28 14:42:28,335 - monitoring - DEBUG - Performance metric recorded: federated_training.avg_training_time = 18.661919355392456
+2025-05-28 14:42:28,347 - monitoring - DEBUG - Performance metric recorded: federated_training.training_count = 1
+2025-05-28 14:42:28,370 - monitoring - INFO - [main] Federated Learning system shutdown

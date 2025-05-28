@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import logging
-from fl_integration.data_processor.processor import DataProcessor
+from data_processor.processor import DataProcessor
 
 logger = logging.getLogger("feature_extractor")
 
@@ -20,11 +20,11 @@ class FeatureExtractor:
             logger.info(f"Feature extraction complete. Models: {list(processed.keys())}")
             processed_df = {}
             for model, data in processed.items():
-                # Nếu data là dict có 'features' và 'labels', chuyển thành DataFrame
+                # If data is dict with 'features' and 'labels', convert to DataFrame
                 if isinstance(data, dict) and 'features' in data and 'labels' in data:
                     features = data['features']
                     labels = data['labels']
-                    # Nếu có 'ids' (danh sách dict), thêm vào DataFrame
+                    # If 'ids' (list of dict) exists, add to DataFrame
                     ids = data.get('ids', None)
                     if features and labels and len(features) == len(labels):
                         df = pd.DataFrame(features)
@@ -35,12 +35,12 @@ class FeatureExtractor:
                             df = pd.concat([df.reset_index(drop=True), ids_df], axis=1)
                         processed_df[model] = df
                     else:
-                        # Trả về DataFrame rỗng với cột label
+                        # Return empty DataFrame with label column
                         processed_df[model] = pd.DataFrame(columns=[f'f{i}' for i in range(1, 16)] + ['label'])
                 elif isinstance(data, pd.DataFrame):
                     processed_df[model] = data
                 else:
-                    # Trả về DataFrame rỗng nếu không đúng định dạng
+                    # Return empty DataFrame if format is incorrect
                     processed_df[model] = pd.DataFrame()
             return processed_df
         except Exception as e:

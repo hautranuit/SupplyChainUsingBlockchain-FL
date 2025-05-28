@@ -15,6 +15,180 @@ from datetime import datetime
 import time
 import random
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Custom JSON encoder to handle NumPy data types
+class NumpyJSONEncoder(json.JSONEncoder):
+    """JSON Encoder supporting NumPy data types."""
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NumpyJSONEncoder, self).default(obj)
+
+# Enhanced Data Augmentation and Performance Analysis
+class PerformanceAnalyzer:
+    """Enhanced performance analysis and monitoring."""
+    
+    def __init__(self, enable_detailed_analysis=True):
+        self.enable_detailed_analysis = enable_detailed_analysis
+        self.training_history = []
+        self.performance_metrics = {}
+    
+    def analyze_training_round(self, round_num, metrics):
+        """Analyze performance for a single training round."""
+        analysis = {
+            'round': round_num,
+            'timestamp': datetime.now().isoformat(),
+            'metrics': metrics,
+            'analysis': {}
+        }
+        
+        if 'loss' in metrics:
+            analysis['analysis']['loss_trend'] = self.analyze_loss_trend(metrics['loss'])
+        
+        if 'binary_accuracy' in metrics:
+            accuracy = float(metrics['binary_accuracy'])
+            analysis['analysis']['accuracy_assessment'] = self.assess_accuracy(accuracy)
+        
+        if 'auc' in metrics:
+            auc = float(metrics['auc'])
+            analysis['analysis']['auc_assessment'] = self.assess_auc(auc)
+        
+        self.training_history.append(analysis)
+        return analysis
+    
+    def analyze_loss_trend(self, loss_value):
+        """Analyze loss trend and convergence."""
+        return float(loss_value)
+    
+    def assess_accuracy(self, accuracy):
+        """Assess accuracy performance."""
+        return float(accuracy)
+    
+    def _analyze_loss_trend(self, loss_value):
+        """Private wrapper for backward compatibility."""
+        return self.analyze_loss_trend(loss_value)
+    
+    def _assess_accuracy(self, accuracy):
+        """Private wrapper for backward compatibility."""
+        return self.assess_accuracy(accuracy)
+    
+    def assess_auc(self, auc):
+        """Assess AUC performance."""
+        return float(auc)
+    
+    def _assess_auc(self, auc):
+        """Private wrapper for backward compatibility."""
+        return self.assess_auc(auc)
+    
+    def generate_performance_report(self):
+        """Generate comprehensive performance report."""
+        if not self.training_history:
+            return "No training history available"
+        
+        report = ["=" * 80]
+        report.append("FEDERATED LEARNING PERFORMANCE ANALYSIS REPORT")
+        report.append("=" * 80)
+        report.append(f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append(f"Total Training Rounds: {len(self.training_history)}")
+        report.append("")
+        
+        # Latest metrics
+        latest = self.training_history[-1]
+        report.append("LATEST PERFORMANCE METRICS:")
+        report.append("-" * 40)
+        
+        for metric, value in latest['metrics'].items():
+            if metric in latest['analysis']:
+                assessment = latest['analysis'][metric + '_assessment'] if metric + '_assessment' in latest['analysis'] else latest['analysis'].get(metric + '_trend', 'N/A')
+                report.append(f"{metric.upper()}: {value} - {assessment}")
+            else:
+                report.append(f"{metric.upper()}: {value}")
+        
+        # Performance trends
+        if len(self.training_history) > 1:
+            report.append("")
+            report.append("PERFORMANCE TRENDS:")
+            report.append("-" * 40)
+            
+            # Accuracy trend
+            accuracies = [float(h['metrics'].get('binary_accuracy', 0)) for h in self.training_history if 'binary_accuracy' in h['metrics']]
+            if len(accuracies) > 1:
+                trend = "IMPROVING" if accuracies[-1] > accuracies[0] else "DECLINING"
+                improvement = abs(accuracies[-1] - accuracies[0]) * 100
+                report.append(f"Accuracy Trend: {trend} ({improvement:.1f}% change)")
+            
+            # Loss trend
+            losses = [float(h['metrics'].get('loss', 0)) for h in self.training_history if 'loss' in h['metrics']]
+            if len(losses) > 1:
+                trend = "IMPROVING" if losses[-1] < losses[0] else "INCREASING"
+                change = abs(losses[-1] - losses[0])
+                report.append(f"Loss Trend: {trend} ({change:.3f} change)")
+        
+        # Recommendations
+        report.append("")
+        report.append("OPTIMIZATION RECOMMENDATIONS:")
+        report.append("-" * 40)
+        recommendations = self._generate_recommendations()
+        for rec in recommendations:
+            report.append(f"• {rec}")
+        
+        return "\n".join(report)
+    
+    def _generate_recommendations(self):
+        """Generate optimization recommendations based on performance."""
+        recommendations = []
+        
+        if not self.training_history:
+            return ["No training data available for recommendations"]
+        
+        latest = self.training_history[-1]['metrics']
+        
+        # Loss-based recommendations
+        if 'loss' in latest:
+            loss = float(latest['loss'])
+            if loss > 1.0:
+                recommendations.append("High loss detected: Consider reducing learning rate or using focal loss")
+                recommendations.append("Check data quality and feature scaling")
+            elif loss > 0.7:
+                recommendations.append("Moderate loss: Continue training or try label smoothing")
+        
+        # Accuracy-based recommendations
+        if 'binary_accuracy' in latest:
+            accuracy = float(latest['binary_accuracy'])
+            if accuracy < 0.7:
+                recommendations.append("Low accuracy: Consider model architecture improvements")
+                recommendations.append("Try data augmentation or feature engineering")
+            elif accuracy > 0.95:
+                recommendations.append("Very high accuracy: Check for overfitting, consider regularization")
+        
+        # AUC-based recommendations
+        if 'auc' in latest:
+            auc = float(latest['auc'])
+            if auc < 0.7:
+                recommendations.append("Low AUC: Model has poor discrimination ability")
+                recommendations.append("Consider class balancing or cost-sensitive learning")
+        
+        # Performance stability
+        if len(self.training_history) > 5:
+            recent_accuracies = [float(h['metrics'].get('binary_accuracy', 0)) 
+                               for h in self.training_history[-5:] 
+                               if 'binary_accuracy' in h['metrics']]
+            if recent_accuracies and np.std(recent_accuracies) > 0.1:
+                recommendations.append("Performance instability detected: Consider reducing learning rate")
+                recommendations.append("Add more regularization or use early stopping")
+        
+        if not recommendations:
+            recommendations.append("Performance looks good! Continue monitoring.")
+        
+        return recommendations
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -64,11 +238,15 @@ class FLOrchestrator:
         self.registered_clients = {}
         self.client_selection_strategy = "random"
         
+        # Initialize performance analyzer for enhanced monitoring
+        self.performance_analyzer = PerformanceAnalyzer(enable_detailed_analysis=True)
+        
         logger.info(f"FL Orchestrator initialized with:")
         logger.info(f"  Model directory: {model_dir}")
         logger.info(f"  Client auth: {client_auth_enabled}")
         logger.info(f"  Secure aggregation: {secure_aggregation}")
         logger.info(f"  Differential privacy: {differential_privacy}")
+        logger.info(f"  Performance analysis: Enabled")
         
         # Set TFF execution context
         try:
@@ -160,6 +338,7 @@ class FLOrchestrator:
             for round_num in range(num_rounds):
                 start_time = time.time()
                 
+                print(f"\n🔄 Round {round_num + 1}/{num_rounds}")
                 logger.info(f"Starting round {round_num + 1}/{num_rounds}")
                 
                 # Perform one round of federated training
@@ -169,18 +348,100 @@ class FLOrchestrator:
                 # Extract metrics
                 round_metrics = result.metrics
                 
-                # Log round results
+                # Enhanced metric extraction and performance analysis
                 round_time = time.time() - start_time
                 history["training_time"].append(round_time)
                 
-                if hasattr(round_metrics, 'train') and hasattr(round_metrics['train'], 'loss'):
-                    round_loss = float(round_metrics['train']['loss'])
-                    history["round_losses"].append(round_loss)
-                    logger.info(f"Round {round_num + 1} completed. Loss: {round_loss:.4f}, Time: {round_time:.2f}s")
+                # Extract metrics from nested structure
+                processed_metrics = {}
+                
+                # Debug: Print the actual metrics structure
+                logger.debug(f"Round {round_num + 1} metrics structure: {round_metrics}")
+                
+                if isinstance(round_metrics, dict):
+                    # Handle nested TFF metrics structure
+                    client_work = round_metrics.get('client_work', {})
+                    train_metrics = client_work.get('train', {})
+                    
+                    # Debug: Print train_metrics
+                    logger.debug(f"Train metrics: {train_metrics}")
+                    
+                    # Extract common metrics
+                    if 'loss' in train_metrics:
+                        processed_metrics['loss'] = float(train_metrics['loss'])
+                        history["round_losses"].append(processed_metrics['loss'])
+                    
+                    if 'binary_accuracy' in train_metrics:
+                        processed_metrics['binary_accuracy'] = float(train_metrics['binary_accuracy'])
+                    elif 'accuracy' in train_metrics:
+                        processed_metrics['binary_accuracy'] = float(train_metrics['accuracy'])
+                    
+                    if 'auc' in train_metrics:
+                        processed_metrics['auc'] = float(train_metrics['auc'])
+                        logger.info(f"AUC found in metrics: {processed_metrics['auc']}")
+                    else:
+                        logger.warning(f"AUC not found in train_metrics. Available keys: {list(train_metrics.keys())}")
+                    
+                    if 'precision' in train_metrics:
+                        processed_metrics['precision'] = float(train_metrics['precision'])
+                        
+                    if 'recall' in train_metrics:
+                        processed_metrics['recall'] = float(train_metrics['recall'])
+                        
+                    if 'f1_score' in train_metrics:
+                        processed_metrics['f1_score'] = float(train_metrics['f1_score'])
+                
+                # Perform performance analysis
+                if processed_metrics:
+                    analysis = self.performance_analyzer.analyze_training_round(round_num + 1, processed_metrics)
+                    
+                    # Enhanced logging with performance insights
+                    metrics_str = []
+                    for metric, value in processed_metrics.items():
+                        if isinstance(value, float):
+                            metrics_str.append(f"{metric}={value:.4f}")
+                        else:
+                            metrics_str.append(f"{metric}={value}")
+                    
+                    # Visual progress display
+                    print(f"   📊 Metrics: {', '.join(metrics_str)}")
+                    print(f"   ⏱️  Time: {round_time:.2f}s")
+                    
+                    # Display performance insights
+                    if 'loss' in processed_metrics:
+                        loss_trend = self.performance_analyzer.analyze_loss_trend(processed_metrics['loss'])
+                        print(f"   📉 Loss Analysis: {loss_trend}")
+                    
+                    if 'binary_accuracy' in processed_metrics:
+                        acc_assessment = self.performance_analyzer.assess_accuracy(processed_metrics['binary_accuracy'])
+                        print(f"   🎯 Accuracy Analysis: {acc_assessment}")
+                    
+                    if 'auc' in processed_metrics:
+                        auc_assessment = self.performance_analyzer.assess_auc(processed_metrics['auc'])
+                        print(f"   📏 AUC Analysis: {auc_assessment}")
+                    
+                    logger.info(f"Round {round_num + 1} completed. {', '.join(metrics_str)}, Time: {round_time:.2f}s")
+                    
+                    # Log performance insights
+                    for analysis_type, insight in analysis['analysis'].items():
+                        logger.info(f"Performance Insight - {analysis_type}: {insight}")
+                
                 else:
+                    # Fallback for metrics extraction
+                    if hasattr(round_metrics, 'train') and hasattr(round_metrics['train'], 'loss'):
+                        round_loss = float(round_metrics['train']['loss'])
+                        history["round_losses"].append(round_loss)
+                        processed_metrics['loss'] = round_loss
+                    
                     logger.info(f"Round {round_num + 1} completed. Time: {round_time:.2f}s")
                 
                 history["round_metrics"].append(round_metrics)
+            
+            # Training completion
+            print(f"\n🏁 Training completed after {num_rounds} rounds!")
+            
+            total_training_time = sum(history["training_time"])
+            print(f"⏱️  Total training time: {total_training_time:.2f}s")
             
             logger.info("Federated training completed successfully")
             return server_state, history
@@ -324,3 +585,216 @@ class FLOrchestrator:
             logger.info("FL Orchestrator cleanup completed")
         except Exception as e:
             logger.error(f"Error during cleanup: {str(e)}")
+
+    def transfer_weights_to_keras_model(self, server_state, keras_model):
+        """
+        Transfer weights from TFF server state to a Keras model.
+        
+        Args:
+            server_state: TFF server state containing model weights
+            keras_model: Keras model to receive the weights
+            
+        Returns:
+            Updated Keras model with transferred weights
+        """
+        try:
+            # Extract model weights from server state
+            if hasattr(server_state, 'model'):
+                tff_weights = server_state.model
+                
+                # Get trainable weights from TFF model
+                if hasattr(tff_weights, 'trainable'):
+                    trainable_weights = [w.numpy() for w in tff_weights.trainable]
+                    
+                    # Set weights to Keras model
+                    if len(trainable_weights) == len(keras_model.trainable_weights):
+                        keras_model.set_weights(trainable_weights)
+                        logger.info("Successfully transferred weights from TFF server state to Keras model")
+                    else:
+                        logger.warning(f"Weight dimension mismatch: TFF={len(trainable_weights)}, Keras={len(keras_model.trainable_weights)}")
+                        
+                        # Try to match weights by shape
+                        for i, (tff_weight, keras_weight) in enumerate(zip(trainable_weights, keras_model.trainable_weights)):
+                            if tff_weight.shape == keras_weight.shape:
+                                keras_model.trainable_weights[i].assign(tff_weight)
+                            else:
+                                logger.warning(f"Shape mismatch at layer {i}: TFF={tff_weight.shape}, Keras={keras_weight.shape}")
+                else:
+                    logger.error("No trainable weights found in TFF server state")
+            else:
+                logger.error("No model found in server state")
+                
+            return keras_model
+            
+        except Exception as e:
+            logger.error(f"Failed to transfer weights: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return keras_model
+
+    def save_performance_report(self, report_data: Dict, output_dir: str = None, filename: str = None):
+        """
+        Save performance analysis report to file.
+        
+        Args:
+            report_data: Performance report data dictionary
+            output_dir: Directory to save the report (optional)
+            filename: Custom filename (optional)
+            
+        Returns:
+            Path to saved report file
+        """
+        try:
+            if output_dir is None:
+                output_dir = os.path.join(self.model_dir, "performance_reports")
+            
+            os.makedirs(output_dir, exist_ok=True)
+            
+            if filename is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"performance_report_{timestamp}.json"
+            
+            report_path = os.path.join(output_dir, filename)
+            
+            # Enhance report with metadata
+            enhanced_report = {
+                "report_metadata": {
+                    "generated_at": datetime.now().isoformat(),
+                    "orchestrator_version": "1.0.0",
+                    "system_info": {
+                        "python_version": sys.version,
+                        "tensorflow_version": tf.__version__ if 'tf' in globals() else "Unknown"
+                    }
+                },
+                "performance_analysis": report_data,
+                "training_history": self.performance_analyzer.training_history[-10:] if self.performance_analyzer.training_history else []
+            }
+            
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(enhanced_report, f, indent=2, ensure_ascii=False, cls=NumpyJSONEncoder)
+            
+            logger.info(f"Performance report saved to: {report_path}")
+            return report_path
+            
+        except Exception as e:
+            logger.error(f"Failed to save performance report: {str(e)}")
+            return None
+
+    def generate_comprehensive_performance_report(self):
+        """
+        Generate a comprehensive performance report with visualizations and insights.
+        
+        Returns:
+            Dictionary containing comprehensive performance analysis
+        """
+        try:
+            if not self.performance_analyzer.training_history:
+                return {"error": "No training history available for analysis"}
+            
+            # Extract metrics for analysis
+            rounds = []
+            losses = []
+            accuracies = []
+            aucs = []
+            
+            for entry in self.performance_analyzer.training_history:
+                rounds.append(entry['round'])
+                metrics = entry['metrics']
+                
+                if 'loss' in metrics:
+                    losses.append(float(metrics['loss']))
+                if 'binary_accuracy' in metrics:
+                    accuracies.append(float(metrics['binary_accuracy']))
+                if 'auc' in metrics:
+                    aucs.append(float(metrics['auc']))
+            
+            # Performance analysis
+            comprehensive_report = {
+                "training_summary": {
+                    "total_rounds": len(rounds),
+                    "final_round": max(rounds) if rounds else 0,
+                    "training_duration": self._calculate_training_duration()
+                },
+                "metrics_analysis": {},
+                "trends": {},
+                "recommendations": self.performance_analyzer.generate_recommendations(),
+                "alerts": []
+            }
+            
+            # Loss analysis
+            if losses:
+                comprehensive_report["metrics_analysis"]["loss"] = {
+                    "final": losses[-1],
+                    "minimum": min(losses),
+                    "maximum": max(losses),
+                    "average": np.mean(losses),
+                    "std_deviation": np.std(losses),
+                    "improvement": losses[0] - losses[-1] if len(losses) > 1 else 0
+                }
+                
+                # Loss trend analysis
+                if len(losses) >= 3:
+                    recent_trend = np.polyfit(range(len(losses[-3:])), losses[-3:], 1)[0]
+                    comprehensive_report["trends"]["loss_trend"] = "improving" if recent_trend < 0 else "deteriorating"
+            
+            # Accuracy analysis
+            if accuracies:
+                comprehensive_report["metrics_analysis"]["accuracy"] = {
+                    "final": accuracies[-1],
+                    "maximum": max(accuracies),
+                    "minimum": min(accuracies),
+                    "average": np.mean(accuracies),
+                    "std_deviation": np.std(accuracies),
+                    "improvement": accuracies[-1] - accuracies[0] if len(accuracies) > 1 else 0
+                }
+                
+                # Accuracy stability check
+                if len(accuracies) >= 5:
+                    recent_stability = np.std(accuracies[-5:])
+                    if recent_stability > 0.05:
+                        comprehensive_report["alerts"].append("High accuracy variation in recent rounds")
+            
+            # AUC analysis
+            if aucs:
+                comprehensive_report["metrics_analysis"]["auc"] = {
+                    "final": aucs[-1],
+                    "maximum": max(aucs),
+                    "minimum": min(aucs),
+                    "average": np.mean(aucs),
+                    "improvement": aucs[-1] - aucs[0] if len(aucs) > 1 else 0
+                }
+            
+            # Performance alerts
+            if losses and losses[-1] > 1.0:
+                comprehensive_report["alerts"].append("High final loss detected")
+            
+            if accuracies and accuracies[-1] < 0.7:
+                comprehensive_report["alerts"].append("Low final accuracy detected")
+            
+            if aucs and aucs[-1] < 0.7:
+                comprehensive_report["alerts"].append("Poor model discrimination (low AUC)")
+            
+            return comprehensive_report
+            
+        except Exception as e:
+            logger.error(f"Failed to generate comprehensive performance report: {str(e)}")
+            return {"error": str(e)}
+
+    def _calculate_training_duration(self):
+        """Calculate total training duration from training history."""
+        if not self.performance_analyzer.training_history:
+            return 0
+        
+        try:
+            start_time = self.performance_analyzer.training_history[0]['timestamp']
+            end_time = self.performance_analyzer.training_history[-1]['timestamp']
+            
+            from datetime import datetime
+            start_dt = datetime.fromisoformat(start_time)
+            end_dt = datetime.fromisoformat(end_time)
+            
+            duration = (end_dt - start_dt).total_seconds()
+            return duration
+            
+        except Exception:
+            return 0

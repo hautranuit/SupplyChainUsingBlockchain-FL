@@ -1,0 +1,597 @@
+{
+  "sybil_detection": {
+    "predictions": [
+      0.5684598088264465,
+      0.5136061906814575,
+      0.47027215361595154,
+      0.6311740875244141,
+      0.6117944121360779,
+      0.6296565532684326,
+      0.5636045932769775,
+      0.861919105052948,
+      0.872006356716156,
+      0.8297755718231201,
+      0.8378644585609436,
+      0.5251837372779846,
+      0.534452497959137,
+      0.5239009261131287,
+      0.8994323015213013,
+      0.5254964828491211,
+      0.9157425165176392,
+      0.5332581996917725,
+      0.5346077084541321,
+      0.5212490558624268,
+      0.5375334620475769,
+      0.854529857635498,
+      0.5241600871086121,
+      0.8084194660186768,
+      0.799999475479126,
+      0.5248100161552429,
+      0.7985361814498901,
+      0.5218609571456909,
+      0.5179835557937622,
+      0.535740077495575
+    ],
+    "node_mapping": [
+      {
+        "index": 0,
+        "node_address": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+        "prediction": 0.5684598088264465,
+        "risk_level": "Low"
+      },
+      {
+        "index": 1,
+        "node_address": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+        "prediction": 0.5136061906814575,
+        "risk_level": "Low"
+      },
+      {
+        "index": 2,
+        "node_address": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+        "prediction": 0.47027215361595154,
+        "risk_level": "Low"
+      },
+      {
+        "index": 3,
+        "node_address": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+        "prediction": 0.6311740875244141,
+        "risk_level": "Low"
+      },
+      {
+        "index": 4,
+        "node_address": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+        "prediction": 0.6117944121360779,
+        "risk_level": "Low"
+      },
+      {
+        "index": 5,
+        "node_address": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+        "prediction": 0.6296565532684326,
+        "risk_level": "Low"
+      },
+      {
+        "index": 6,
+        "node_address": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+        "prediction": 0.5636045932769775,
+        "risk_level": "Low"
+      },
+      {
+        "index": 7,
+        "node_address": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+        "prediction": 0.861919105052948,
+        "risk_level": "High"
+      },
+      {
+        "index": 8,
+        "node_address": "0x7ca2dF29b5ea3BB9Ef3b4245D8b7c41a03318Fc1",
+        "prediction": 0.872006356716156,
+        "risk_level": "High"
+      },
+      {
+        "index": 9,
+        "node_address": "0x361d25a7F28F05dDE7a2cb191b4B8128EEE0fAB6",
+        "prediction": 0.8297755718231201,
+        "risk_level": "High"
+      },
+      {
+        "index": 10,
+        "node_address": "0x28918ecf013F32fAf45e05d62B4D9b207FCae784",
+        "prediction": 0.8378644585609436,
+        "risk_level": "High"
+      }
+    ],
+    "ids": [],
+    "threshold": 0.7,
+    "high_risk_threshold": 0.8,
+    "statistics": {
+      "max": 0.9157425165176392,
+      "min": 0.47027215361595154,
+      "average": 0.6442343592643738,
+      "total_samples": 30
+    },
+    "anomalies": [
+      7,
+      8,
+      9,
+      10,
+      14,
+      16,
+      21,
+      23,
+      24,
+      26
+    ],
+    "high_risk_cases": [
+      7,
+      8,
+      9,
+      10,
+      14,
+      16,
+      21,
+      23
+    ],
+    "detailed_predictions": [
+      {
+        "index": 0,
+        "prediction": 0.5684598088264465,
+        "risk_level": "Low"
+      },
+      {
+        "index": 1,
+        "prediction": 0.5136061906814575,
+        "risk_level": "Low"
+      },
+      {
+        "index": 2,
+        "prediction": 0.47027215361595154,
+        "risk_level": "Low"
+      },
+      {
+        "index": 3,
+        "prediction": 0.6311740875244141,
+        "risk_level": "Low"
+      },
+      {
+        "index": 4,
+        "prediction": 0.6117944121360779,
+        "risk_level": "Low"
+      },
+      {
+        "index": 5,
+        "prediction": 0.6296565532684326,
+        "risk_level": "Low"
+      },
+      {
+        "index": 6,
+        "prediction": 0.5636045932769775,
+        "risk_level": "Low"
+      },
+      {
+        "index": 7,
+        "prediction": 0.861919105052948,
+        "risk_level": "High"
+      },
+      {
+        "index": 8,
+        "prediction": 0.872006356716156,
+        "risk_level": "High"
+      },
+      {
+        "index": 9,
+        "prediction": 0.8297755718231201,
+        "risk_level": "High"
+      },
+      {
+        "index": 10,
+        "prediction": 0.8378644585609436,
+        "risk_level": "High"
+      },
+      {
+        "index": 11,
+        "prediction": 0.5251837372779846,
+        "risk_level": "Low"
+      },
+      {
+        "index": 12,
+        "prediction": 0.534452497959137,
+        "risk_level": "Low"
+      },
+      {
+        "index": 13,
+        "prediction": 0.5239009261131287,
+        "risk_level": "Low"
+      },
+      {
+        "index": 14,
+        "prediction": 0.8994323015213013,
+        "risk_level": "High"
+      },
+      {
+        "index": 15,
+        "prediction": 0.5254964828491211,
+        "risk_level": "Low"
+      },
+      {
+        "index": 16,
+        "prediction": 0.9157425165176392,
+        "risk_level": "High"
+      },
+      {
+        "index": 17,
+        "prediction": 0.5332581996917725,
+        "risk_level": "Low"
+      },
+      {
+        "index": 18,
+        "prediction": 0.5346077084541321,
+        "risk_level": "Low"
+      },
+      {
+        "index": 19,
+        "prediction": 0.5212490558624268,
+        "risk_level": "Low"
+      },
+      {
+        "index": 20,
+        "prediction": 0.5375334620475769,
+        "risk_level": "Low"
+      },
+      {
+        "index": 21,
+        "prediction": 0.854529857635498,
+        "risk_level": "High"
+      },
+      {
+        "index": 22,
+        "prediction": 0.5241600871086121,
+        "risk_level": "Low"
+      },
+      {
+        "index": 23,
+        "prediction": 0.8084194660186768,
+        "risk_level": "High"
+      },
+      {
+        "index": 24,
+        "prediction": 0.799999475479126,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 25,
+        "prediction": 0.5248100161552429,
+        "risk_level": "Low"
+      },
+      {
+        "index": 26,
+        "prediction": 0.7985361814498901,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 27,
+        "prediction": 0.5218609571456909,
+        "risk_level": "Low"
+      },
+      {
+        "index": 28,
+        "prediction": 0.5179835557937622,
+        "risk_level": "Low"
+      },
+      {
+        "index": 29,
+        "prediction": 0.535740077495575,
+        "risk_level": "Low"
+      }
+    ]
+  },
+  "bribery_detection": {
+    "predictions": [
+      0.4350854754447937,
+      0.7957161068916321,
+      0.8962515592575073,
+      0.8475367426872253,
+      0.5174099206924438,
+      0.5011051297187805,
+      0.5978067517280579,
+      0.8321636319160461,
+      0.8618422746658325,
+      0.8041467666625977,
+      0.8564388751983643,
+      0.8462640643119812,
+      0.8649375438690186,
+      0.9006778001785278,
+      0.5243546366691589,
+      0.9039576649665833,
+      0.8390421867370605,
+      0.8830556273460388,
+      0.5208481550216675,
+      0.9161255359649658,
+      0.8108398914337158,
+      0.7583912014961243,
+      0.9004202485084534,
+      0.8878688812255859,
+      0.9051551222801208,
+      0.831595778465271,
+      0.7699252367019653,
+      0.8622499108314514,
+      0.5308020114898682,
+      0.8248148560523987
+    ],
+    "node_mapping": [
+      {
+        "index": 0,
+        "node_address": "0x04351e7df40d04b5e610c4aa033facf435b98711",
+        "prediction": 0.4350854754447937,
+        "risk_level": "Low"
+      },
+      {
+        "index": 1,
+        "node_address": "0xc6a050a538a9e857b4dcb4a33436280c202f6941",
+        "prediction": 0.7957161068916321,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 2,
+        "node_address": "0x5503a5b847e98b621d97695edf1bd84242c5862e",
+        "prediction": 0.8962515592575073,
+        "risk_level": "High"
+      },
+      {
+        "index": 3,
+        "node_address": "0x34fc023ee50781e0a007852eedc4a17fa353a8cd",
+        "prediction": 0.8475367426872253,
+        "risk_level": "High"
+      },
+      {
+        "index": 4,
+        "node_address": "0x724876f86fa52568abc51955bd3a68bfc1441097",
+        "prediction": 0.5174099206924438,
+        "risk_level": "Low"
+      },
+      {
+        "index": 5,
+        "node_address": "0x72eb9742d3b684eba40f11573b733ac9db499f23",
+        "prediction": 0.5011051297187805,
+        "risk_level": "Low"
+      },
+      {
+        "index": 6,
+        "node_address": "0x94081502540fd333075f3290d1d5c10a21ac5a5c",
+        "prediction": 0.5978067517280579,
+        "risk_level": "Low"
+      },
+      {
+        "index": 7,
+        "node_address": "0x032041b4b356fee1496805dd4749f181bc736ffa",
+        "prediction": 0.8321636319160461,
+        "risk_level": "High"
+      },
+      {
+        "index": 8,
+        "node_address": "0x7ca2dF29b5ea3BB9Ef3b4245D8b7c41a03318Fc1",
+        "prediction": 0.8618422746658325,
+        "risk_level": "High"
+      },
+      {
+        "index": 9,
+        "node_address": "0x361d25a7F28F05dDE7a2cb191b4B8128EEE0fAB6",
+        "prediction": 0.8041467666625977,
+        "risk_level": "High"
+      },
+      {
+        "index": 10,
+        "node_address": "0x28918ecf013F32fAf45e05d62B4D9b207FCae784",
+        "prediction": 0.8564388751983643,
+        "risk_level": "High"
+      }
+    ],
+    "ids": [],
+    "threshold": 0.7,
+    "high_risk_threshold": 0.8,
+    "statistics": {
+      "max": 0.9161255359649658,
+      "min": 0.4350854754447937,
+      "average": 0.7742277383804321,
+      "total_samples": 30
+    },
+    "anomalies": [
+      1,
+      2,
+      3,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      17,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      29
+    ],
+    "high_risk_cases": [
+      2,
+      3,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      17,
+      19,
+      20,
+      22,
+      23,
+      24,
+      25,
+      27,
+      29
+    ],
+    "detailed_predictions": [
+      {
+        "index": 0,
+        "prediction": 0.4350854754447937,
+        "risk_level": "Low"
+      },
+      {
+        "index": 1,
+        "prediction": 0.7957161068916321,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 2,
+        "prediction": 0.8962515592575073,
+        "risk_level": "High"
+      },
+      {
+        "index": 3,
+        "prediction": 0.8475367426872253,
+        "risk_level": "High"
+      },
+      {
+        "index": 4,
+        "prediction": 0.5174099206924438,
+        "risk_level": "Low"
+      },
+      {
+        "index": 5,
+        "prediction": 0.5011051297187805,
+        "risk_level": "Low"
+      },
+      {
+        "index": 6,
+        "prediction": 0.5978067517280579,
+        "risk_level": "Low"
+      },
+      {
+        "index": 7,
+        "prediction": 0.8321636319160461,
+        "risk_level": "High"
+      },
+      {
+        "index": 8,
+        "prediction": 0.8618422746658325,
+        "risk_level": "High"
+      },
+      {
+        "index": 9,
+        "prediction": 0.8041467666625977,
+        "risk_level": "High"
+      },
+      {
+        "index": 10,
+        "prediction": 0.8564388751983643,
+        "risk_level": "High"
+      },
+      {
+        "index": 11,
+        "prediction": 0.8462640643119812,
+        "risk_level": "High"
+      },
+      {
+        "index": 12,
+        "prediction": 0.8649375438690186,
+        "risk_level": "High"
+      },
+      {
+        "index": 13,
+        "prediction": 0.9006778001785278,
+        "risk_level": "High"
+      },
+      {
+        "index": 14,
+        "prediction": 0.5243546366691589,
+        "risk_level": "Low"
+      },
+      {
+        "index": 15,
+        "prediction": 0.9039576649665833,
+        "risk_level": "High"
+      },
+      {
+        "index": 16,
+        "prediction": 0.8390421867370605,
+        "risk_level": "High"
+      },
+      {
+        "index": 17,
+        "prediction": 0.8830556273460388,
+        "risk_level": "High"
+      },
+      {
+        "index": 18,
+        "prediction": 0.5208481550216675,
+        "risk_level": "Low"
+      },
+      {
+        "index": 19,
+        "prediction": 0.9161255359649658,
+        "risk_level": "High"
+      },
+      {
+        "index": 20,
+        "prediction": 0.8108398914337158,
+        "risk_level": "High"
+      },
+      {
+        "index": 21,
+        "prediction": 0.7583912014961243,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 22,
+        "prediction": 0.9004202485084534,
+        "risk_level": "High"
+      },
+      {
+        "index": 23,
+        "prediction": 0.8878688812255859,
+        "risk_level": "High"
+      },
+      {
+        "index": 24,
+        "prediction": 0.9051551222801208,
+        "risk_level": "High"
+      },
+      {
+        "index": 25,
+        "prediction": 0.831595778465271,
+        "risk_level": "High"
+      },
+      {
+        "index": 26,
+        "prediction": 0.7699252367019653,
+        "risk_level": "Medium"
+      },
+      {
+        "index": 27,
+        "prediction": 0.8622499108314514,
+        "risk_level": "High"
+      },
+      {
+        "index": 28,
+        "prediction": 0.5308020114898682,
+        "risk_level": "Low"
+      },
+      {
+        "index": 29,
+        "prediction": 0.8248148560523987,
+        "risk_level": "High"
+      }
+    ]
+  }
+}

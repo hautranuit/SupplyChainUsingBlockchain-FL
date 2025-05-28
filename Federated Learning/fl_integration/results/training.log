@@ -1,0 +1,3377 @@
+2025-05-28 14:41:14.282585: I tensorflow/core/util/port.cc:111] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-05-28 14:41:14.723357: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2025-05-28 14:41:16.562631: E tensorflow/compiler/xla/stream_executor/cuda/cuda_dnn.cc:9342] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-05-28 14:41:16.562677: E tensorflow/compiler/xla/stream_executor/cuda/cuda_fft.cc:609] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-05-28 14:41:16.572142: E tensorflow/compiler/xla/stream_executor/cuda/cuda_blas.cc:1518] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-05-28 14:41:17.663707: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2025-05-28 14:41:17.671724: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-05-28 14:41:24.552574: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+INFO:monitoring:Performing health check
+INFO:monitoring:Health check thread started with interval 60 seconds
+INFO:monitoring:Component blockchain_connector status updated to healthy
+INFO:monitoring:Monitoring system initialized with log directory: results/logs
+INFO:monitoring:Metrics directory: results/metrics
+INFO:monitoring:Performance monitoring enabled: True
+INFO:monitoring:Health checks enabled: True
+INFO:monitoring:[main] Starting Federated Learning system (TRAIN ONLY)
+INFO:monitoring:Component data_processor status updated to healthy
+WARNING:blockchain_connector:No ABI file found in potential paths, creating minimal ABI
+INFO:monitoring:Component fl_orchestrator status updated to healthy
+INFO:monitoring:Component model_repository status updated to healthy
+INFO:monitoring:Component anomaly_detector status updated to healthy
+INFO:monitoring:Component response_engine status updated to healthy
+WARNING:fl_orchestrator:Could not set TFF execution context: module 'tensorflow_federated.python.core.backends.native' has no attribute 'set_local_python_execution_context'
+WARNING:fl_orchestrator:Using default TFF execution context
+DEBUG:monitoring:Performance metric recorded: feature_extraction.data_processing_time = 0.010535240173339844
+DEBUG:monitoring:Performance metric recorded: feature_extraction.avg_data_processing_time = 0.010535240173339844
+DEBUG:monitoring:Performance metric recorded: feature_extraction.data_processing_count = 1
+WARNING:__main__:Insufficient data for sybil_detection (30 < 50). Adding synthetic data.
+WARNING:__main__:Insufficient data for bribery_detection (30 < 50). Adding synthetic data.
+2025-05-28 14:42:09.921675: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:09.923504: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+/mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/tff_wsl_env/lib/python3.10/site-packages/tensorflow_federated/python/learning/models/keras_utils.py:201: UserWarning: Batch Normalization contains non-trainable variables that won't be updated during the training. Consider using Group Normalization instead.
+  warnings.warn(
+2025-05-28 14:42:13.693963: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:13.694018: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:13.694457: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:13.695399: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:13.695458: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:13.914010: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:13.914066: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:13.914156: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:13.914501: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:13.914516: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.347768: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.347814: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.347918: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.348636: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.348652: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.569264: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.569322: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.569514: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.570310: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.570351: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.580684: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.580732: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.580860: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.581399: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.581430: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.595632: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.595679: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.595766: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.596283: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.596316: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.614550: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.614607: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.614737: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.615240: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.615257: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.655215: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.655270: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.655390: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.655838: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.655874: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.670095: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.670138: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.670288: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.670692: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.670722: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.680419: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.680471: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.680587: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.681001: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.681016: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.697387: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.697443: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.697559: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.698009: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.698025: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.713767: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.713829: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.713934: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.714332: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.714349: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.718154: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.718202: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.718288: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.718717: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.718745: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.723568: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.723622: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.723740: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.724138: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.724153: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.731497: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.731551: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.731700: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.732334: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.732388: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:15.750901: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.750973: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:15.751099: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:15.751541: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:15.751556: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+[DEBUG] Script started.
+[DEBUG] Main execution started.
+[DEBUG] Arguments parsed: {'mode': 'full', 'input_data_file': '../../SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json', 'output_dir': 'results', 'config_file': None, 'num_rounds': 50, 'batch_size': 32, 'learning_rate': 0.01, 'num_clients': 4, 'verbose': True, 'loss_optimization': 'standard', 'focal_alpha': 0.25, 'focal_gamma': 2.0, 'label_smoothing': 0.1, 'optimizer_strategy': 'standard', 'enable_loss_analysis': False, 'enable_data_augmentation': False, 'noise_factor': 0.1, 'feature_scaling': 'standard', 'enable_smote': False, 'enable_batch_norm': True, 'dropout_rate': 0.3, 'l2_regularization': 0.001, 'enable_performance_analysis': True, 'save_performance_report': True}
+[DEBUG] Configuration loaded.
+[DEBUG] Directories created: {'data_dir': 'results/data', 'models_dir': 'results/models', 'results_dir': 'results/results', 'logs_dir': 'results/logs', 'metrics_dir': 'results/metrics'}
+[INFO] Starting Federated Learning Integration System
+[INFO] Mode: full
+[INFO] Input data file: ../../SupplyChain_dapp/scripts/lifecycle_demo/demo_context.json
+[INFO] Output directory: results
+[INFO] Number of rounds: 50
+[INFO] Number of clients: 4
+[INFO] Batch size: 32
+[INFO] Learning rate: 0.01
+[DEBUG] Calling run_federated_learning function...
+
+============================================================
+BLOCKCHAIN MONITORING DATA FETCH
+============================================================
+[SUCCESS] Successfully fetched data for 10 blocks.
+[SUCCESS] ✅ Data prepared for sybil_detection: 50 samples
+[SUCCESS] ✅ Data prepared for bribery_detection: 50 samples
+
+============================================================
+PREPARING DATA FOR FEDERATED LEARNING
+============================================================
+[INFO] 🎯 Configuring 2 core attack detection models
+
+============================================================
+TRAINING MODEL: SYBIL_DETECTION
+============================================================
+[INFO] Input shape: 25 features
+[INFO] Training samples: 50
+[INFO] Training rounds: 50
+[INFO] Batch size: 32
+[INFO] Learning rate: 0.01
+[INFO] Loss optimization: standard
+[INFO] Optimizer strategy: standard
+[INFO] Starting federated learning training...
+
+🔄 Round 1/50
+   📊 Metrics: loss=0.9765, binary_accuracy=0.2200, auc=0.1699, precision=0.2647, recall=0.3913
+   ⏱️  Time: 1.06s
+   📉 Loss Analysis: 0.9765264391899109
+   🎯 Accuracy Analysis: 0.2199999988079071
+   📏 AUC Analysis: 0.16988727450370789
+
+🔄 Round 2/50
+   📊 Metrics: loss=0.8712, binary_accuracy=0.3800, auc=0.3414, precision=0.4048, recall=0.7391
+   ⏱️  Time: 0.13s
+   📉 Loss Analysis: 0.8712286353111267
+   🎯 Accuracy Analysis: 0.3799999952316284
+   📏 AUC Analysis: 0.3413848578929901
+
+🔄 Round 3/50
+   📊 Metrics: loss=0.7398, binary_accuracy=0.5200, auc=0.5709, precision=0.4878, recall=0.8696
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.7397921681404114
+   🎯 Accuracy Analysis: 0.5199999809265137
+   📏 AUC Analysis: 0.5708534717559814
+
+🔄 Round 4/50
+   📊 Metrics: loss=0.7761, binary_accuracy=0.4800, auc=0.4203, precision=0.4595, recall=0.7391
+   ⏱️  Time: 0.13s
+   📉 Loss Analysis: 0.776109516620636
+   🎯 Accuracy Analysis: 0.47999998927116394
+   📏 AUC Analysis: 0.4202898442745209
+
+🔄 Round 5/50
+   📊 Metrics: loss=0.7654, binary_accuracy=0.4600, auc=0.5129, precision=0.4474, recall=0.7391
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.7654252648353577
+   🎯 Accuracy Analysis: 0.46000000834465027
+   📏 AUC Analysis: 0.5128824710845947
+
+🔄 Round 6/50
+   📊 Metrics: loss=0.7174, binary_accuracy=0.6000, auc=0.6127, precision=0.5405, recall=0.8696
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.7174224853515625
+   🎯 Accuracy Analysis: 0.6000000238418579
+   📏 AUC Analysis: 0.6127214431762695
+
+🔄 Round 7/50
+   📊 Metrics: loss=0.6379, binary_accuracy=0.5800, auc=0.7093, precision=0.5294, recall=0.7826
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.637916088104248
+   🎯 Accuracy Analysis: 0.5799999833106995
+   📏 AUC Analysis: 0.7093397378921509
+
+🔄 Round 8/50
+   📊 Metrics: loss=0.5772, binary_accuracy=0.6800, auc=0.8164, precision=0.6000, recall=0.9130
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.5771675109863281
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.816425085067749
+
+🔄 Round 9/50
+   📊 Metrics: loss=0.6218, binary_accuracy=0.6600, auc=0.7794, precision=0.5938, recall=0.8261
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.6218463182449341
+   🎯 Accuracy Analysis: 0.6600000262260437
+   📏 AUC Analysis: 0.7793880701065063
+
+🔄 Round 10/50
+   📊 Metrics: loss=0.5052, binary_accuracy=0.7800, auc=0.9356, precision=0.7000, recall=0.9130
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.5052142143249512
+   🎯 Accuracy Analysis: 0.7799999713897705
+   📏 AUC Analysis: 0.9355877041816711
+
+🔄 Round 11/50
+   📊 Metrics: loss=0.6384, binary_accuracy=0.5800, auc=0.7150, precision=0.5294, recall=0.7826
+   ⏱️  Time: 0.11s
+   📉 Loss Analysis: 0.6384040117263794
+   🎯 Accuracy Analysis: 0.5799999833106995
+   📏 AUC Analysis: 0.7149758338928223
+
+🔄 Round 12/50
+   📊 Metrics: loss=0.5544, binary_accuracy=0.7000, auc=0.8792, precision=0.6111, recall=0.9565
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.5544440746307373
+   🎯 Accuracy Analysis: 0.699999988079071
+   📏 AUC Analysis: 0.8792270421981812
+
+🔄 Round 13/50
+   📊 Metrics: loss=0.5084, binary_accuracy=0.7600, auc=0.9114, precision=0.6774, recall=0.9130
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.508385181427002
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.911433219909668
+
+🔄 Round 14/50
+   📊 Metrics: loss=0.4920, binary_accuracy=0.7600, auc=0.9074, precision=0.6897, recall=0.8696
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.4920288026332855
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.9074074029922485
+
+🔄 Round 15/50
+   📊 Metrics: loss=0.4994, binary_accuracy=0.7600, auc=0.9058, precision=0.6897, recall=0.8696
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.49935492873191833
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.9057971239089966
+
+🔄 Round 16/50
+   📊 Metrics: loss=0.4833, binary_accuracy=0.7600, auc=0.9130, precision=0.6897, recall=0.8696
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.48329979181289673
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.9130434989929199
+
+🔄 Round 17/50
+   📊 Metrics: loss=0.4293, binary_accuracy=0.8400, auc=0.9557, precision=0.7586, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4292883574962616
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.955716609954834
+
+🔄 Round 18/50
+   📊 Metrics: loss=0.4831, binary_accuracy=0.8000, auc=0.8937, precision=0.7826, recall=0.7826
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.48305201530456543
+   🎯 Accuracy Analysis: 0.800000011920929
+   📏 AUC Analysis: 0.8937197923660278
+
+🔄 Round 19/50
+   📊 Metrics: loss=0.4499, binary_accuracy=0.9000, auc=0.9356, precision=0.8750, recall=0.9130
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4499019682407379
+   🎯 Accuracy Analysis: 0.8999999761581421
+   📏 AUC Analysis: 0.9355877637863159
+
+🔄 Round 20/50
+   📊 Metrics: loss=0.4532, binary_accuracy=0.7800, auc=0.9187, precision=0.7143, recall=0.8696
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.45318612456321716
+   🎯 Accuracy Analysis: 0.7799999713897705
+   📏 AUC Analysis: 0.9186795353889465
+
+🔄 Round 21/50
+   📊 Metrics: loss=0.3860, binary_accuracy=0.8800, auc=0.9605, precision=0.8400, recall=0.9130
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.3860238194465637
+   🎯 Accuracy Analysis: 0.8799999952316284
+   📏 AUC Analysis: 0.9605475068092346
+
+🔄 Round 22/50
+   📊 Metrics: loss=0.3808, binary_accuracy=0.8800, auc=0.9686, precision=0.8148, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.38081973791122437
+   🎯 Accuracy Analysis: 0.8799999952316284
+   📏 AUC Analysis: 0.9685990214347839
+
+🔄 Round 23/50
+ERROR:fl_orchestrator:No model found in server state
+/mnt/e/NAM3/DO_AN_CHUYEN_NGANH/Federated Learning/tff_wsl_env/lib/python3.10/site-packages/keras/src/engine/training.py:3079: UserWarning: You are saving your model as an HDF5 file via `model.save()`. This file format is considered legacy. We recommend using instead the native Keras format, e.g. `model.save('my_model.keras')`.
+  saving_api.save_model(
+   📊 Metrics: loss=0.4387, binary_accuracy=0.8600, auc=0.9541, precision=0.7857, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.438689649105072
+   🎯 Accuracy Analysis: 0.8600000143051147
+   📏 AUC Analysis: 0.954106330871582
+
+🔄 Round 24/50
+   📊 Metrics: loss=0.4548, binary_accuracy=0.8400, auc=0.9678, precision=0.7586, recall=0.9565
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.4547973871231079
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9677939414978027
+
+🔄 Round 25/50
+   📊 Metrics: loss=0.3646, binary_accuracy=0.9200, auc=0.9944, precision=0.8800, recall=0.9565
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.3645576238632202
+   🎯 Accuracy Analysis: 0.9200000166893005
+   📏 AUC Analysis: 0.9943639039993286
+
+🔄 Round 26/50
+   📊 Metrics: loss=0.3646, binary_accuracy=0.9600, auc=0.9928, precision=0.9565, recall=0.9565
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.36463460326194763
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.9927536249160767
+
+🔄 Round 27/50
+   📊 Metrics: loss=0.3724, binary_accuracy=0.8600, auc=0.9734, precision=0.8077, recall=0.9130
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.37235862016677856
+   🎯 Accuracy Analysis: 0.8600000143051147
+   📏 AUC Analysis: 0.9734299182891846
+
+🔄 Round 28/50
+   📊 Metrics: loss=0.3356, binary_accuracy=0.9600, auc=0.9952, precision=0.9565, recall=0.9565
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.3356108069419861
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.9951691627502441
+
+🔄 Round 29/50
+   📊 Metrics: loss=0.3074, binary_accuracy=0.9600, auc=1.0000, precision=0.9200, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.30735236406326294
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 1.0
+
+🔄 Round 30/50
+   📊 Metrics: loss=0.4370, binary_accuracy=0.8400, auc=0.9163, precision=0.7778, recall=0.9130
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.4369887411594391
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9162640571594238
+
+🔄 Round 31/50
+   📊 Metrics: loss=0.3259, binary_accuracy=0.9400, auc=0.9791, precision=0.9167, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.32588890194892883
+   🎯 Accuracy Analysis: 0.9399999976158142
+   📏 AUC Analysis: 0.979066014289856
+
+🔄 Round 32/50
+   📊 Metrics: loss=0.3320, binary_accuracy=0.9200, auc=0.9879, precision=0.8800, recall=0.9565
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.33203795552253723
+   🎯 Accuracy Analysis: 0.9200000166893005
+   📏 AUC Analysis: 0.987922728061676
+
+🔄 Round 33/50
+   📊 Metrics: loss=0.2824, binary_accuracy=0.9400, auc=1.0000, precision=0.8846, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.2824234664440155
+   🎯 Accuracy Analysis: 0.9399999976158142
+   📏 AUC Analysis: 1.0
+
+🔄 Round 34/50
+   📊 Metrics: loss=0.3360, binary_accuracy=0.9200, auc=0.9799, precision=0.9130, recall=0.9130
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.3359867036342621
+   🎯 Accuracy Analysis: 0.9200000166893005
+   📏 AUC Analysis: 0.9798712134361267
+
+🔄 Round 35/50
+   📊 Metrics: loss=0.3021, binary_accuracy=0.9600, auc=0.9807, precision=1.0000, recall=0.9130
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.30210790038108826
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.9806763529777527
+
+🔄 Round 36/50
+   📊 Metrics: loss=0.3315, binary_accuracy=0.9000, auc=0.9823, precision=0.8750, recall=0.9130
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.331450492143631
+   🎯 Accuracy Analysis: 0.8999999761581421
+   📏 AUC Analysis: 0.9822866320610046
+
+🔄 Round 37/50
+   📊 Metrics: loss=0.2919, binary_accuracy=0.9400, auc=0.9895, precision=0.9167, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.2919240891933441
+   🎯 Accuracy Analysis: 0.9399999976158142
+   📏 AUC Analysis: 0.989533007144928
+
+🔄 Round 38/50
+   📊 Metrics: loss=0.2737, binary_accuracy=0.9600, auc=0.9960, precision=0.9565, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.27368319034576416
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.9959742426872253
+
+🔄 Round 39/50
+   📊 Metrics: loss=0.2595, binary_accuracy=0.9400, auc=0.9944, precision=0.8846, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.2595396339893341
+   🎯 Accuracy Analysis: 0.9399999976158142
+   📏 AUC Analysis: 0.9943639039993286
+
+🔄 Round 40/50
+   📊 Metrics: loss=0.2900, binary_accuracy=0.9600, auc=0.9887, precision=0.9565, recall=0.9565
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.2900044322013855
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.988727867603302
+
+🔄 Round 41/50
+   📊 Metrics: loss=0.2792, binary_accuracy=0.9600, auc=0.9903, precision=1.0000, recall=0.9130
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.27915242314338684
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.9903382062911987
+
+🔄 Round 42/50
+   📊 Metrics: loss=0.2486, binary_accuracy=1.0000, auc=1.0000, precision=1.0000, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.24864858388900757
+   🎯 Accuracy Analysis: 1.0
+   📏 AUC Analysis: 1.0
+
+🔄 Round 43/50
+   📊 Metrics: loss=0.2313, binary_accuracy=0.9600, auc=1.0000, precision=0.9200, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.23126736283302307
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 1.0
+
+🔄 Round 44/50
+   📊 Metrics: loss=0.2439, binary_accuracy=0.9800, auc=0.9952, precision=0.9583, recall=1.0000
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.24394258856773376
+   🎯 Accuracy Analysis: 0.9800000190734863
+   📏 AUC Analysis: 0.9951691031455994
+
+🔄 Round 45/50
+   📊 Metrics: loss=0.3082, binary_accuracy=0.9200, auc=0.9670, precision=0.8800, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.3082335591316223
+   🎯 Accuracy Analysis: 0.9200000166893005
+   📏 AUC Analysis: 0.966988742351532
+
+🔄 Round 46/50
+   📊 Metrics: loss=0.2169, binary_accuracy=0.9600, auc=0.9879, precision=1.0000, recall=0.9130
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.21692200005054474
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 0.987922728061676
+
+🔄 Round 47/50
+   📊 Metrics: loss=0.2104, binary_accuracy=1.0000, auc=1.0000, precision=1.0000, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.21035002171993256
+   🎯 Accuracy Analysis: 1.0
+   📏 AUC Analysis: 1.0
+
+🔄 Round 48/50
+   📊 Metrics: loss=0.2540, binary_accuracy=0.9400, auc=0.9823, precision=0.9545, recall=0.9130
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.25401628017425537
+   🎯 Accuracy Analysis: 0.9399999976158142
+   📏 AUC Analysis: 0.9822866320610046
+
+🔄 Round 49/50
+   📊 Metrics: loss=0.2114, binary_accuracy=0.9800, auc=0.9855, precision=1.0000, recall=0.9565
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.21141408383846283
+   🎯 Accuracy Analysis: 0.9800000190734863
+   📏 AUC Analysis: 0.9855072498321533
+
+🔄 Round 50/50
+   📊 Metrics: loss=0.2073, binary_accuracy=0.9600, auc=1.0000, precision=0.9200, recall=1.0000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.20732493698596954
+   🎯 Accuracy Analysis: 0.9599999785423279
+   📏 AUC Analysis: 1.0
+
+🏁 Training completed after 50 rounds!
+⏱️  Total training time: 5.49s
+[SUCCESS] Federated learning training completed!
+[TRAINING][sybil_detection] Full training history:
+{
+  "round_losses": [
+    0.9765264391899109,
+    0.8712286353111267,
+    0.7397921681404114,
+    0.776109516620636,
+    0.7654252648353577,
+    0.7174224853515625,
+    0.637916088104248,
+    0.5771675109863281,
+    0.6218463182449341,
+    0.5052142143249512,
+    0.6384040117263794,
+    0.5544440746307373,
+    0.508385181427002,
+    0.4920288026332855,
+    0.49935492873191833,
+    0.48329979181289673,
+    0.4292883574962616,
+    0.48305201530456543,
+    0.4499019682407379,
+    0.45318612456321716,
+    0.3860238194465637,
+    0.38081973791122437,
+    0.438689649105072,
+    0.4547973871231079,
+    0.3645576238632202,
+    0.36463460326194763,
+    0.37235862016677856,
+    0.3356108069419861,
+    0.30735236406326294,
+    0.4369887411594391,
+    0.32588890194892883,
+    0.33203795552253723,
+    0.2824234664440155,
+    0.3359867036342621,
+    0.30210790038108826,
+    0.331450492143631,
+    0.2919240891933441,
+    0.27368319034576416,
+    0.2595396339893341,
+    0.2900044322013855,
+    0.27915242314338684,
+    0.24864858388900757,
+    0.23126736283302307,
+    0.24394258856773376,
+    0.3082335591316223,
+    0.21692200005054474,
+    0.21035002171993256,
+    0.25401628017425537,
+    0.21141408383846283,
+    0.20732493698596954
+  ],
+  "round_metrics": [
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.22",
+          "auc": "0.16988727",
+          "precision": "0.2647059",
+          "recall": "0.39130434",
+          "loss": "0.97652644",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.38",
+          "auc": "0.34138486",
+          "precision": "0.4047619",
+          "recall": "0.73913044",
+          "loss": "0.87122864",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.52",
+          "auc": "0.5708535",
+          "precision": "0.4878049",
+          "recall": "0.8695652",
+          "loss": "0.73979217",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.48",
+          "auc": "0.42028984",
+          "precision": "0.45945945",
+          "recall": "0.73913044",
+          "loss": "0.7761095",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.46",
+          "auc": "0.5128825",
+          "precision": "0.4473684",
+          "recall": "0.73913044",
+          "loss": "0.76542526",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.6",
+          "auc": "0.61272144",
+          "precision": "0.5405405",
+          "recall": "0.8695652",
+          "loss": "0.7174225",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.58",
+          "auc": "0.70933974",
+          "precision": "0.5294118",
+          "recall": "0.7826087",
+          "loss": "0.6379161",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.8164251",
+          "precision": "0.6",
+          "recall": "0.9130435",
+          "loss": "0.5771675",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.66",
+          "auc": "0.77938807",
+          "precision": "0.59375",
+          "recall": "0.82608694",
+          "loss": "0.6218463",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.78",
+          "auc": "0.9355877",
+          "precision": "0.7",
+          "recall": "0.9130435",
+          "loss": "0.5052142",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.58",
+          "auc": "0.71497583",
+          "precision": "0.5294118",
+          "recall": "0.7826087",
+          "loss": "0.638404",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.7",
+          "auc": "0.87922704",
+          "precision": "0.6111111",
+          "recall": "0.95652175",
+          "loss": "0.5544441",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.9114332",
+          "precision": "0.67741936",
+          "recall": "0.9130435",
+          "loss": "0.5083852",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.9074074",
+          "precision": "0.6896552",
+          "recall": "0.8695652",
+          "loss": "0.4920288",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.9057971",
+          "precision": "0.6896552",
+          "recall": "0.8695652",
+          "loss": "0.49935493",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.9130435",
+          "precision": "0.6896552",
+          "recall": "0.8695652",
+          "loss": "0.4832998",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.9557166",
+          "precision": "0.7586207",
+          "recall": "0.95652175",
+          "loss": "0.42928836",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.8",
+          "auc": "0.8937198",
+          "precision": "0.7826087",
+          "recall": "0.7826087",
+          "loss": "0.48305202",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.9",
+          "auc": "0.93558776",
+          "precision": "0.875",
+          "recall": "0.9130435",
+          "loss": "0.44990197",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.78",
+          "auc": "0.91867954",
+          "precision": "0.71428573",
+          "recall": "0.8695652",
+          "loss": "0.45318612",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.88",
+          "auc": "0.9605475",
+          "precision": "0.84",
+          "recall": "0.9130435",
+          "loss": "0.38602382",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.88",
+          "auc": "0.968599",
+          "precision": "0.8148148",
+          "recall": "0.95652175",
+          "loss": "0.38081974",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.86",
+          "auc": "0.95410633",
+          "precision": "0.78571427",
+          "recall": "0.95652175",
+          "loss": "0.43868965",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.96779394",
+          "precision": "0.7586207",
+          "recall": "0.95652175",
+          "loss": "0.4547974",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.92",
+          "auc": "0.9943639",
+          "precision": "0.88",
+          "recall": "0.95652175",
+          "loss": "0.36455762",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.9927536",
+          "precision": "0.95652175",
+          "recall": "0.95652175",
+          "loss": "0.3646346",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.86",
+          "auc": "0.9734299",
+          "precision": "0.8076923",
+          "recall": "0.9130435",
+          "loss": "0.37235862",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.99516916",
+          "precision": "0.95652175",
+          "recall": "0.95652175",
+          "loss": "0.3356108",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "1.0",
+          "precision": "0.92",
+          "recall": "1.0",
+          "loss": "0.30735236",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.91626406",
+          "precision": "0.7777778",
+          "recall": "0.9130435",
+          "loss": "0.43698874",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.94",
+          "auc": "0.979066",
+          "precision": "0.9166667",
+          "recall": "0.95652175",
+          "loss": "0.3258889",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.92",
+          "auc": "0.9879227",
+          "precision": "0.88",
+          "recall": "0.95652175",
+          "loss": "0.33203796",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.94",
+          "auc": "1.0",
+          "precision": "0.88461536",
+          "recall": "1.0",
+          "loss": "0.28242347",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.92",
+          "auc": "0.9798712",
+          "precision": "0.9130435",
+          "recall": "0.9130435",
+          "loss": "0.3359867",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.98067635",
+          "precision": "1.0",
+          "recall": "0.9130435",
+          "loss": "0.3021079",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.9",
+          "auc": "0.98228663",
+          "precision": "0.875",
+          "recall": "0.9130435",
+          "loss": "0.3314505",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.94",
+          "auc": "0.989533",
+          "precision": "0.9166667",
+          "recall": "0.95652175",
+          "loss": "0.2919241",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.99597424",
+          "precision": "0.95652175",
+          "recall": "0.95652175",
+          "loss": "0.2736832",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.94",
+          "auc": "0.9943639",
+          "precision": "0.88461536",
+          "recall": "1.0",
+          "loss": "0.25953963",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.98872787",
+          "precision": "0.95652175",
+          "recall": "0.95652175",
+          "loss": "0.29000443",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.9903382",
+          "precision": "1.0",
+          "recall": "0.9130435",
+          "loss": "0.27915242",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "1.0",
+          "auc": "1.0",
+          "precision": "1.0",
+          "recall": "1.0",
+          "loss": "0.24864858",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "1.0",
+          "precision": "0.92",
+          "recall": "1.0",
+          "loss": "0.23126736",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.98",
+          "auc": "0.9951691",
+          "precision": "0.9583333",
+          "recall": "1.0",
+          "loss": "0.24394259",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.92",
+          "auc": "0.96698874",
+          "precision": "0.88",
+          "recall": "0.95652175",
+          "loss": "0.30823356",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "0.9879227",
+          "precision": "1.0",
+          "recall": "0.9130435",
+          "loss": "0.216922",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "1.0",
+          "auc": "1.0",
+          "precision": "1.0",
+          "recall": "1.0",
+          "loss": "0.21035002",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.94",
+          "auc": "0.98228663",
+          "precision": "0.95454544",
+          "recall": "0.9130435",
+          "loss": "0.25401628",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.98",
+          "auc": "0.98550725",
+          "precision": "1.0",
+          "recall": "0.95652175",
+          "loss": "0.21141408",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.96",
+          "auc": "1.0",
+          "precision": "0.92",
+          "recall": "1.0",
+          "loss": "0.20732494",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    }
+  ],
+  "training_time": [
+    1.055920124053955,
+    0.12707257270812988,
+    0.11419248580932617,
+    0.12640953063964844,
+    0.1077873706817627,
+    0.11070919036865234,
+    0.10837173461914062,
+    0.11475443840026855,
+    0.09073448181152344,
+    0.09508681297302246,
+    0.10831713676452637,
+    0.0960533618927002,
+    0.1004340648651123,
+    0.08601713180541992,
+    0.08355236053466797,
+    0.0886845588684082,
+    0.08207535743713379,
+    0.08210587501525879,
+    0.08061599731445312,
+    0.0954890251159668,
+    0.08455562591552734,
+    0.07733440399169922,
+    0.07917976379394531,
+    0.09853410720825195,
+    0.0865790843963623,
+    0.08969330787658691,
+    0.08526611328125,
+    0.08609175682067871,
+    0.08326244354248047,
+    0.08763289451599121,
+    0.08228802680969238,
+    0.08536696434020996,
+    0.08028292655944824,
+    0.0892481803894043,
+    0.08107185363769531,
+    0.08524823188781738,
+    0.08150100708007812,
+    0.08454322814941406,
+    0.08194994926452637,
+    0.08722615242004395,
+    0.08220195770263672,
+    0.08395671844482422,
+    0.08219718933105469,
+    0.08711004257202148,
+    0.08200240135192871,
+    0.08188343048095703,
+    0.08141517639160156,
+    0.0944070816040039,
+    0.0824122428894043,
+    0.0829305648803711
+  ]
+}2025-05-28 14:42:23.057274: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.057328: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.057509: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.058308: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.058367: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.097226: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.097270: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.097464: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.097973: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.098007: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.429494: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.429546: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.429665: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.430098: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.430115: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.658216: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.658268: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.658387: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.658802: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.658831: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.669475: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.669536: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.669655: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.670142: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.670160: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.682879: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.682976: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.683198: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.683880: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.683921: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.702103: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.702155: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.702257: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.702666: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.702701: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.736879: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.736935: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.737043: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.737382: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.737401: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.750522: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.750571: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.750771: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.751415: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.751443: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.769639: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.769710: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.770070: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.770705: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.770747: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.790824: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.790898: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.791090: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.791773: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.791809: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.805721: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.805774: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.805888: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.806308: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.806323: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.809935: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.809981: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.810105: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.810554: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.810572: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.816905: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.816965: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.817079: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.817544: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.817561: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.825840: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.825890: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.825987: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.826326: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.826340: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2025-05-28 14:42:23.844824: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.844879: I tensorflow/core/grappler/devices.cc:66] Number of eligible GPUs (core count >= 8, compute capability >= 0.0): 1
+2025-05-28 14:42:23.845008: I tensorflow/core/grappler/clusters/single_machine.cc:361] Starting new session
+2025-05-28 14:42:23.845537: I tensorflow/compiler/xla/stream_executor/cuda/cuda_gpu_executor.cc:880] could not open file to read NUMA node: /sys/bus/pci/devices/0000:01:00.0/numa_node
+Your kernel may have been built without NUMA support.
+2025-05-28 14:42:23.845553: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2211] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+
+
+============================================================
+TRAINING MODEL: BRIBERY_DETECTION
+============================================================
+[INFO] Input shape: 15 features
+[INFO] Training samples: 50
+[INFO] Training rounds: 50
+[INFO] Batch size: 32
+[INFO] Learning rate: 0.01
+[INFO] Loss optimization: standard
+[INFO] Optimizer strategy: standard
+[INFO] Starting federated learning training...
+
+🔄 Round 1/50
+   📊 Metrics: loss=0.7576, binary_accuracy=0.5400, auc=0.5176, precision=0.6000, recall=0.1250
+   ⏱️  Time: 0.96s
+   📉 Loss Analysis: 0.7576003074645996
+   🎯 Accuracy Analysis: 0.5400000214576721
+   📏 AUC Analysis: 0.5176281929016113
+
+🔄 Round 2/50
+   📊 Metrics: loss=0.7127, binary_accuracy=0.5000, auc=0.5529, precision=0.4706, recall=0.3333
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.7126634120941162
+   🎯 Accuracy Analysis: 0.5
+   📏 AUC Analysis: 0.552884578704834
+
+🔄 Round 3/50
+   📊 Metrics: loss=0.6245, binary_accuracy=0.6200, auc=0.7532, precision=0.7273, recall=0.3333
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.6245298981666565
+   🎯 Accuracy Analysis: 0.6200000047683716
+   📏 AUC Analysis: 0.7532050609588623
+
+🔄 Round 4/50
+   📊 Metrics: loss=0.7421, binary_accuracy=0.5200, auc=0.5329, precision=0.5000, recall=0.3750
+   ⏱️  Time: 0.10s
+   📉 Loss Analysis: 0.7420799732208252
+   🎯 Accuracy Analysis: 0.5199999809265137
+   📏 AUC Analysis: 0.5328525304794312
+
+🔄 Round 5/50
+   📊 Metrics: loss=0.6764, binary_accuracy=0.5400, auc=0.6691, precision=0.5556, recall=0.2083
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.676410973072052
+   🎯 Accuracy Analysis: 0.5400000214576721
+   📏 AUC Analysis: 0.6690704822540283
+
+🔄 Round 6/50
+   📊 Metrics: loss=0.7008, binary_accuracy=0.5600, auc=0.6298, precision=0.5714, recall=0.3333
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.7008429765701294
+   🎯 Accuracy Analysis: 0.5600000023841858
+   📏 AUC Analysis: 0.629807710647583
+
+🔄 Round 7/50
+   📊 Metrics: loss=0.6843, binary_accuracy=0.6400, auc=0.6298, precision=0.7143, recall=0.4167
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6842592358589172
+   🎯 Accuracy Analysis: 0.6399999856948853
+   📏 AUC Analysis: 0.629807710647583
+
+🔄 Round 8/50
+   📊 Metrics: loss=0.7202, binary_accuracy=0.6000, auc=0.5505, precision=0.6667, recall=0.3333
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.7202499508857727
+   🎯 Accuracy Analysis: 0.6000000238418579
+   📏 AUC Analysis: 0.5504807233810425
+
+🔄 Round 9/50
+   📊 Metrics: loss=0.6607, binary_accuracy=0.6000, auc=0.6362, precision=0.7000, recall=0.2917
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6606630682945251
+   🎯 Accuracy Analysis: 0.6000000238418579
+   📏 AUC Analysis: 0.6362179517745972
+
+🔄 Round 10/50
+   📊 Metrics: loss=0.6000, binary_accuracy=0.6800, auc=0.7484, precision=0.7222, recall=0.5417
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.6000489592552185
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.7483974695205688
+
+🔄 Round 11/50
+   📊 Metrics: loss=0.6142, binary_accuracy=0.7200, auc=0.7524, precision=0.9167, recall=0.4583
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6141582727432251
+   🎯 Accuracy Analysis: 0.7200000286102295
+   📏 AUC Analysis: 0.7524038553237915
+
+🔄 Round 12/50
+   📊 Metrics: loss=0.5994, binary_accuracy=0.6800, auc=0.7853, precision=0.8333, recall=0.4167
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5993852019309998
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.7852563858032227
+
+🔄 Round 13/50
+   📊 Metrics: loss=0.6828, binary_accuracy=0.6200, auc=0.6490, precision=0.6667, recall=0.4167
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6827653646469116
+   🎯 Accuracy Analysis: 0.6200000047683716
+   📏 AUC Analysis: 0.6490384340286255
+
+🔄 Round 14/50
+   📊 Metrics: loss=0.6481, binary_accuracy=0.6400, auc=0.7147, precision=0.7143, recall=0.4167
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.6480998992919922
+   🎯 Accuracy Analysis: 0.6399999856948853
+   📏 AUC Analysis: 0.7147435545921326
+
+🔄 Round 15/50
+   📊 Metrics: loss=0.5957, binary_accuracy=0.6800, auc=0.7885, precision=0.9000, recall=0.3750
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.595715343952179
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.7884615659713745
+
+🔄 Round 16/50
+   📊 Metrics: loss=0.6676, binary_accuracy=0.5400, auc=0.6803, precision=0.5294, recall=0.3750
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6675959229469299
+   🎯 Accuracy Analysis: 0.5400000214576721
+   📏 AUC Analysis: 0.6802884340286255
+
+🔄 Round 17/50
+   📊 Metrics: loss=0.5864, binary_accuracy=0.6800, auc=0.7708, precision=0.7857, recall=0.4583
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5864335894584656
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.7708333730697632
+
+🔄 Round 18/50
+   📊 Metrics: loss=0.6362, binary_accuracy=0.6800, auc=0.7019, precision=0.7000, recall=0.5833
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.6362193822860718
+   🎯 Accuracy Analysis: 0.6800000071525574
+   📏 AUC Analysis: 0.7019230127334595
+
+🔄 Round 19/50
+   📊 Metrics: loss=0.5732, binary_accuracy=0.7400, auc=0.7997, precision=0.7619, recall=0.6667
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5732128620147705
+   🎯 Accuracy Analysis: 0.7400000095367432
+   📏 AUC Analysis: 0.7996794581413269
+
+🔄 Round 20/50
+   📊 Metrics: loss=0.6112, binary_accuracy=0.7200, auc=0.7588, precision=0.8571, recall=0.5000
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6112381219863892
+   🎯 Accuracy Analysis: 0.7200000286102295
+   📏 AUC Analysis: 0.7588140964508057
+
+🔄 Round 21/50
+   📊 Metrics: loss=0.6052, binary_accuracy=0.7400, auc=0.7644, precision=0.7895, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6051647663116455
+   🎯 Accuracy Analysis: 0.7400000095367432
+   📏 AUC Analysis: 0.7644230723381042
+
+🔄 Round 22/50
+   📊 Metrics: loss=0.5762, binary_accuracy=0.7400, auc=0.8029, precision=0.8235, recall=0.5833
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.5762437582015991
+   🎯 Accuracy Analysis: 0.7400000095367432
+   📏 AUC Analysis: 0.802884578704834
+
+🔄 Round 23/50
+   📊 Metrics: loss=0.5631, binary_accuracy=0.8000, auc=0.8438, precision=0.9375, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5630578398704529
+   🎯 Accuracy Analysis: 0.800000011920929
+   📏 AUC Analysis: 0.84375
+
+🔄 Round 24/50
+   📊 Metrics: loss=0.5828, binary_accuracy=0.7200, auc=0.7756, precision=0.7500, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5827609896659851
+   🎯 Accuracy Analysis: 0.7200000286102295
+   📏 AUC Analysis: 0.7756410241127014
+
+🔄 Round 25/50
+   📊 Metrics: loss=0.6570, binary_accuracy=0.5800, auc=0.7091, precision=0.7143, recall=0.2083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6569778323173523
+   🎯 Accuracy Analysis: 0.5799999833106995
+   📏 AUC Analysis: 0.7091346383094788
+
+🔄 Round 26/50
+   📊 Metrics: loss=0.5709, binary_accuracy=0.7600, auc=0.8069, precision=0.8333, recall=0.6250
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.5708631277084351
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.8068910241127014
+
+🔄 Round 27/50
+   📊 Metrics: loss=0.6276, binary_accuracy=0.6200, auc=0.6947, precision=0.6471, recall=0.4583
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.6275656819343567
+   🎯 Accuracy Analysis: 0.6200000047683716
+   📏 AUC Analysis: 0.6947115063667297
+
+🔄 Round 28/50
+   📊 Metrics: loss=0.5307, binary_accuracy=0.7600, auc=0.8646, precision=0.8333, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5306870341300964
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.8645833134651184
+
+🔄 Round 29/50
+   📊 Metrics: loss=0.4907, binary_accuracy=0.7800, auc=0.8734, precision=0.8824, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4907393753528595
+   🎯 Accuracy Analysis: 0.7799999713897705
+   📏 AUC Analysis: 0.8733974695205688
+
+🔄 Round 30/50
+ERROR:fl_orchestrator:No model found in server state
+   📊 Metrics: loss=0.4642, binary_accuracy=0.8600, auc=0.9239, precision=0.9474, recall=0.7500
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.4642103314399719
+   🎯 Accuracy Analysis: 0.8600000143051147
+   📏 AUC Analysis: 0.9238781929016113
+
+🔄 Round 31/50
+   📊 Metrics: loss=0.5972, binary_accuracy=0.7200, auc=0.7460, precision=0.7083, recall=0.7083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5972466468811035
+   🎯 Accuracy Analysis: 0.7200000286102295
+   📏 AUC Analysis: 0.7459935545921326
+
+🔄 Round 32/50
+   📊 Metrics: loss=0.5270, binary_accuracy=0.8200, auc=0.8638, precision=0.8947, recall=0.7083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5269964337348938
+   🎯 Accuracy Analysis: 0.8199999928474426
+   📏 AUC Analysis: 0.8637820482254028
+
+🔄 Round 33/50
+   📊 Metrics: loss=0.5072, binary_accuracy=0.7800, auc=0.8574, precision=0.8421, recall=0.6667
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5072399377822876
+   🎯 Accuracy Analysis: 0.7799999713897705
+   📏 AUC Analysis: 0.8573717474937439
+
+🔄 Round 34/50
+   📊 Metrics: loss=0.5131, binary_accuracy=0.8200, auc=0.8822, precision=0.9412, recall=0.6667
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.5131226181983948
+   🎯 Accuracy Analysis: 0.8199999928474426
+   📏 AUC Analysis: 0.8822115063667297
+
+🔄 Round 35/50
+   📊 Metrics: loss=0.4467, binary_accuracy=0.8400, auc=0.9415, precision=0.9000, recall=0.7500
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.44670912623405457
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9415063858032227
+
+🔄 Round 36/50
+   📊 Metrics: loss=0.4991, binary_accuracy=0.7600, auc=0.8750, precision=0.7727, recall=0.7083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.49908265471458435
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.875
+
+🔄 Round 37/50
+   📊 Metrics: loss=0.5080, binary_accuracy=0.7800, auc=0.8638, precision=0.8421, recall=0.6667
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5079759955406189
+   🎯 Accuracy Analysis: 0.7799999713897705
+   📏 AUC Analysis: 0.8637820482254028
+
+🔄 Round 38/50
+   📊 Metrics: loss=0.4800, binary_accuracy=0.8000, auc=0.9079, precision=1.0000, recall=0.5833
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.48003944754600525
+   🎯 Accuracy Analysis: 0.800000011920929
+   📏 AUC Analysis: 0.9078526496887207
+
+🔄 Round 39/50
+   📊 Metrics: loss=0.4910, binary_accuracy=0.8400, auc=0.8926, precision=0.9000, recall=0.7500
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4910028874874115
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.8926282525062561
+
+🔄 Round 40/50
+   📊 Metrics: loss=0.4777, binary_accuracy=0.8400, auc=0.9135, precision=0.8333, recall=0.8333
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.477701872587204
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9134615659713745
+
+🔄 Round 41/50
+   📊 Metrics: loss=0.4792, binary_accuracy=0.8200, auc=0.8638, precision=0.8947, recall=0.7083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4791661202907562
+   🎯 Accuracy Analysis: 0.8199999928474426
+   📏 AUC Analysis: 0.8637820482254028
+
+🔄 Round 42/50
+   📊 Metrics: loss=0.4690, binary_accuracy=0.8400, auc=0.8798, precision=0.8636, recall=0.7917
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.469002366065979
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.8798076510429382
+
+🔄 Round 43/50
+   📊 Metrics: loss=0.4137, binary_accuracy=0.8600, auc=0.9439, precision=0.9474, recall=0.7500
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4136940836906433
+   🎯 Accuracy Analysis: 0.8600000143051147
+   📏 AUC Analysis: 0.9439102411270142
+
+🔄 Round 44/50
+   📊 Metrics: loss=0.4227, binary_accuracy=0.8400, auc=0.9551, precision=0.9000, recall=0.7500
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.42265480756759644
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9551282525062561
+
+🔄 Round 45/50
+   📊 Metrics: loss=0.4947, binary_accuracy=0.7600, auc=0.8790, precision=0.8333, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4946695566177368
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.8790063858032227
+
+🔄 Round 46/50
+   📊 Metrics: loss=0.4006, binary_accuracy=0.8400, auc=0.9575, precision=0.9444, recall=0.7083
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.4006215035915375
+   🎯 Accuracy Analysis: 0.8399999737739563
+   📏 AUC Analysis: 0.9575320482254028
+
+🔄 Round 47/50
+   📊 Metrics: loss=0.4986, binary_accuracy=0.7600, auc=0.8389, precision=0.7727, recall=0.7083
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.498617947101593
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.838942289352417
+
+🔄 Round 48/50
+   📊 Metrics: loss=0.5053, binary_accuracy=0.7600, auc=0.8421, precision=0.8333, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.5052672028541565
+   🎯 Accuracy Analysis: 0.7599999904632568
+   📏 AUC Analysis: 0.8421474695205688
+
+🔄 Round 49/50
+   📊 Metrics: loss=0.4700, binary_accuracy=0.8200, auc=0.9159, precision=1.0000, recall=0.6250
+   ⏱️  Time: 0.08s
+   📉 Loss Analysis: 0.4699614346027374
+   🎯 Accuracy Analysis: 0.8199999928474426
+   📏 AUC Analysis: 0.915865421295166
+
+🔄 Round 50/50
+   📊 Metrics: loss=0.4126, binary_accuracy=0.8200, auc=0.9463, precision=0.9412, recall=0.6667
+   ⏱️  Time: 0.09s
+   📉 Loss Analysis: 0.4126254916191101
+   🎯 Accuracy Analysis: 0.8199999928474426
+   📏 AUC Analysis: 0.9463140964508057
+
+🏁 Training completed after 50 rounds!
+⏱️  Total training time: 5.08s
+[SUCCESS] Federated learning training completed!
+[TRAINING][bribery_detection] Full training history:
+{
+  "round_losses": [
+    0.7576003074645996,
+    0.7126634120941162,
+    0.6245298981666565,
+    0.7420799732208252,
+    0.676410973072052,
+    0.7008429765701294,
+    0.6842592358589172,
+    0.7202499508857727,
+    0.6606630682945251,
+    0.6000489592552185,
+    0.6141582727432251,
+    0.5993852019309998,
+    0.6827653646469116,
+    0.6480998992919922,
+    0.595715343952179,
+    0.6675959229469299,
+    0.5864335894584656,
+    0.6362193822860718,
+    0.5732128620147705,
+    0.6112381219863892,
+    0.6051647663116455,
+    0.5762437582015991,
+    0.5630578398704529,
+    0.5827609896659851,
+    0.6569778323173523,
+    0.5708631277084351,
+    0.6275656819343567,
+    0.5306870341300964,
+    0.4907393753528595,
+    0.4642103314399719,
+    0.5972466468811035,
+    0.5269964337348938,
+    0.5072399377822876,
+    0.5131226181983948,
+    0.44670912623405457,
+    0.49908265471458435,
+    0.5079759955406189,
+    0.48003944754600525,
+    0.4910028874874115,
+    0.477701872587204,
+    0.4791661202907562,
+    0.469002366065979,
+    0.4136940836906433,
+    0.42265480756759644,
+    0.4946695566177368,
+    0.4006215035915375,
+    0.498617947101593,
+    0.5052672028541565,
+    0.4699614346027374,
+    0.4126254916191101
+  ],
+  "round_metrics": [
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.54",
+          "auc": "0.5176282",
+          "precision": "0.6",
+          "recall": "0.125",
+          "loss": "0.7576003",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.5",
+          "auc": "0.5528846",
+          "precision": "0.47058824",
+          "recall": "0.33333334",
+          "loss": "0.7126634",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.62",
+          "auc": "0.75320506",
+          "precision": "0.72727275",
+          "recall": "0.33333334",
+          "loss": "0.6245299",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.52",
+          "auc": "0.53285253",
+          "precision": "0.5",
+          "recall": "0.375",
+          "loss": "0.74208",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.54",
+          "auc": "0.6690705",
+          "precision": "0.5555556",
+          "recall": "0.20833333",
+          "loss": "0.676411",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.56",
+          "auc": "0.6298077",
+          "precision": "0.5714286",
+          "recall": "0.33333334",
+          "loss": "0.700843",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.64",
+          "auc": "0.6298077",
+          "precision": "0.71428573",
+          "recall": "0.41666666",
+          "loss": "0.68425924",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.6",
+          "auc": "0.5504807",
+          "precision": "0.6666667",
+          "recall": "0.33333334",
+          "loss": "0.72024995",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.6",
+          "auc": "0.63621795",
+          "precision": "0.7",
+          "recall": "0.29166666",
+          "loss": "0.66066307",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.74839747",
+          "precision": "0.7222222",
+          "recall": "0.5416667",
+          "loss": "0.60004896",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.72",
+          "auc": "0.75240386",
+          "precision": "0.9166667",
+          "recall": "0.45833334",
+          "loss": "0.6141583",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.7852564",
+          "precision": "0.8333333",
+          "recall": "0.41666666",
+          "loss": "0.5993852",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.62",
+          "auc": "0.64903843",
+          "precision": "0.6666667",
+          "recall": "0.41666666",
+          "loss": "0.68276536",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.64",
+          "auc": "0.71474355",
+          "precision": "0.71428573",
+          "recall": "0.41666666",
+          "loss": "0.6480999",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.78846157",
+          "precision": "0.9",
+          "recall": "0.375",
+          "loss": "0.59571534",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.54",
+          "auc": "0.68028843",
+          "precision": "0.5294118",
+          "recall": "0.375",
+          "loss": "0.6675959",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.7708334",
+          "precision": "0.78571427",
+          "recall": "0.45833334",
+          "loss": "0.5864336",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.68",
+          "auc": "0.701923",
+          "precision": "0.7",
+          "recall": "0.5833333",
+          "loss": "0.6362194",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.74",
+          "auc": "0.79967946",
+          "precision": "0.7619048",
+          "recall": "0.6666667",
+          "loss": "0.57321286",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.72",
+          "auc": "0.7588141",
+          "precision": "0.85714287",
+          "recall": "0.5",
+          "loss": "0.6112381",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.74",
+          "auc": "0.7644231",
+          "precision": "0.7894737",
+          "recall": "0.625",
+          "loss": "0.60516477",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.74",
+          "auc": "0.8028846",
+          "precision": "0.8235294",
+          "recall": "0.5833333",
+          "loss": "0.57624376",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.8",
+          "auc": "0.84375",
+          "precision": "0.9375",
+          "recall": "0.625",
+          "loss": "0.56305784",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.72",
+          "auc": "0.775641",
+          "precision": "0.75",
+          "recall": "0.625",
+          "loss": "0.582761",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.58",
+          "auc": "0.70913464",
+          "precision": "0.71428573",
+          "recall": "0.20833333",
+          "loss": "0.65697783",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.806891",
+          "precision": "0.8333333",
+          "recall": "0.625",
+          "loss": "0.5708631",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.62",
+          "auc": "0.6947115",
+          "precision": "0.64705884",
+          "recall": "0.45833334",
+          "loss": "0.6275657",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.8645833",
+          "precision": "0.8333333",
+          "recall": "0.625",
+          "loss": "0.53068703",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.78",
+          "auc": "0.87339747",
+          "precision": "0.88235295",
+          "recall": "0.625",
+          "loss": "0.49073938",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.86",
+          "auc": "0.9238782",
+          "precision": "0.94736844",
+          "recall": "0.75",
+          "loss": "0.46421033",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.72",
+          "auc": "0.74599355",
+          "precision": "0.7083333",
+          "recall": "0.7083333",
+          "loss": "0.59724665",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.82",
+          "auc": "0.86378205",
+          "precision": "0.8947368",
+          "recall": "0.7083333",
+          "loss": "0.52699643",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.78",
+          "auc": "0.85737175",
+          "precision": "0.84210527",
+          "recall": "0.6666667",
+          "loss": "0.50723994",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.82",
+          "auc": "0.8822115",
+          "precision": "0.9411765",
+          "recall": "0.6666667",
+          "loss": "0.5131226",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.9415064",
+          "precision": "0.9",
+          "recall": "0.75",
+          "loss": "0.44670913",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.875",
+          "precision": "0.77272725",
+          "recall": "0.7083333",
+          "loss": "0.49908265",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.78",
+          "auc": "0.86378205",
+          "precision": "0.84210527",
+          "recall": "0.6666667",
+          "loss": "0.507976",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.8",
+          "auc": "0.90785265",
+          "precision": "1.0",
+          "recall": "0.5833333",
+          "loss": "0.48003945",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.89262825",
+          "precision": "0.9",
+          "recall": "0.75",
+          "loss": "0.4910029",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.91346157",
+          "precision": "0.8333333",
+          "recall": "0.8333333",
+          "loss": "0.47770187",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.82",
+          "auc": "0.86378205",
+          "precision": "0.8947368",
+          "recall": "0.7083333",
+          "loss": "0.47916612",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.87980765",
+          "precision": "0.8636364",
+          "recall": "0.7916667",
+          "loss": "0.46900237",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.86",
+          "auc": "0.94391024",
+          "precision": "0.94736844",
+          "recall": "0.75",
+          "loss": "0.41369408",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.95512825",
+          "precision": "0.9",
+          "recall": "0.75",
+          "loss": "0.4226548",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.8790064",
+          "precision": "0.8333333",
+          "recall": "0.625",
+          "loss": "0.49466956",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.84",
+          "auc": "0.95753205",
+          "precision": "0.9444444",
+          "recall": "0.7083333",
+          "loss": "0.4006215",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.8389423",
+          "precision": "0.77272725",
+          "recall": "0.7083333",
+          "loss": "0.49861795",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.76",
+          "auc": "0.84214747",
+          "precision": "0.8333333",
+          "recall": "0.625",
+          "loss": "0.5052672",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.82",
+          "auc": "0.9158654",
+          "precision": "1.0",
+          "recall": "0.625",
+          "loss": "0.46996143",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    },
+    {
+      "distributor": [],
+      "client_work": {
+        "train": {
+          "binary_accuracy": "0.82",
+          "auc": "0.9463141",
+          "precision": "0.9411765",
+          "recall": "0.6666667",
+          "loss": "0.4126255",
+          "num_examples": "50",
+          "num_batches": "2"
+        }
+      },
+      "aggregator": {
+        "mean_value": [],
+        "mean_weight": []
+      },
+      "finalizer": {
+        "update_non_finite": "0"
+      }
+    }
+  ],
+  "training_time": [
+    0.9622111320495605,
+    0.09448671340942383,
+    0.0859832763671875,
+    0.10017013549804688,
+    0.08541417121887207,
+    0.08888053894042969,
+    0.0832221508026123,
+    0.08135509490966797,
+    0.08224797248840332,
+    0.08801937103271484,
+    0.08014416694641113,
+    0.08020687103271484,
+    0.08392643928527832,
+    0.08843207359313965,
+    0.0802464485168457,
+    0.08180451393127441,
+    0.08187270164489746,
+    0.09027314186096191,
+    0.08175826072692871,
+    0.07842302322387695,
+    0.08159852027893066,
+    0.08524632453918457,
+    0.07987737655639648,
+    0.08085155487060547,
+    0.08394455909729004,
+    0.08629941940307617,
+    0.08163213729858398,
+    0.07930445671081543,
+    0.07913661003112793,
+    0.08562612533569336,
+    0.08275151252746582,
+    0.07955741882324219,
+    0.0827782154083252,
+    0.0915839672088623,
+    0.08284974098205566,
+    0.08002090454101562,
+    0.08011603355407715,
+    0.08771920204162598,
+    0.08401846885681152,
+    0.08129215240478516,
+    0.08177518844604492,
+    0.08662748336791992,
+    0.08264636993408203,
+    0.08310532569885254,
+    0.08150315284729004,
+    0.08686208724975586,
+    0.08313441276550293,
+    0.08082008361816406,
+    0.08205342292785645,
+    0.09386062622070312
+  ]
+}DEBUG:monitoring:Performance metric recorded: federated_training.training_time = 18.661919355392456
+DEBUG:monitoring:Performance metric recorded: federated_training.avg_training_time = 18.661919355392456
+DEBUG:monitoring:Performance metric recorded: federated_training.training_count = 1
+INFO:monitoring:[main] Federated Learning system shutdown
+
+[INFO] ✅ Federated Learning execution completed successfully!

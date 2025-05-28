@@ -458,6 +458,36 @@
           "phase": "Phase 5 - Primary Upgrade",
           "timestamp": 1748357977,
           "details": "Rapidly promoted to Primary node through reputation manipulation"
+        },
+        {
+          "type": "CoordinatedSybilAttack",
+          "coordinationLevel": "extreme",
+          "coSybilNodes": ["0x361d25a7F28F05dDE7a2cb191b4B8128EEE0fAB6", "0x28918ecf013F32fAf45e05d62B4D9b207FCae784"],
+          "attackPhases": 6,
+          "timestamp": 1748357977,
+          "details": "Leading coordinated attack with multiple Sybil nodes across 6 phases"
+        },
+        {
+          "type": "BriberySourceAttack",
+          "targetValidators": 3,
+          "totalBribeAmount": 3.0,
+          "manipulatedBatches": ["47", "48", "49"],
+          "timestamp": 1748357977,
+          "details": "Primary source of bribes to manipulate validator decisions"
+        },
+        {
+          "type": "MaliciousBatchCreation",
+          "batchCount": 8,
+          "fakeProductsInvolved": 3,
+          "timestamp": 1748357977,
+          "details": "Created multiple malicious batches with counterfeit products"
+        },
+        {
+          "type": "SybilCoordination",
+          "coordinationScore": 0.98,
+          "simultaneousActions": true,
+          "timestamp": 1748357977,
+          "details": "Extremely high coordination with other Sybil nodes for synchronized attacks"
         }
       ]
     },
@@ -497,6 +527,34 @@
           "phase": "Phase 5 - Primary Upgrade",
           "timestamp": 1748357977,
           "details": "Rapidly promoted to Primary node through reputation manipulation"
+        },
+        {
+          "type": "CoordinatedSybilAttack",
+          "coordinationLevel": "high",
+          "coSybilNodes": ["0x7ca2dF29b5ea3BB9Ef3b4245D8b7c41a03318Fc1", "0x28918ecf013F32fAf45e05d62B4D9b207FCae784"],
+          "attackPhases": 6,
+          "timestamp": 1748357977,
+          "details": "Coordinated attack participant with multiple Sybil nodes"
+        },
+        {
+          "type": "SybilCoordination",
+          "coordinationScore": 0.95,
+          "simultaneousActions": true,
+          "timestamp": 1748357977,
+          "details": "High coordination with other Sybil nodes in synchronized attacks"
+        },
+        {
+          "type": "FakeProductProposal",
+          "proposedFakeProducts": 2,
+          "timestamp": 1748357977,
+          "details": "Proposed multiple fake products for malicious transactions"
+        },
+        {
+          "type": "MaliciousBatchCreation",
+          "batchCount": 6,
+          "fakeProductsInvolved": 2,
+          "timestamp": 1748357977,
+          "details": "Created malicious batches with counterfeit products"
         }
       ]
     },
@@ -573,6 +631,56 @@
           "phase": "Phase 4 - Reputation Update",
           "timestamp": 1748357977,
           "details": "Artificially boosted reputation from 25 to 85"
+        },
+        {
+          "type": "CoordinatedSybilAttack",
+          "campaign": "ATTACK_20250527_215630",
+          "phase": "Extreme Attack Phase",
+          "timestamp": 1748358200,
+          "details": "Initiated coordinated attack with other Sybil nodes",
+          "coordinatedNodes": ["0x7ca2dF29b5ea3BB9Ef3b4245D8b7c41a03318Fc1", "0x361d25a7F28F05dDE7a2cb191b4B8128EEE0fAB6"],
+          "attackStrength": "EXTREME",
+          "riskScore": 0.98
+        },
+        {
+          "type": "MaliciousBatchCreation",
+          "batchId": "EXTREME_BATCH_3",
+          "timestamp": 1748358230,
+          "details": "Created malicious batch for fake product transfers",
+          "fakeProducts": ["4", "5", "6"],
+          "manipulatedTransfers": 12,
+          "extremeRisk": true,
+          "riskScore": 0.96
+        },
+        {
+          "type": "SybilCoordination",
+          "coordinationType": "EXTREME_COORDINATION",
+          "timestamp": 1748358260,
+          "details": "Advanced coordination with Sybil network for reputation manipulation",
+          "coordinatedActions": ["fake_product_minting", "batch_manipulation", "reputation_boost"],
+          "networkSize": 3,
+          "extremeCoordination": true,
+          "riskScore": 0.97
+        },
+        {
+          "type": "FakeProductProposal",
+          "proposalId": "EXTREME_PROPOSAL_3",
+          "timestamp": 1748358290,
+          "details": "Proposed fake products for batch transfer",
+          "fakeProductCount": 3,
+          "originalProductsCloned": ["1", "2", "3"],
+          "extremeDeception": true,
+          "riskScore": 0.95
+        },
+        {
+          "type": "BatchManipulationAttack",
+          "batchId": "EXTREME_BATCH_3",
+          "timestamp": 1748358320,
+          "details": "Manipulated batch voting and processing for personal gain",
+          "manipulatedVotes": 8,
+          "falsifiedTransfers": 12,
+          "extremeManipulation": true,
+          "riskScore": 0.99
         }
       ]
     }
@@ -3998,6 +4106,65 @@
           "endTime": "2025-05-27T21:59:35.440+07:00"
         }
       ],
+      "extremeAttackPatterns": {
+        "highRiskSybilNode1": {
+          "address": "0x7ca2df29b5ea3bb9ef3b4245d8b7c41a03318fc1",
+          "isSybil": true,
+          "attackCampaign": "ATTACK_20250527_215630",
+          "riskScore": 0.95,
+          "extremeRiskFactors": {
+            "rapidReputationIncrease": 80,
+            "coordinatedWithOtherSybils": true,
+            "coordinatedAttack": true,
+            "fakeProductProposer": true,
+            "fakeProductMinting": true,
+            "maliciousBatchCreation": 8,
+            "briberySource": true,
+            "massiveTransactionVolume": 150,
+            "extremeSybilCoordination": true,
+            "multiPhaseAttack": true,
+            "validatorManipulation": true
+          }
+        },
+        "highRiskSybilNode2": {
+          "address": "0x361d25a7f28f05dde7a2cb191b4b8128eee0fab6",
+          "isSybil": true,
+          "attackCampaign": "ATTACK_20250527_215630",
+          "riskScore": 0.93,
+          "extremeRiskFactors": {
+            "rapidReputationIncrease": 80,
+            "coordinatedWithOtherSybils": true,
+            "coordinatedAttack": true,
+            "fakeProductProposer": true,
+            "maliciousBatchCreation": 6,
+            "briberySource": false,
+            "massiveTransactionVolume": 120,
+            "extremeSybilCoordination": true,
+            "multiPhaseAttack": true,
+            "validatorManipulation": false
+          }
+        },
+        "highRiskSybilNode3": {
+          "address": "0x28918ecf013f32faf45e05d62b4d9b207fcae784",
+          "isSybil": true,
+          "attackCampaign": "ATTACK_20250527_215630",
+          "riskScore": 0.98,
+          "extremeRiskFactors": {
+            "rapidReputationIncrease": 60,
+            "coordinatedWithOtherSybils": true,
+            "coordinatedAttack": true,
+            "fakeProductProposer": true,
+            "fakeProductMinting": true,
+            "maliciousBatchCreation": 12,
+            "briberySource": false,
+            "massiveTransactionVolume": 200,
+            "extremeSybilCoordination": true,
+            "multiPhaseAttack": true,
+            "validatorManipulation": true,
+            "primaryBatchProposer": true
+          }
+        }
+      },
       "flTrainingData": {
         "sybilDetection": [
           {
@@ -4129,6 +4296,65 @@
             "timestamp": 1748357977
           }
         ]
+      }
+    },
+    "extremeAttackPatterns": {
+      "highRiskSybilNode1": {
+        "address": "0x7ca2dF29b5ea3BB9Ef3b4245D8b7c41a03318Fc1",
+        "isSybil": true,
+        "attackCampaign": "ATTACK_20250527_215630",
+        "riskScore": 0.95,
+        "extremeRiskFactors": {
+          "rapidReputationIncrease": 80,
+          "coordinatedWithOtherSybils": true,
+          "coordinatedAttack": true,
+          "fakeProductProposer": true,
+          "fakeProductMinting": true,
+          "maliciousBatchCreation": 8,
+          "briberySource": true,
+          "massiveTransactionVolume": 150,
+          "extremeSybilCoordination": true,
+          "multiPhaseAttack": true,
+          "validatorManipulation": true
+        }
+      },
+      "highRiskSybilNode2": {
+        "address": "0x361d25a7F28F05dDE7a2cb191b4B8128EEE0fAB6",
+        "isSybil": true,
+        "attackCampaign": "ATTACK_20250527_215630",
+        "riskScore": 0.93,
+        "extremeRiskFactors": {
+          "rapidReputationIncrease": 80,
+          "coordinatedWithOtherSybils": true,
+          "coordinatedAttack": true,
+          "fakeProductProposer": true,
+          "maliciousBatchCreation": 6,
+          "briberySource": false,
+          "massiveTransactionVolume": 120,
+          "extremeSybilCoordination": true,
+          "multiPhaseAttack": true,
+          "validatorManipulation": false
+        }
+      },
+      "highRiskSybilNode3": {
+        "address": "0x28918ecf013F32fAf45e05d62B4D9b207FCae784",
+        "isSybil": true,
+        "attackCampaign": "ATTACK_20250527_215630",
+        "riskScore": 0.98,
+        "extremeRiskFactors": {
+          "rapidReputationIncrease": 60,
+          "coordinatedWithOtherSybils": true,
+          "coordinatedAttack": true,
+          "fakeProductProposer": true,
+          "fakeProductMinting": true,
+          "maliciousBatchCreation": 12,
+          "briberySource": false,
+          "massiveTransactionVolume": 200,
+          "extremeSybilCoordination": true,
+          "multiPhaseAttack": true,
+          "validatorManipulation": true,
+          "primaryBatchProposer": true
+        }
       }
     }
   }

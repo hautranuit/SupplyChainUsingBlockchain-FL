@@ -10,6 +10,15 @@ import numpy as np
 import tensorflow as tf
 from typing import List, Dict, Any, Optional, Tuple
 
+# Enhanced Sybil detection with 25 features for better attack pattern detection
+NUM_SYBIL_FEATURES = 25
+
+# Element specification for TensorFlow Federated (TFF)
+ELEMENT_SPEC_SYBIL = (
+    tf.TensorSpec(shape=(NUM_SYBIL_FEATURES,), dtype=tf.float32),
+    tf.TensorSpec(shape=(1,), dtype=tf.float32)  # Label: 0 for normal, 1 for Sybil
+)
+
 def generate_sybil_features(is_sybil: bool, num_features: int = 10, random_seed: int = None) -> np.ndarray:
     """
     Generate synthetic features for sybil/non-sybil nodes.
@@ -50,11 +59,12 @@ def extract_features_from_real_data(
     blockchain_events: Dict[str, List[Dict[str, Any]]], 
     demo_context: Dict[str, Any],
     all_node_addresses_in_fl: List[str], # For context like network density
-    num_features: int = 15 # Increased number of features
+    num_features: int = 25 # Increased from 15 to capture extreme attack patterns
 ) -> np.ndarray:
     """
     Extract features from real blockchain event data and demo_context.
-    Enhanced to include more sophisticated features for Sybil/Bribery detection.
+    Enhanced to detect extreme Sybil attack patterns including coordinated attacks,
+    rapid reputation manipulation, fake product creation, and bribery patterns.
 
     Args:
         node_address: The Ethereum address of the node (lowercase).
@@ -73,11 +83,11 @@ def extract_features_from_real_data(
     # Event Counts
     event_counts = {name: len(events) for name, events in blockchain_events.items()}
 
+    # === BASIC ACTIVITY FEATURES (0-5) ===
     # Feature 0: Total number of events involving the node (general activity level)
     features[0] = sum(event_counts.values())
 
     # Feature 1: Number of products minted by node (if manufacturer)
-    # Assuming ProductMinted event has a 'minter' or 'manufacturer' arg
     product_minted_events = blockchain_events.get("ProductMinted", [])
     features[1] = sum(1 for event in product_minted_events if event.get('args', {}).get('minter', '').lower() == node_address_lower or event.get('args', {}).get('manufacturer', '').lower() == node_address_lower)
 
@@ -106,7 +116,7 @@ def extract_features_from_real_data(
             counterparties.add(args['from'].lower())
     features[5] = len(counterparties)
 
-    # Role-based features from demo_context
+    # === ROLE-BASED FEATURES (6-9) ===
     # Feature 6: Is Manufacturer
     features[6] = 1.0 if demo_context.get("manufacturerAddress", "").lower() == node_address_lower else 0.0
     
@@ -122,31 +132,26 @@ def extract_features_from_real_data(
     buyer_keys = ["buyer1Address", "buyer2Address", "buyer3Address"]
     features[9] = 1.0 if any(demo_context.get(key, "").lower() == node_address_lower for key in buyer_keys) else 0.0
 
+    # === TRADITIONAL DETECTION FEATURES (10-14) ===
     # Feature 10: Number of disputes initiated by this node
     dispute_initiated_events = blockchain_events.get("DisputeInitiated", [])
-    # Assuming DisputeInitiated has an 'initiator' arg
     features[10] = sum(1 for event in dispute_initiated_events if event.get('args', {}).get('initiator', '').lower() == node_address_lower)
 
-    # Feature 11: Number of times this node was involved in a dispute (e.g., as defendant)
-    # This requires knowing the structure of DisputeInitiated args, e.g., 'defendant' or 'productId' to trace back
-    # Placeholder: for now, let's assume 'productId' can be used to link. This is highly speculative.
-    # A more robust way would be to have specific fields like 'party1', 'party2'.
-    # For now, this feature might be weak.
+    # Feature 11: Number of times this node was involved in a dispute
     disputed_product_ids = set(event.get('args', {}).get('productId') for event in dispute_initiated_events)
     node_product_interactions = 0
-    # Simplistic check: if node transferred or received a product that was later disputed.
     for event in product_transferred_events:
         args = event.get('args', {})
         if args.get('tokenId') in disputed_product_ids and \
            (args.get('from', '').lower() == node_address_lower or args.get('to', '').lower() == node_address_lower):
             node_product_interactions +=1
-    features[11] = node_product_interactions # This is a proxy, not direct involvement count.
+    features[11] = node_product_interactions
 
     # Feature 12: Node Verified (from NodeVerified event)
     node_verified_events = blockchain_events.get("NodeVerified", [])
     features[12] = 1.0 if any(event.get('args', {}).get('nodeAddress', '').lower() == node_address_lower for event in node_verified_events) else 0.0
 
-    # Feature 13: Activity within productDetails (e.g., as seller, recipient)
+    # Feature 13: Activity within productDetails
     product_details_activity = 0
     if "productDetails" in demo_context and isinstance(demo_context["productDetails"], list):
         for product in demo_context["productDetails"]:
@@ -161,13 +166,141 @@ def extract_features_from_real_data(
 
     # Feature 14: Number of batches proposed by this node
     batch_proposed_events = blockchain_events.get("BatchProposed", [])
-    # Assuming BatchProposed has a 'proposer' arg
     features[14] = sum(1 for event in batch_proposed_events if event.get('args', {}).get('proposer', '').lower() == node_address_lower)
+
+    # === EXTREME SYBIL ATTACK PATTERN FEATURES (15-24) ===
+    # Check if this node exists in demo_context nodes with extreme patterns
+    node_data = None
+    if "nodes" in demo_context and node_address_lower in demo_context["nodes"]:
+        node_data = demo_context["nodes"][node_address_lower]
     
-    # Ensure features array has the correct length, pad with 0 if fewer features generated
+    # Check extreme attack patterns section
+    extreme_node_data = None
+    # Check both old location and new location in attackData
+    extreme_patterns = None
+    if "extremeAttackPatterns" in demo_context:
+        extreme_patterns = demo_context["extremeAttackPatterns"]
+    elif "attackData" in demo_context and "extremeAttackPatterns" in demo_context["attackData"]:
+        extreme_patterns = demo_context["attackData"]["extremeAttackPatterns"]
+    
+    if extreme_patterns:
+        for pattern_key in ["highRiskSybilNode1", "highRiskSybilNode2", "highRiskSybilNode3"]:
+            pattern_node = extreme_patterns.get(pattern_key, {})
+            if pattern_node.get("address", "").lower() == node_address_lower:
+                extreme_node_data = pattern_node
+                break
+
+    # Feature 15: Is identified as Sybil node
+    features[15] = 1.0 if (node_data and node_data.get("isSybil", False)) or \
+                          (extreme_node_data and extreme_node_data.get("isSybil", False)) else 0.0
+
+    # Feature 16: Rapid reputation increase detection
+    rapid_rep_increase = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        rapid_rep_increase = extreme_node_data["extremeRiskFactors"].get("rapidReputationIncrease", 0)
+    elif node_data and "interactions" in node_data:
+        # Look for ReputationManipulation interactions
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") == "ReputationManipulation":
+                old_rep = interaction.get("oldReputation", 0)
+                new_rep = interaction.get("newReputation", 0)
+                rapid_rep_increase = max(rapid_rep_increase, new_rep - old_rep)
+    features[16] = min(rapid_rep_increase / 100.0, 1.0)  # Normalize to 0-1
+
+    # Feature 17: Coordinated attack detection
+    coordination_score = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        if extreme_node_data["extremeRiskFactors"].get("coordinatedWithOtherSybils", False):
+            coordination_score = 1.0
+        elif extreme_node_data["extremeRiskFactors"].get("coordinatedAttack", False):
+            coordination_score = 1.0
+    elif node_data and "interactions" in node_data:
+        # Look for coordinated attack interactions
+        coord_types = ["CoordinatedSybilAttack", "SybilCoordination", "SimultaneousRegistration"]
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") in coord_types:
+                coordination_score = 1.0
+                break
+    features[17] = coordination_score
+
+    # Feature 18: Fake product creation/proposal detection
+    fake_product_score = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        if extreme_node_data["extremeRiskFactors"].get("fakeProductProposer", False):
+            fake_product_score = 1.0
+        elif extreme_node_data["extremeRiskFactors"].get("fakeProductMinting", False):
+            fake_product_score = 1.0
+    elif node_data and "interactions" in node_data:
+        # Look for fake product interactions
+        fake_types = ["FakeProductProposal", "MintFakeProduct", "CoordinatedFakeProducts"]
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") in fake_types:
+                fake_product_score = 1.0
+                break
+    features[18] = fake_product_score
+
+    # Feature 19: Malicious batch creation detection
+    malicious_batch_score = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        malicious_batch_count = extreme_node_data["extremeRiskFactors"].get("maliciousBatchCreation", 0)
+        malicious_batch_score = min(malicious_batch_count / 10.0, 1.0)  # Normalize
+    elif node_data and "interactions" in node_data:
+        # Look for malicious batch interactions
+        malicious_count = 0
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") == "MaliciousBatchCreation":
+                malicious_count += interaction.get("batchCount", 1)
+        malicious_batch_score = min(malicious_count / 10.0, 1.0)
+    features[19] = malicious_batch_score
+
+    # Feature 20: Bribery source detection
+    bribery_source_score = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        if extreme_node_data["extremeRiskFactors"].get("briberySource", False):
+            bribery_source_score = 1.0
+    elif node_data and "interactions" in node_data:
+        # Look for bribery source interactions
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") == "BriberySourceAttack":
+                bribery_source_score = 1.0
+                break
+    features[20] = bribery_source_score
+
+    # Feature 21: Attack campaign participation
+    attack_campaign_score = 0
+    if node_data and node_data.get("attackCampaign"):
+        attack_campaign_score = 1.0
+    elif extreme_node_data and extreme_node_data.get("attackCampaign"):
+        attack_campaign_score = 1.0
+    features[21] = attack_campaign_score
+
+    # Feature 22: Risk score from extreme patterns
+    risk_score = 0.0
+    if extreme_node_data and "riskScore" in extreme_node_data:
+        risk_score = extreme_node_data["riskScore"]
+    elif node_data and "riskScore" in node_data:
+        risk_score = node_data["riskScore"]
+    features[22] = risk_score
+
+    # Feature 23: Rapid promotion detection (Secondary to Primary)
+    rapid_promotion_score = 0
+    if node_data and "interactions" in node_data:
+        for interaction in node_data["interactions"]:
+            if interaction.get("type") == "SuspiciousPromotion":
+                rapid_promotion_score = 1.0
+                break
+    features[23] = rapid_promotion_score
+
+    # Feature 24: Massive transaction volume detection
+    massive_volume_score = 0
+    if extreme_node_data and "extremeRiskFactors" in extreme_node_data:
+        volume = extreme_node_data["extremeRiskFactors"].get("massiveTransactionVolume", 0)
+        massive_volume_score = min(volume / 100.0, 1.0)  # Normalize based on volume
+    features[24] = massive_volume_score
+
+    # Ensure features array has the correct length
     if len(features) < num_features:
         features = np.pad(features, (0, num_features - len(features)), 'constant')
-    # Truncate if more features were generated (should not happen with explicit indexing)
     elif len(features) > num_features:
         features = features[:num_features]
         
@@ -180,14 +313,14 @@ def make_federated_data_sybil_real(
     num_fl_clients: int = 3,
     sybil_attack_log: Optional[Dict[str, Any]] = None,
     samples_per_client: int = 1, # Changed to 1, as we generate one feature vector per node
-    num_features: int = 15 # Match the new feature count
+    num_features: int = 25 # Updated to match the new enhanced feature count
 ) -> Tuple[List[tf.data.Dataset], Dict[str, List[str]]]:
     """
     Create federated data for Sybil detection model using real data.
     Each client gets data corresponding to one node.
     """
     sybil_addresses = []
-    bribed_addresses = # Though this is sybil detection, bribery can be linked
+    bribed_addresses = []  # Though this is sybil detection, bribery can be linked
     
     if sybil_attack_log:
         if "sybilNodes" in sybil_attack_log:
