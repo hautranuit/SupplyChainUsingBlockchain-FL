@@ -221,8 +221,6 @@ async function main() {
         const initialCID = await initialCIDStoredPromise;
 
         if ((imagePath && !fs.existsSync(imagePath)) || (videoPath && !fs.existsSync(videoPath))) {
-            if (imagePath && !fs.existsSync(imagePath)) console.warn(`⚠️ Image file not found at: ${imagePath}. Skipping media upload.`);
-            if (videoPath && !fs.existsSync(videoPath)) console.warn(`⚠️ Video file not found at: ${videoPath}. Skipping media upload.`);
             console.log("✅ Product minted with initial metadata. Media upload skipped due to missing files.");
             process.exit(0);
         }

@@ -100,14 +100,16 @@ async function main() {
         if (!fs.existsSync(qrOutputDir)) {
             fs.mkdirSync(qrOutputDir, { recursive: true });
         }
+        
+        // Clean up old QR codes BEFORE creating new one
+        cleanupOldQRCodes(tokenId);
+        
         const qrFilePath = path.join(qrOutputDir, `token_${tokenId}_updated_qr_${Date.now()}.png`);
         await generateQRCodeToFile(finalPayload, qrFilePath);
 
         console.log("\n✅ Updated QR Code generated successfully.");
         console.log(`   QR Image Path: ${qrFilePath}`);
         console.log(`   Encrypted Payload for next step (consumer view): ${finalPayload}`);
-
-        cleanupOldQRCodes(tokenId);
 
     } catch (error) {
         console.error("❌ Error generating updated QR code:", error.message);

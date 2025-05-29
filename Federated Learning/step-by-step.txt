@@ -15,7 +15,7 @@
 
 # Train the model 
 ./run_fl_complete.sh
-python run_feder
-ated_learning.py --mode full --output_dir ./output/analysis
+python run_inference.py
+
 
 
